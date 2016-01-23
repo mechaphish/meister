@@ -1,6 +1,5 @@
 class Job(object):
-    def __init__(self, task, cores, gigs):
-        self.task = task
+    def __init__(self, cores, gigs):
         self.cores = cores
         self.gigs = gigs
 
