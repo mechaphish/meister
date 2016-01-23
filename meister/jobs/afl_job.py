@@ -1,4 +1,4 @@
-from .. import Job
+from ..job import Job
 
 class AFLJob(Job):
     def __init__(self, binary_id):
