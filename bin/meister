@@ -1,0 +1,14 @@
+#!/usr/bin/env python
+
+import argparse
+from meister.run import run
+
+parser = argparse.ArgumentParser(
+    description='Meister: Shellphish CRS Master component'
+)
+parser.add_argument('-a', help='CGC API URL')
+parser.add_argument('-u', help='CGC API username')
+parser.add_argument('-p', help='CGC API password')
+args = parser.parse_args()
+
+run(args.a, args.u, args.p)
