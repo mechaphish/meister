@@ -4,7 +4,7 @@ This repo is for the "master" component of the CGC.
 
 ## Run
 
-   meister -a URL -u USERNAME -p PASSWORD
+    meister -a URL -u USERNAME -p PASSWORD
 
 ## Testing
 
