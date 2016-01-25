@@ -7,22 +7,47 @@ class Client():
         self.base_uri = base_uri
         self.version = version
 
-    def _url(self, paths):
+    def _url(self, *paths):
         resource = '/'.join(('api', self.version) + paths)
         return urljoin(self.base_uri, resource)
 
-    def _get(self, *paths):
-        resp = requests.get(self._url(paths))
+    def _get(self, resource):
+        resp = requests.get(resource)
+        if resp.status_code == 200:
+            return resp.json()
+
+    def _post(self, resource, data):
+        resp = requests.post(resource, data)
         if resp.status_code == 200:
             return resp.json()
 
     def replications(self, namespace='default'):
-        return self._get('namespaces', namespace, 'replicationcontrollers')
+        resource = self._url('namespaces', namespace, 'replicationcontrollers')
+        return self._get(resource)
 
     def createReplication(self,
                           name,
                           image,
                           replicas,
                           namespace='default'):
-        return self._post('namespaces', namespace,
-                          'replicationcontrollers', data)
+        resource = self._url('namespaces', namespace, 'replicationcontrollers')
+        data = {
+            'metadata': {'name': name},
+            'spec': {
+                'replicas': replicas,
+                'selector': {'app': name},
+                'template': {
+                    'metadata': {
+                        'name': name,
+                        'labels': {'app': name}
+                    },
+                    'spec': {
+                        'containers': [{
+                            'name': name,
+                            'image': image
+                        }]
+                    }
+                }
+            }
+        }
+        return self._post(resource, data)
