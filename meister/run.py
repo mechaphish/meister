@@ -1,6 +1,5 @@
 from .ti.api import API
 from time import sleep
-from os import getenv as ENV
 
 def run(url, username, password):
     api = API(url, username, password)
