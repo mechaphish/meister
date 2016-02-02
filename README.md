@@ -4,7 +4,8 @@ This repo is for the "master" component of the CGC.
 
 ## Run
 
-    meister -a URL -u USERNAME -p PASSWORD
+    mv .env.development .env
+    meister
 
 ## Testing
 

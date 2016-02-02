@@ -1,2 +1,3 @@
 requests
 responses
+python-dotenv
