@@ -1,7 +1,6 @@
 from ..scheduler import Scheduler
-from crscommon.jobs import AFLJob
-import crscommon
 
 class AFLScheduler(Scheduler):
-    def schedule(self):
-        return [ AFLJob(b) for b in crscommon.api.get_all_binaries() ]
+    def schedule(self, cbn, cpus, memory):
+        worker = 'afl'
+        return super(AFLScheduler, self).schedule(worker, cbn, cpus, memory)
