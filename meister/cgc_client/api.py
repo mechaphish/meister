@@ -35,7 +35,7 @@ class API:
             'CB_PATH_FIXME',
             '/home/nebirhos/Work/SecLab/CyberGrandChallenge/cbs/'
         )
-        binaries = glob.glob(binaries_path + 'scored_event_1/*/*')
+        binaries = glob.glob(binaries_path + 'qualifier_event/*/*')
         bin_data = []
         for binary in binaries:
             b = open(binary, 'rb')
