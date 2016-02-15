@@ -16,8 +16,8 @@ class Scheduler(object):
             Job.create(
                 worker = worker,
                 cbn_id = cbn.id,
-                cpus = cpus,
-                memory = memory,
+                limit_cpu = cpus,
+                limit_memory = memory,
                 payload = cbn   # FIXME: is this really necessary?
             )
         )
