@@ -1,3 +1,4 @@
+import base64
 from time import sleep
 from os import environ as ENV
 from requests.exceptions import RequestException
@@ -17,10 +18,16 @@ def run():
             print "[Meister] Round # %s" % round_n
             binaries = cgc.binaries(round_n)['binaries']
             for binary in binaries:
-                cbn = ChallengeBinaryNode.find_or_create_by(
-                    name = binary['cbid'],
-                    blob = binary['data'],
-                    parent_id = None
+                cbn = (
+                    ChallengeBinaryNode.find_by(
+                        name = binary['cbid'],
+                        parent_id = None,
+                    ) or
+                    ChallengeBinaryNode.create(
+                        name = binary['cbid'],
+                        blob = base64.b64decode(binary['data']), # FIXME: base64 only in simulation
+                        parent_id = None
+                    )
                 )
                 AFLScheduler().schedule(cbn = cbn, cpus = 4, memory = 1)
 
