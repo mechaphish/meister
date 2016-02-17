@@ -4,7 +4,7 @@ import json
 import glob
 import base64
 import ntpath
-import os
+from os import environ as ENV
 from urlparse import urljoin
 from .errors import *
 
@@ -31,10 +31,7 @@ class API:
         return self._get('/status')
 
     def binaries(self, round_n):
-        binaries_path = os.getenv(
-            'CB_PATH_FIXME',
-            '/home/nebirhos/Work/SecLab/CyberGrandChallenge/cbs/'
-        )
+        binaries_path = ENV['CGC_CB_PATH_FIXME']
         binaries = glob.glob(binaries_path + 'qualifier_event/*/*')
         bin_data = []
         for binary in binaries:
