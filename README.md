@@ -9,4 +9,4 @@ This repo is for the "master" component of the CGC.
 
 ## Testing
 
-    nosetests --with-coverage --cover-html --cover-package=meister --with-timer tests/*
+    nosetests tests

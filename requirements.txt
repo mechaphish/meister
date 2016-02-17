@@ -1,5 +1,0 @@
-requests
-responses
-python-dotenv
-crscommon
-farnsworth-client
