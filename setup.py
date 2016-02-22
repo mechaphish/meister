@@ -10,6 +10,7 @@ setup(
         'python-dotenv',
         'crscommon',
         'farnsworth-client',
+        'pykube',
         # test dependencies
         'responses',
         'nose>=1.3.7',
