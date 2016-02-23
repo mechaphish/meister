@@ -1,9 +1,12 @@
 from os import environ as ENV
 from pykube.config import KubeConfig
 
-kubemaster_url = "http://{}:{}".format(
-    ENV['KUBERNETES_SERVICE_HOST'], ENV['KUBERNETES_SERVICE_PORT']
+kubemaster_url = "{}://{}:{}".format(
+    'https' if ENV['KUBERNETES_SERVICE_USE_SSL'] == 'True' else 'http',
+    ENV['KUBERNETES_SERVICE_HOST'],
+    ENV['KUBERNETES_SERVICE_PORT']
 )
+
 config_data = {
     'apiVersion': 'v1',
     'clusters': [
@@ -15,7 +18,7 @@ config_data = {
     'contexts': [
         {'context':
          {'cluster': 'ubuntu',
-          'user': 'admin'},
+          'user': ENV['KUBERNETES_SERVICE_USER']},
          'name': 'ubuntu'}
     ],
     'current-context': 'ubuntu',
