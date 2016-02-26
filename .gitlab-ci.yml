@@ -2,6 +2,7 @@ tests:
   script:
     - pip install -r requirements.txt
     - pip install -e .
+    - mv .env.development .env
     - nosetests tests
   tags: [angr]
 
