@@ -53,7 +53,7 @@ class CGCAPI(object):
         """Retrieve the current status."""
         return self._get('/status')
 
-    def binaries(self, round_n):
+    def binaries(self, round_n):    # pylint: disable=unused-argument
         """Return all available binaries."""
         # NOTE: Why is this happening on disk instead of at the API?
         binaries_files = glob.glob(os.path.join(self.binaries_path,
@@ -61,6 +61,6 @@ class CGCAPI(object):
         binaries = []
         for binary in binaries_files:
             with open(binary) as bin_file:
-                bin_data.append({'cbid': os.path.basename(binary),
+                binaries.append({'cbid': os.path.basename(binary),
                                  'data': base64.b64encode(bin_file.read())})
         return {'binaries': binaries}
