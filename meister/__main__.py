@@ -15,12 +15,14 @@ from requests.exceptions import RequestException
 from farnsworth_client.api import API as ProfAPI
 from farnsworth_client.models import ChallengeBinaryNode
 
+import meister.settings
 import meister.cgc_client.api
 
 from meister.schedulers.afl_scheduler import AFLScheduler
 
 
 def main():
+    """Run the meister."""
     cgc = meister.cgc_client.api.from_env()
     prof_url = "http://{}:{}".format(ENV['FARNSWORTH_SERVICE_HOST'],
                                      ENV['FARNSWORTH_SERVICE_PORT'])
