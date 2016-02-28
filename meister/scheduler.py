@@ -2,6 +2,7 @@ from .kube_config import kube_config
 from pykube.http import HTTPClient
 from pykube.objects import ReplicationController
 from requests.exceptions import HTTPError
+from os import environ as ENV
 
 from farnsworth_client.models import Job
 
@@ -64,7 +65,8 @@ class Scheduler(object):
             }
         }
         try:
-            ReplicationController(self.api, config).create()
+            if ENV['KUBERNETES_SERVICE_HOST']:
+                ReplicationController(self.api, config).create()
         except HTTPError as e:
             if e.response.status_code == 409:
                 print "Already scheduled"
