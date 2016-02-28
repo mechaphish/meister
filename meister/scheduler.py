@@ -6,10 +6,11 @@
 from __future__ import print_function, unicode_literals, absolute_import, \
                        division
 
+import os
+
 from pykube.http import HTTPClient
 from pykube.objects import ReplicationController
 from requests.exceptions import HTTPError
-from os import environ as ENV
 
 import meister.kubernetes as kubernetes
 from farnsworth_client.models import Job
@@ -84,7 +85,7 @@ class Scheduler(object):
         }
 
         try:
-            if ENV['KUBERNETES_SERVICE_HOST']:
+            if 'KUBERNETES_SERVICE_HOST' in os.environ:
                 ReplicationController(self.api, config).create()
         except HTTPError as error:
             if error.response.status_code == 409:
