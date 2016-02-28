@@ -86,9 +86,9 @@ class Scheduler(object):
         try:
             if ENV['KUBERNETES_SERVICE_HOST']:
                 ReplicationController(self.api, config).create()
-        except HTTPError as e:
-            if e.response.status_code == 409:
+        except HTTPError as error:
+            if error.response.status_code == 409:
                 # FIXME: use log instead of print
                 print("Already scheduled")
             else:
-                raise e
+                raise error
