@@ -5,7 +5,6 @@
 
 import glob
 import base64
-import json
 import os
 import os.path
 from urlparse import urljoin
