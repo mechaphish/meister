@@ -7,7 +7,8 @@ import glob
 import base64
 import os
 import os.path
-from urlparse import urljoin
+
+from urllib.parse import urljoin
 
 import requests
 from requests.auth import HTTPDigestAuth
