@@ -1,4 +1,8 @@
-from .kube_config import kube_config
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
+import meister.kubernetes as kubernetes
+
 from pykube.http import HTTPClient
 from pykube.objects import ReplicationController
 from requests.exceptions import HTTPError
@@ -6,10 +10,10 @@ from os import environ as ENV
 
 from farnsworth_client.models import Job
 
+
 class Scheduler(object):
     def __init__(self):
-        self.api = HTTPClient(kube_config)
-        None
+        self.api = HTTPClient(kubernetes.config_from_env())
 
     def schedule(self, worker, cbn, cpus, memory):
         job = (
