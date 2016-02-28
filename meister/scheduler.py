@@ -42,7 +42,7 @@ class Scheduler(object):
     def api(self):
         """Return the API we are working on."""
         if self._api is None:
-            self._api = HTTPClient(kubernetes.config_from_env())
+            self._api = HTTPClient(kubernetes.from_env())
         return self._api
 
     def _schedule_kube_controller(self, job, cpus, memory):

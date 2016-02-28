@@ -16,7 +16,7 @@ from requests.auth import HTTPDigestAuth
 from .errors import CGCAPIError
 
 
-def api_from_env():
+def from_env():
     """Create a CGC API Object from environment variables."""
     url = os.environ.get('CGC_API_URL', 'localhost')
     user = os.environ.get('CGC_API_USER', 'shellphish')

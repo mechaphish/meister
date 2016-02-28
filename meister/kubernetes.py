@@ -10,7 +10,7 @@ import os
 import pykube.config
 
 
-def config_from_env():
+def from_env():
     """Get a Kubernetes configuration from environment variables."""
     if 'KUBERNETES_SERVICE_USE_SSL' in os.environ:
         protocol = 'https'
