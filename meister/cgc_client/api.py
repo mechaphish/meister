@@ -60,7 +60,7 @@ class CGCAPI(object):
                                                 'qualifier_event/*/*'))
         binaries = []
         for binary in binaries_files:
-            with open(binary) as bin_file:
+            with open(binary, 'rb') as bin_file:
                 binaries.append({'cbid': os.path.basename(binary),
                                  'data': base64.b64encode(bin_file.read())})
         return {'binaries': binaries}
