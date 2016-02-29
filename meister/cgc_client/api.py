@@ -12,10 +12,12 @@ import os
 import os.path
 import sys
 
+# pylint: disable=import-error,no-name-in-module
 if sys.version_info < (3,):
     from urlparse import urljoin
 else:
     from urllib.parse import urljoin
+# pylint: enable=import-error,no-name-in-module
 
 import requests
 from requests.auth import HTTPDigestAuth
