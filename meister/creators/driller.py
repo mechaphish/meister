@@ -2,8 +2,13 @@
 # -*- coding: utf-8 -*-
 
 from meister.creators import BaseCreator
-import crscommon
+from farnsworth_client.models import DrillerJob
+
 
 class DrillerCreator(BaseCreator):
-    def schedule(self):
-        return [crscommon.jobs.DrillerJob(t.binary, t) for t in t.binary.undrilled_testcases]
+    @property
+    def jobs(self):
+        for cbn in self.cbns():
+            for test in cbn.undrilled_tests:
+                yield DrillerJob(cbn=cbn, limit_cpus=1, limit_memory=20,
+                                 payload=test)
