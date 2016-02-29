@@ -21,11 +21,9 @@ LOG = meister.strategies.LOG.getChild('brute')
 class Brute(meister.strategies.BaseStrategy):
     """Brute-force strategy."""
 
-    # pylint: disable=star-args
     def __init__(self, *args, **kwargs):
         """Create a brute-force strategy object."""
         super(self.__class__, self).__init__(*args, **kwargs)
-    # pylint: enable=star-args
 
     def run(self):
         """Run the brute strategy."""
