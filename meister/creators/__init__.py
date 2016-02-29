@@ -42,9 +42,14 @@ class BaseCreator(object):
 
         for binary in self.cgc.binaries(round_)['binaries']:
             cbid = binary['cbid']
-            cbn = ChallengeBinaryNode.find_by(name=cbid)
-            if cbn is None:
+            # Note: this has to run single-threaded, otherwise we might add the
+            # same binary twice to the database.
+            try:
+                cbn = ChallengeBinaryNode.get(ChallengeBinaryNode.name == cbid)
+            except ChallengeBinaryNode.DoesNotExist:
                 blob = base64.b64decode(binary['data'])
-                cbn = ChallengeBinaryNode.create(name=cbid, blob=blob)
+                csid = cbid.split('_', 1)[0]
+                cbn = ChallengeBinaryNode(name=cbid, cs_id=csid, blob=blob)
+                cbn.save()
             LOG.debug("Found cbid: %s", cbid)
             yield cbn

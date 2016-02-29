@@ -38,7 +38,7 @@ class KubernetesScheduler(object):
 
     def schedule(self, job):
         """Schedule the job with the specific resources."""
-        job.save_if_not_existing()
+        job.save()
         self._schedule_kube_controller(job)
         return job
 
