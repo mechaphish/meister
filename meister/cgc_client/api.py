@@ -3,12 +3,19 @@
 
 """API client to talk to the CGC API."""
 
+from __future__ import print_function, unicode_literals, absolute_import, \
+                       division
+
 import glob
 import base64
 import os
 import os.path
+import sys
 
-from urllib.parse import urljoin
+if sys.version_info < (3,):
+    from urlparse import urljoin
+else:
+    from urllib.parse import urljoin
 
 import requests
 from requests.auth import HTTPDigestAuth
