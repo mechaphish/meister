@@ -34,7 +34,6 @@ def from_env():
 
 
 class CGCAPI(object):
-
     """Wrapper to talk to the CGC API."""
 
     def __init__(self, url, user, password, binaries_path):

@@ -15,7 +15,6 @@ LOG = meister.log.LOG.getChild('strategies')
 
 
 class BaseStrategy(object):
-
     """Base strategy.
 
     All other scheduling strategies should inherit from this Strategy.

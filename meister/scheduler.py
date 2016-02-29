@@ -20,7 +20,6 @@ LOG = meister.log.LOG.getChild('scheduler')
 
 
 class Scheduler(object):
-
     """Abstract scheduler class, should be inherited by actual schedulers."""
 
     def __init__(self):
