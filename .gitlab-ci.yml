@@ -7,7 +7,10 @@ tests:
   tags: [angr]
 
 lint:
-  script: "lint.py"
+  script:
+    - pip install -r requirements.txt
+    - pip install -e .
+    - lint.py
   tags: ["cgc-linter"]
 
 docs:

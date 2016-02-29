@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
 """Manage Kubernetes configurations."""
@@ -7,7 +7,10 @@ from __future__ import print_function, unicode_literals, absolute_import, \
                        division
 
 import os
+
+# pylint: disable=import-error
 import pykube.config
+# pylint: enable=import-error
 
 
 def from_env():
