@@ -1,6 +1,18 @@
 from ..scheduler import Scheduler
-import crscommon
+from farnsworth_client.models import DrillerJob
 
 class DrillerScheduler(Scheduler):
-    def schedule(self):
-        return [ crscommon.jobs.DrillerJob(t.binary, t) for t in t.binary.undrilled_testcases ]
+    def schedule(self, cbn):
+        scheduled = [ ]
+
+        for t in cbn.undrilled_tests:
+            job = DrillerJob(
+                cbn=cbn,
+                limit_cpus=1,
+                limit_memory=20,
+                payload=t
+            )
+
+            scheduled.append(super(DrillerScheduler, self).schedule(job))
+
+        return scheduled

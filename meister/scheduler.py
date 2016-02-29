@@ -31,7 +31,7 @@ class Scheduler(object):
     def schedule(self, job):
         """Schedule the job with the specific resources."""
         job.save_if_not_existing()
-        self.schedule_kube_controller(job, job.limit_cpu, job.limit_memory)
+        self._schedule_kube_controller(job, job.limit_cpu, job.limit_memory)
         return job
 
     @property
@@ -81,7 +81,7 @@ class Scheduler(object):
         }
 
         try:
-            if 'KUBERNETES_SERVICE_HOST' in os.environ:
+            if os.environ.get('KUBERNETES_SERVICE_HOST', '') != '':
                 ReplicationController(self.api, config).create()
         except HTTPError as error:
             if error.response.status_code == 409:
