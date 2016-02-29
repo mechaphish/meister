@@ -6,6 +6,7 @@
 from __future__ import print_function, unicode_literals, absolute_import, \
                        division
 
+import base64
 import time
 
 from farnsworth_client.models.challenge_binary_node import ChallengeBinaryNode
