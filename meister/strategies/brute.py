@@ -10,13 +10,8 @@ from __future__ import print_function, unicode_literals, absolute_import, \
                        division
 
 
-import base64
-from os import environ as ENV
-from time import sleep
-
 from requests.exceptions import RequestException
 
-from farnsworth_client.models import ChallengeBinaryNode
 import meister.strategies
 from meister.schedulers.afl_scheduler import AFLScheduler
 
