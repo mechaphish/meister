@@ -8,6 +8,8 @@ from __future__ import print_function, unicode_literals, absolute_import, \
 
 from os.path import join, dirname
 
+# pylint: disable=import-error
 from dotenv import load_dotenv
+# pylint: enable=import-error
 
 load_dotenv(join(dirname(__file__), '../.env'))
