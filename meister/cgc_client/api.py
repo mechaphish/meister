@@ -72,7 +72,8 @@ class CGCAPI(object):
         # NOTE: Why is this happening on disk instead of at the API?
         binaries_files = glob.glob(os.path.join(self.binaries_path,
                                                 'qualifier_event/*/*'))
-        LOG.debug("Binaries available: %s", ", ".join(binaries_files))
+        binaries_names = (os.path.basename(b) for b in binaries_files)
+        LOG.debug("Binaries available: %s", ", ".join(binaries_names))
         binaries = []
         for binary in binaries_files:
             with open(binary, 'rb') as bin_file:
