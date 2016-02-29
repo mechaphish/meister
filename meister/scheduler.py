@@ -28,14 +28,10 @@ class Scheduler(object):
         """
         self._api = None
 
-    def schedule(self, worker, cbn, cpus, memory):
+    def schedule(self, job):
         """Schedule the job with the specific resources."""
-        job = Job.find_by(worker=worker, cbn_id=cbn.id)
-        if job is None:
-            # We have to explicitly compare to None, job might evaluate to False
-            job = Job.create(worker=worker, cbn_id=cbn.id, limit_cpu=cpus,
-                             limit_memory=memory, payload=cbn)
-        self._schedule_kube_controller(job, cpus, memory)
+        job.save_if_not_existing()
+        self.schedule_kube_controller(job, job.limit_cpu, job.limit_memory)
         return job
 
     @property
