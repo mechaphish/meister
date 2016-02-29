@@ -1,46 +1,31 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-"""Module containing the BaseStrategy."""
+"""Job creator."""
 
 from __future__ import print_function, unicode_literals, absolute_import, \
                        division
 
-import base64
-import time
-
 from farnsworth_client.models.challenge_binary_node import ChallengeBinaryNode
 import meister.log
 
-LOG = meister.log.LOG.getChild('strategies')
+LOG = meister.log.LOG.getChild('creators')
 
 
-class BaseStrategy(object):
-    """Base strategy.
+class BaseCreator(object):
+    """Abstract creator class, should be inherited by actual job creators."""
 
-    All other scheduling strategies should inherit from this Strategy.
-    """
+    def __init__(self, cgc):
+        """Create base creator.
 
-    def __init__(self, cgc, sleepytime=3):
-        """Construct a base strategy object.
-
-        The Base Strategy assumes that the Farnsworth API is setup already,
-        and uses it directly.
-
-        :argument cgc: a CGCAPI object, so that we can talk to the CGC API.
-        :keyword sleepytime: the amount to sleep between strategy runs.
+        Create the base creator, you should call this from your creator to
+        make sure that all class variables are set up properly.
         """
         self.cgc = cgc
-        self.sleepytime = sleepytime
-
-    def sleep(self):
-        """Sleep a pre-defined interval."""
-        time.sleep(self.sleepytime)
 
     @property
-    def round(self):
-        """Return the number of the active round."""
-        return self.cgc.status()['round']
+    def jobs(self):
+        raise NotImplementedError("You have to implemented the jobs property")
 
     def cbns(self, round_=None):
         """Return the list of binaries that are active in a round.
@@ -49,7 +34,9 @@ class BaseStrategy(object):
                          returned (default: current round).
         """
         if round_ is None:
-            round_ = self.round
+            round_ = self.cgc.status()['round']
+
+        LOG.debug("Fetching binaries for round %s", round_)
 
         for binary in self.cgc.binaries(round_)['binaries']:
             cbid = binary['cbid']

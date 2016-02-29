@@ -1,11 +1,14 @@
-from collections import defaultdict
-from ..scheduler import Scheduler
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+from meister.creators import BaseCreator
 from crscommon.jobs import RexJob
 import crscommon
 
-class RexScheduler(Scheduler):
+class RexCreator(BaseCreator):
 
-    def schedule(self):
+    @property
+    def jobs(self):
         # check for new crashing test cases
 
         out = [ ]

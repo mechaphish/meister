@@ -15,11 +15,14 @@ from requests.exceptions import RequestException
 import meister.strategies
 from meister.schedulers.afl_scheduler import AFLScheduler
 
-LOG = meister.strategies.LOG.getChild('brute')
+LOG = meister.strategies.LOG.getChild('priority')
 
 
-class Brute(meister.strategies.BaseStrategy):
-    """Brute-force strategy."""
+class Priority(meister.strategies.BaseStrategy):
+    """Priority strategy.
+
+    Always have the highest priority jobs running, kill what we need to run.
+    """
 
     def __init__(self, *args, **kwargs):
         """Create a brute-force strategy object."""

@@ -8,11 +8,12 @@ from __future__ import print_function, unicode_literals, absolute_import, \
 
 import os
 
-from farnsworth_client.api import API as ProfAPI
-
-import meister.cgc_client.api
 import meister.settings
-from meister.strategies.brute import Brute
+
+from farnsworth_client.api import API as ProfAPI
+import meister.cgc_client.api
+from meister.creators.afl import AFLCreator
+from meister.schedulers.brute import BruteScheduler
 
 
 def main():
@@ -23,9 +24,10 @@ def main():
                                      os.environ['FARNSWORTH_SERVICE_PORT'])
     ProfAPI.init(prof_url)
 
-    # Start strategy
-    strategy = Brute(cgc)
-    strategy.run()
+    # Scheduler strategy
+    afl = AFLCreator(cgc)
+    scheduler = BruteScheduler(cgc=cgc, creators=[afl])
+    scheduler.run()
 
 if __name__ == "__main__":
     main()

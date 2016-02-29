@@ -1,11 +1,15 @@
-from collections import defaultdict
-from ..scheduler import Scheduler
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+from meister.creators import BaseCreators
 from crscommon.jobs import PwnrexJob
 import crscommon
 
-class PwnrexScheduler(Scheduler):
 
-    def schedule(self):
+class PwnrexCreator(BaseCreators):
+
+    @property
+    def jobs(self):
         # check for new replay attack
 
         out = []

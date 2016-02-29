@@ -22,11 +22,15 @@ else:
 import requests
 from requests.auth import HTTPDigestAuth
 
+import meister.cgc_client
 from .errors import CGCAPIError
+
+LOG = meister.cgc_client.LOG.getChild('api')
 
 
 def from_env():
     """Create a CGC API Object from environment variables."""
+    LOG.debug("Creating configuration from environment variables")
     url = os.environ.get('CGC_API_URL', 'localhost')
     user = os.environ.get('CGC_API_USER', 'shellphish')
     password = os.environ.get('CGC_API_PASS', 'shellphish')
@@ -59,13 +63,16 @@ class CGCAPI(object):
 
     def status(self):
         """Retrieve the current status."""
+        LOG.debug("Fetching current game status")
         return self._get('/status')
 
     def binaries(self, round_n):    # pylint: disable=unused-argument
         """Return all available binaries."""
+        LOG.debug("Fetching binaries: %s", self.binaries_path)
         # NOTE: Why is this happening on disk instead of at the API?
         binaries_files = glob.glob(os.path.join(self.binaries_path,
                                                 'qualifier_event/*/*'))
+        LOG.debug("Binaries available: %s", ", ".join(binaries_files))
         binaries = []
         for binary in binaries_files:
             with open(binary, 'rb') as bin_file:
