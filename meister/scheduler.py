@@ -8,13 +8,14 @@ from __future__ import print_function, unicode_literals, absolute_import, \
 
 import os
 
+# pylint: disable=import-error
 from pykube.http import HTTPClient
 from pykube.objects import ReplicationController
+# pylint: disable=import-error
 from requests.exceptions import HTTPError
 
 import meister.log
 import meister.kubernetes as kubernetes
-from farnsworth_client.models import Job
 
 LOG = meister.log.LOG.getChild('scheduler')
 
@@ -33,7 +34,7 @@ class Scheduler(object):
     def schedule(self, job):
         """Schedule the job with the specific resources."""
         job.save_if_not_existing()
-        self.schedule_kube_controller(job, job.limit_cpu, job.limit_memory)
+        self._schedule_kube_controller(job, job.limit_cpu, job.limit_memory)
         return job
 
     @property
