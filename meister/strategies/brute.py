@@ -17,11 +17,13 @@ from time import sleep
 from requests.exceptions import RequestException
 
 from farnsworth_client.models import ChallengeBinaryNode
-from meister.strategies import BaseStrategy
+import meister.strategies
 from meister.schedulers.afl_scheduler import AFLScheduler
 
+LOG = meister.strategies.LOG.getChild('brute')
 
-class Brute(BaseStrategy):
+
+class Brute(meister.strategies.BaseStrategy):
 
     """Brute-force strategy."""
 
@@ -34,10 +36,10 @@ class Brute(BaseStrategy):
         """Run the brute strategy."""
         while True:
             try:
-                print("[Meister] Round # {}".format(self.round))
+                LOG.info("Round #%d", self.round)
                 for cbn in self.cbns():
-                    print("Scheduling AFL Job: {}".format(cbn.name))
+                    LOG.debug("Scheduling AFL Job: %s", cbn.name)
                     AFLScheduler().schedule(cbn=cbn, cpus=4, memory=1)
             except RequestException as ex:
-                print("[Meister] ERROR: {}".format(type(ex)))
+                LOG.error("%s", ex)
             self.sleep()

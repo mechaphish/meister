@@ -12,8 +12,11 @@ from pykube.http import HTTPClient
 from pykube.objects import ReplicationController
 from requests.exceptions import HTTPError
 
+from meister.log import LOG
 import meister.kubernetes as kubernetes
 from farnsworth_client.models import Job
+
+LOG = meister.log.getChild('scheduler')
 
 
 class Scheduler(object):
@@ -85,7 +88,6 @@ class Scheduler(object):
                 ReplicationController(self.api, config).create()
         except HTTPError as error:
             if error.response.status_code == 409:
-                # FIXME: use log instead of print
-                print("Already scheduled")
+                LOG.warning("Job already scheduled %s", job.id)
             else:
                 raise error
