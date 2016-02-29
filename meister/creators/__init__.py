@@ -6,6 +6,8 @@
 from __future__ import print_function, unicode_literals, absolute_import, \
                        division
 
+import base64
+
 from farnsworth_client.models.challenge_binary_node import ChallengeBinaryNode
 import meister.log
 
@@ -44,5 +46,5 @@ class BaseCreator(object):
             if cbn is None:
                 blob = base64.b64decode(binary['data'])
                 cbn = ChallengeBinaryNode.create(name=cbid, blob=blob)
-            LOG.debug("Yielding %s", cbid)
+            LOG.debug("Found cbid: %s", cbid)
             yield cbn

@@ -13,6 +13,7 @@ import meister.settings
 from farnsworth_client.api import API as ProfAPI
 import meister.cgc_client.api
 from meister.creators.afl import AFLCreator
+from meister.creators.driller import DrillerCreator
 from meister.schedulers.brute import BruteScheduler
 
 
@@ -26,8 +27,9 @@ def main():
 
     # Scheduler strategy
     afl = AFLCreator(cgc)
-    scheduler = BruteScheduler(cgc=cgc, creators=[afl])
+    driller = DrillerCreator(cgc)
+    scheduler = BruteScheduler(cgc=cgc, creators=[afl, driller])
     scheduler.run()
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()
