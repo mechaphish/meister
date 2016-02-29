@@ -12,11 +12,11 @@ from pykube.http import HTTPClient
 from pykube.objects import ReplicationController
 from requests.exceptions import HTTPError
 
-from meister.log import LOG
+import meister.log
 import meister.kubernetes as kubernetes
 from farnsworth_client.models import Job
 
-LOG = meister.log.getChild('scheduler')
+LOG = meister.log.LOG.getChild('scheduler')
 
 
 class Scheduler(object):
