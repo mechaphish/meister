@@ -20,7 +20,7 @@ from requests.exceptions import HTTPError
 import meister.log
 import meister.kubernetes as kubernetes
 
-from farnsworth_client.models.challenge_binary_node import ChallengeBinaryNode
+from farnsworth.models.challenge_binary_node import ChallengeBinaryNode
 
 LOG = meister.log.LOG.getChild('schedulers')
 

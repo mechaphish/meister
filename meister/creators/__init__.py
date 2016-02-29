@@ -8,7 +8,7 @@ from __future__ import print_function, unicode_literals, absolute_import, \
 
 import base64
 
-from farnsworth_client.models.challenge_binary_node import ChallengeBinaryNode
+from farnsworth.models.challenge_binary_node import ChallengeBinaryNode
 import meister.log
 
 LOG = meister.log.LOG.getChild('creators')

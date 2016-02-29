@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import meister.creators
-from farnsworth_client.models import DrillerJob
+from farnsworth.models import DrillerJob
 
 LOG = meister.creators.LOG.getChild('driller')
 

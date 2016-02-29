@@ -10,7 +10,6 @@ import os
 
 import meister.settings
 
-from farnsworth_client.api import API as ProfAPI
 import meister.cgc_client.api
 from meister.creators.afl import AFLCreator
 from meister.creators.driller import DrillerCreator
@@ -21,9 +20,6 @@ def main():
     """Run the meister."""
     # Initialize APIs
     cgc = meister.cgc_client.api.from_env()
-    prof_url = "http://{}:{}".format(os.environ['FARNSWORTH_SERVICE_HOST'],
-                                     os.environ['FARNSWORTH_SERVICE_PORT'])
-    ProfAPI.init(prof_url)
 
     # Scheduler strategy
     afl = AFLCreator(cgc)

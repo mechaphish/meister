@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import meister.creators
-from farnsworth_client.models import AFLJob
+from farnsworth.models import AFLJob
 
 LOG = meister.creators.LOG.getChild('AFL')
 
