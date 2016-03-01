@@ -15,5 +15,10 @@ class AFLCreator(meister.creators.BaseCreator):
     def jobs(self):
         LOG.debug("Collecting jobs")
         for cbn in self.cbns():
-            LOG.debug("Yielding AFLJob for %s", cbn.id)
-            yield AFLJob(cbn=cbn)
+            try:
+                AFLJob.get((AFLJob.cbn == cbn) &
+                           AFLJob.completed_at.is_null(True))
+                LOG.debug("Skipping AFLJob for %s", cbn.id)
+            except AFLJob.DoesNotExist:
+                LOG.debug("Yielding AFLJob for %s", cbn.id)
+                yield AFLJob(cbn=cbn)
