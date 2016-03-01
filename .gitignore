@@ -2,6 +2,7 @@
 /dist/
 /*.egg-info
 /.coverage
+/_coverage
 /cover
 /.env
 /pylintrc
