@@ -82,7 +82,11 @@ class KubernetesScheduler(object):
                                     }
                                 },
                                 'env': [
-                                    {'name': "JOB_ID", 'value': str(job.id)}
+                                    {'name': "JOB_ID", 'value': str(job.id)},
+                                    {'name': "CGC_EVENT", 'value': "qualifier_event"},
+                                    {'name': "POSTGRES_DATABASE_USER", 'value': "postgres"},
+                                    {'name': "POSTGRES_DATABASE_PASSWORD", 'value': ""},
+                                    {'name': "POSTGRES_DATABASE_NAME", 'value': "farnsworth"},
                                 ]
                             }
                         ]
