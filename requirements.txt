@@ -1,7 +1,7 @@
 requests
 python-dotenv
 git+ssh://git@git.seclab.cs.ucsb.edu/cgc/common#egg=crscommon
-git+ssh://git@git.seclab.cs.ucsb.edu/cgc/farnsworth=farnsworth
+git+ssh://git@git.seclab.cs.ucsb.edu/cgc/farnsworth#egg=farnsworth
 
 pykube
 responses
