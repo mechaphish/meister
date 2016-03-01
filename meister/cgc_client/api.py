@@ -31,10 +31,10 @@ LOG = meister.cgc_client.LOG.getChild('api')
 def from_env():
     """Create a CGC API Object from environment variables."""
     LOG.debug("Creating configuration from environment variables")
-    url = os.environ.get('CGC_API_URL', 'localhost')
-    user = os.environ.get('CGC_API_USER', 'shellphish')
-    password = os.environ.get('CGC_API_PASS', 'shellphish')
-    binaries_path = os.environ.get('CGC_CB_PATH', '/tmp/')
+    url = os.environ['CGC_API_URL']
+    user = os.environ['CGC_API_USER']
+    password = os.environ['CGC_API_PASS']
+    binaries_path = os.environ['CGC_CB_PATH']
 
     return CGCAPI(url, user, password, binaries_path)
 
@@ -71,7 +71,8 @@ class CGCAPI(object):
         LOG.debug("Fetching binaries: %s", self.binaries_path)
         # NOTE: Why is this happening on disk instead of at the API?
         binaries_files = glob.glob(os.path.join(self.binaries_path,
-                                                'qualifier_event/*/*'))
+                                                os.environ['CGC_EVENT'],
+                                                '*/*'))
         binaries_names = (os.path.basename(b) for b in binaries_files)
         LOG.debug("Binaries available: %s", ", ".join(binaries_names))
         binaries = []
