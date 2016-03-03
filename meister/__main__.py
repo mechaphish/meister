@@ -12,6 +12,7 @@ import meister.settings
 
 import meister.cgc_client.api
 from meister.creators.afl import AFLCreator
+from meister.creators.rex import RexCreator
 from meister.creators.driller import DrillerCreator
 from meister.schedulers.brute import BruteScheduler
 
@@ -24,7 +25,8 @@ def main():
     # Scheduler strategy
     afl = AFLCreator(cgc)
     driller = DrillerCreator(cgc)
-    scheduler = BruteScheduler(cgc=cgc, creators=[afl, driller])
+    rex = RexCreator(cgc)
+    scheduler = BruteScheduler(cgc=cgc, creators=[afl, driller, rex])
     scheduler.run()
 
 if __name__ == '__main__':
