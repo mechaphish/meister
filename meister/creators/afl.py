@@ -21,4 +21,4 @@ class AFLCreator(meister.creators.BaseCreator):
                 LOG.debug("Skipping AFLJob for %s", cbn.id)
             except AFLJob.DoesNotExist:
                 LOG.debug("Yielding AFLJob for %s", cbn.id)
-                yield AFLJob(cbn=cbn)
+                yield AFLJob(cbn=cbn, limit_cpus=8, limit_memory=1)
