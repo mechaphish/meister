@@ -12,5 +12,5 @@ class DrillerCreator(meister.creators.BaseCreator):
         for cbn in self.cbns():
             for test in cbn.undrilled_tests:
                 LOG.debug("Driller job for %s", cbn.name)
-                yield DrillerJob(cbn=cbn, limit_cpus=1, limit_memory=20,
-                                 payload=test)
+                yield DrillerJob(cbn=cbn, limit_cpus=1, limit_memory=10,
+                                 payload={'test_id': test.id})
