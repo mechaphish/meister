@@ -23,10 +23,11 @@ def main():
     cgc = meister.cgc_client.api.from_env()
 
     # Scheduler strategy
-    afl = AFLCreator(cgc)
-    driller = DrillerCreator(cgc)
-    rex = RexCreator(cgc)
-    scheduler = BruteScheduler(cgc=cgc, creators=[afl, driller, rex])
+    scheduler = BruteScheduler(cgc=cgc, creators=[
+        AFLCreator(cgc),
+        DrillerCreator(cgc),
+        RexCreator(cgc),
+    ])
     scheduler.run()
 
 if __name__ == '__main__':
