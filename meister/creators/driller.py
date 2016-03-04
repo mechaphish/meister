@@ -11,6 +11,8 @@ class DrillerCreator(meister.creators.BaseCreator):
     def jobs(self):
         for cbn in self.cbns():
             for test in cbn.undrilled_tests:
-                LOG.debug("Driller job for %s", cbn.name)
-                yield DrillerJob(cbn=cbn, limit_cpus=1, limit_memory=10,
+                job = DrillerJob(cbn=cbn, limit_cpus=1, limit_memory=10,
                                  payload={'test_id': test.id})
+                if not DrillerJob.queued(job):
+                    LOG.debug("Yielding AFLJob for %s with %s", cbn.id, test.id)
+                    yield job
