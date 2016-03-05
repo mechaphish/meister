@@ -1,13 +1,17 @@
 # -*- coding: utf-8 -*-
 
-from meister.creators import BaseCreator
-
+import meister.creators
 from farnsworth import RexJob
 
-class RexCreator(BaseCreator):
+LOG = meister.creators.LOG.getChild('rex')
+
+class RexCreator(meister.creators.BaseCreator):
     @property
     def jobs(self):
         for cbn in self.cbns():
             for crash in cbn.crashes:
-                yield RexJob(cbn=cbn, payload={'crash_id': crash.id},
+                job = RexJob(cbn=cbn, payload={'crash_id': crash.id},
                              limit_cpu=1, limit_memory=10)
+                if not RexJob.queued(job):
+                    LOG.debug("Yielding RexJob for %s with %s", cbn.id, crash.id)
+                    yield job
