@@ -58,8 +58,7 @@ class CGCAPI(object):
         if resp.status_code == 200:
             return resp.json()
         else:
-            reason = "Error {} on GET {}".format(resp.status_code, path)
-            raise CGCAPIError(reason)
+            raise CGCAPIError(resp.status_code, 'GET', path, resp.text)
 
     def status(self):
         """Retrieve the current status."""
