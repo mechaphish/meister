@@ -8,6 +8,7 @@ import responses
 # Disabling no-member because responses does magic and pylint does not detect it
 # pylint: disable=no-member
 
+import meister.settings
 from meister.cgc_client.api import CGCAPI
 from meister.cgc_client.errors import CGCAPIError
 
