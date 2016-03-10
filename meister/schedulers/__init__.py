@@ -96,9 +96,14 @@ class KubernetesScheduler(object):
         }
 
         try:
+<<<<<<< HEAD
             pass
             # if 'KUBERNETES_SERVICE_HOST' in os.environ:
             #     ReplicationController(self.api, config).create()
+=======
+            if 'KUBERNETES_SERVICE_HOST' in os.environ:
+                ReplicationController(self.api, config).create()
+>>>>>>> parent of a71f823... REVERTME: another test
         except HTTPError as error:
             if error.response.status_code == 409:
                 LOG.warning("Job already scheduled %s", job.id)
