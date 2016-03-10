@@ -4,7 +4,7 @@ tests:
     - pip install -e .
     - mv .env.development .env
     - nosetests tests
-  tags: [angr]
+  tags: ["cgc-linter"]
 
 lint:
   script:
