@@ -96,7 +96,7 @@ class KubernetesScheduler(object):
         }
 
         try:
-            if False: # 'KUBERNETES_SERVICE_HOST' in os.environ:
+            if 'KUBERNETES_SERVICE_HOST' in os.environ:
                 ReplicationController(self.api, config).create()
         except HTTPError as error:
             if error.response.status_code == 409:
