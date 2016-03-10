@@ -96,7 +96,7 @@ class KubernetesScheduler(object):
         }
 
         try:
-            print "ok..."
+            pass
             # if 'KUBERNETES_SERVICE_HOST' in os.environ:
             #     ReplicationController(self.api, config).create()
         except HTTPError as error:
