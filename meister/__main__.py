@@ -25,8 +25,8 @@ def main():
     # Scheduler strategy
     scheduler = BruteScheduler(cgc=cgc, creators=[
         AFLCreator(cgc),
-        DrillerCreator(cgc),
-        RexCreator(cgc),
+        # DrillerCreator(cgc),
+        # RexCreator(cgc),
     ])
     scheduler.run()
 
