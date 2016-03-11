@@ -5,4 +5,4 @@
 
 import meister.log
 
-LOG = meister.log.LOG.getChild('cgc_client')
+LOG = meister.log.LOG.getChild('cgc')

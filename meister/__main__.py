@@ -10,7 +10,7 @@ import os
 
 import meister.settings
 
-import meister.cgc_client.api
+import meister.cgc.ticlient
 from meister.creators.afl import AFLCreator
 from meister.creators.rex import RexCreator
 from meister.creators.driller import DrillerCreator
@@ -20,7 +20,7 @@ from meister.schedulers.brute import BruteScheduler
 def main():
     """Run the meister."""
     # Initialize APIs
-    cgc = meister.cgc_client.api.from_env()
+    cgc = meister.cgc.ticlient.TiClient.from_env()
 
     # Scheduler strategy
     scheduler = BruteScheduler(cgc=cgc, creators=[

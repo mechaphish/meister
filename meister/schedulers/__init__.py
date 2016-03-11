@@ -83,7 +83,7 @@ class KubernetesScheduler(object):
                                 },
                                 'env': [
                                     {'name': "JOB_ID", 'value': str(job.id)},
-                                    {'name': "CGC_EVENT", 'value': os.environ['CGC_EVENT']},
+                                    {'name': "CGC_CBS_PATH", 'value': os.environ['CGC_CBS_PATH']},
                                     {'name': "POSTGRES_DATABASE_USER", 'value': os.environ['POSTGRES_DATABASE_USER']},
                                     {'name': "POSTGRES_DATABASE_PASSWORD", 'value': os.environ['POSTGRES_DATABASE_PASSWORD']},
                                     {'name': "POSTGRES_DATABASE_NAME", 'value': os.environ['POSTGRES_DATABASE_NAME']},
@@ -140,7 +140,7 @@ class BaseScheduler(KubernetesScheduler):
     @property
     def round(self):
         """Return the number of the active round."""
-        return self.cgc.status()['round']
+        return self.cgc.getRound()
 
     @property
     def jobs(self):

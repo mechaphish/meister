@@ -13,7 +13,7 @@ import sys
 DEFAULT_FORMAT = '%(asctime)s - %(name)-30s - %(levelname)-10s - %(message)s'
 
 LOG = logging.getLogger('meister')
-LOG.setLevel(os.environ['MEISTER_LOG_LEVEL'])
+LOG.setLevel(os.environ.get('MEISTER_LOG_LEVEL', 'DEBUG'))
 
 HANDLER = logging.StreamHandler(sys.stdout)
 HANDLER.setFormatter(logging.Formatter(os.environ.get('MEISTER_LOG_FORMAT',DEFAULT_FORMAT)))

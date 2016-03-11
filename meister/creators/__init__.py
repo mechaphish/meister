@@ -36,11 +36,11 @@ class BaseCreator(object):
                          returned (default: current round).
         """
         if round_ is None:
-            round_ = self.cgc.status()['round']
+            round_ = self.cgc.getRound()
 
         LOG.debug("Fetching binaries for round %s", round_)
 
-        for binary in self.cgc.binaries(round_)['binaries']:
+        for binary in self.cgc.getBinaries(round_)['binaries']:
             cbid = binary['cbid']
             # Note: this has to run single-threaded, otherwise we might add the
             # same binary twice to the database.
