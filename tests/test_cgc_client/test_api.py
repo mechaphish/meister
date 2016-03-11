@@ -27,7 +27,7 @@ class TestAPI(object):
         nose.tools.assert_raises(CGCAPIError, api.status)
 
     @responses.activate
-    def test_api_status(self):
+    def test_status(self):
         """Test if the API responds with the correct status."""
         expected = {"round": 1,
                     "scores": [{"team": 1, "rank": 1, "score": 10},
@@ -36,4 +36,4 @@ class TestAPI(object):
                       json=expected, status=200)
         api = CGCAPI(self.API_BASE_URL, 'user', 'pw', '/tmp/cgc')
         data = api.status()
-        assert data == expected
+        nose.tools.assert_equal(data, expected)
