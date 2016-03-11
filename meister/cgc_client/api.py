@@ -60,6 +60,19 @@ class CGCAPI(object):
         else:
             raise CGCAPIError(resp.status_code, 'GET', path, resp.text)
 
+    def _post(self, path, data=None, files=None):
+        # We should use the code below, but requests.post() it's bugged! Dio cane!
+        # See https://github.com/kennethreitz/requests/issues/2422
+        # resp = requests.post(self._url(path),
+        #                      data=data,
+        #                      files=files,
+        #                      auth=HTTPDigestAuth(self.user, self.password))
+        # if resp.status_code == 200:
+        #     return resp.json()
+        # else:
+        #     raise CGCAPIError(resp.status_code, 'POST', path, resp.text)
+
+
     def status(self):
         """Retrieve the current status."""
         LOG.debug("Fetching current game status")
