@@ -12,7 +12,7 @@ import time
 
 # pylint: disable=import-error
 from pykube.http import HTTPClient
-from pykube.objects import ReplicationController
+from pykube.objects import ReplicationController, Pod
 # pylint: disable=import-error
 from requests.exceptions import HTTPError
 
@@ -38,7 +38,11 @@ class KubernetesScheduler(object):
     def schedule(self, job):
         """Schedule the job with the specific resources."""
         job.save()
-        self._schedule_kube_controller(job)
+        # FIXME: add attribute to Job
+        if job.worker == 'afl':
+            self._schedule_kube_controller(job)
+        else:
+            self._schedule_kube_pod(job)
         return job
 
     @property
@@ -48,48 +52,54 @@ class KubernetesScheduler(object):
             self._api = HTTPClient(kubernetes.from_env())
         return self._api
 
-    def _schedule_kube_controller(self, job):
-        """Internal method to schedule a job on Kubernetes."""
-        assert isinstance(self.api, HTTPClient)
+    def _kube_pod_template(self, job, restartPolicy='Always'):
         name = "worker-{}".format(job.id)
         # FIXME
         cpu = str(job.limit_cpu) if job.limit_cpu is not None else 2
         memory = str(job.limit_memory) if job.limit_memory is not None else 4
         config = {
+            'metadata': {
+                'labels': {
+                    'app': 'worker',
+                    'worker': job.worker,
+                    'job_id': str(job.id),
+                },
+                'name': name
+            },
+            'spec': {
+                'restartPolicy': restartPolicy,
+                'containers': [
+                    {
+                        'name': name,
+                        'image': 'worker',
+                        'resources': {
+                            'requests': {
+                                'cpu': str(cpu),
+                                'memory': "{}Gi".format(memory)
+                            }
+                        },
+                        'env': [
+                            {'name': "JOB_ID", 'value': str(job.id)},
+                            {'name': "POSTGRES_DATABASE_USER", 'value': os.environ['POSTGRES_DATABASE_USER']},
+                            {'name': "POSTGRES_DATABASE_PASSWORD", 'value': os.environ['POSTGRES_DATABASE_PASSWORD']},
+                            {'name': "POSTGRES_DATABASE_NAME", 'value': os.environ['POSTGRES_DATABASE_NAME']},
+                        ]
+                    }
+                ]
+            }
+        }
+        return config
+
+    def _schedule_kube_controller(self, job):
+        """Internal method to schedule a never ending job on Kubernetes."""
+        assert isinstance(self.api, HTTPClient)
+        name = "worker-{}".format(job.id)
+        config = {
             'metadata': {'name': name},
             'spec': {
                 'replicas': 1,
                 'selector': {'job_id': str(job.id)},
-                'template': {
-                    'metadata': {
-                        'labels': {
-                            'app': 'worker',
-                            'worker': job.worker,
-                            'job_id': str(job.id),
-                        },
-                        'name': name
-                    },
-                    'spec': {
-                        'containers': [
-                            {
-                                'name': name,
-                                'image': 'worker',
-                                'resources': {
-                                    'requests': {
-                                        'cpu': str(cpu),
-                                        'memory': "{}Gi".format(memory)
-                                    }
-                                },
-                                'env': [
-                                    {'name': "JOB_ID", 'value': str(job.id)},
-                                    {'name': "POSTGRES_DATABASE_USER", 'value': os.environ['POSTGRES_DATABASE_USER']},
-                                    {'name': "POSTGRES_DATABASE_PASSWORD", 'value': os.environ['POSTGRES_DATABASE_PASSWORD']},
-                                    {'name': "POSTGRES_DATABASE_NAME", 'value': os.environ['POSTGRES_DATABASE_NAME']},
-                                ]
-                            }
-                        ]
-                    }
-                }
+                'template': self._kube_pod_template(job)
             }
         }
 
@@ -102,6 +112,20 @@ class KubernetesScheduler(object):
             else:
                 raise error
 
+    def _schedule_kube_pod(self, job):
+        """Internal method to schedule a job on Kubernetes."""
+        assert isinstance(self.api, HTTPClient)
+        name = "worker-{}".format(job.id)
+        config = self._kube_pod_template(job, 'Never')
+
+        try:
+            if 'KUBERNETES_SERVICE_HOST' in os.environ:
+                Pod(self.api, config).create()
+        except HTTPError as error:
+            if error.response.status_code == 409:
+                LOG.warning("Job already scheduled %s", job.id)
+            else:
+                raise error
 
 class BaseScheduler(KubernetesScheduler):
     """Base strategy.
