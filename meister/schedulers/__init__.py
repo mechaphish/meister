@@ -6,7 +6,6 @@
 from __future__ import print_function, unicode_literals, absolute_import, \
                        division
 
-import base64
 import itertools
 import os
 import time
@@ -83,7 +82,6 @@ class KubernetesScheduler(object):
                                 },
                                 'env': [
                                     {'name': "JOB_ID", 'value': str(job.id)},
-                                    {'name': "CGC_CBS_PATH", 'value': os.environ['CGC_CBS_PATH']},
                                     {'name': "POSTGRES_DATABASE_USER", 'value': os.environ['POSTGRES_DATABASE_USER']},
                                     {'name': "POSTGRES_DATABASE_PASSWORD", 'value': os.environ['POSTGRES_DATABASE_PASSWORD']},
                                     {'name': "POSTGRES_DATABASE_NAME", 'value': os.environ['POSTGRES_DATABASE_NAME']},

@@ -1,7 +1,6 @@
 import json
 import os
 import glob
-import base64
 import operator
 
 from meister.cgc.tierror import TiError
@@ -9,17 +8,8 @@ from meister.cgc.tierror import TiError
 class TiRetrieval(object):
     def getBinaries(self, round_n):    # pylint: disable=unused-argument
         """Return all available binaries."""
-        self._LOG.debug("Fetching binaries: %s", self.binaries_path)
-        # NOTE: Why is this happening on disk instead of at the API?
-        binaries_files = glob.glob(os.path.join(self.binaries_path, '*/*'))
-        binaries_names = (os.path.basename(b) for b in binaries_files)
-        self._LOG.debug("Binaries available: %s", ", ".join(binaries_names))
-        binaries = []
-        for binary in binaries_files:
-            with open(binary, 'rb') as bin_file:
-                binaries.append({'cbid': os.path.basename(binary),
-                                 'data': base64.b64encode(bin_file.read())})
-        return {'binaries': binaries}
+        self._LOG.debug("Fetching binaries for round %s", round_n)
+        return self.getEvaluation('cb', round_n, self.user_id())
 
     def getTeams(self):
         """ get list of teams"""

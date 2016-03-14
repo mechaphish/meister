@@ -48,12 +48,11 @@ class TiClient(TiSubmission, TiRetrieval):
 
     good_http = [200, 301]
 
-    def __init__(self, ti_server, ti_port, user, password, binaries_path="FIXME"):
+    def __init__(self, ti_server, ti_port, user, password):
         self.ti_server = ti_server
         self.ti_port = ti_port
         self.user = user
         self.password = password
-        self.binaries_path = binaries_path
         self._LOG = LOG
 
     @classmethod
@@ -64,8 +63,10 @@ class TiClient(TiSubmission, TiRetrieval):
         port = os.environ['CGC_API_SERVICE_PORT']
         user = os.environ['CGC_API_USER']
         password = os.environ['CGC_API_PASS']
-        binaries_path = os.environ['CGC_CBS_PATH']
-        return cls(host, port, user, password, binaries_path)
+        return cls(host, port, user, password)
+
+    def user_id(self):
+        return self.user.split('-')[1]
 
     def _make_request(self, uri, fields=None, files=None):
         """

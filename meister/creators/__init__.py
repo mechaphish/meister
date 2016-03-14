@@ -6,7 +6,7 @@
 from __future__ import print_function, unicode_literals, absolute_import, \
                        division
 
-import base64
+import os
 
 from farnsworth.models.challenge_binary_node import ChallengeBinaryNode
 import meister.log
@@ -39,16 +39,21 @@ class BaseCreator(object):
             round_ = self.cgc.getRound()
 
         LOG.debug("Fetching binaries for round %s", round_)
-
-        for binary in self.cgc.getBinaries(round_)['binaries']:
+        for binary in self.cgc.getBinaries(round_):
             cbid = binary['cbid']
+            csid = binary['csid']
             # Note: this has to run single-threaded, otherwise we might add the
             # same binary twice to the database.
             try:
-                cbn = ChallengeBinaryNode.get(ChallengeBinaryNode.name == cbid)
+                cbn = ChallengeBinaryNode.get(
+                    (ChallengeBinaryNode.name == cbid) &
+                    (ChallengeBinaryNode.cs_id == csid)
+                )
             except ChallengeBinaryNode.DoesNotExist:
-                blob = base64.b64decode(binary['data'])
-                csid = cbid.split('_', 1)[0]
+                tmp_path = os.path.join("/tmp", "{}-{}-{}".format(round_, csid, cbid))
+                binary = self.cgc._get_dl(binary['uri'], tmp_path, binary['hash'])
+                blob = open(tmp_path, 'rb').read()
+                os.remove(tmp_path)
                 cbn = ChallengeBinaryNode(name=cbid, cs_id=csid, blob=blob)
                 cbn.save()
             LOG.debug("Found cbid: %s", cbid)
