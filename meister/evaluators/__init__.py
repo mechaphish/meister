@@ -27,10 +27,10 @@ class Evaluator(object):
         LOG.debug("Getting scores")
         try:
             scores = self._cgc.getStatus()['scores']
+            Score.create(scores=scores, round=self._round)
         except TiError as e:
             LOG.error("Scores error: %s", e.message)
 
-        Score.create(scores=scores, round=self._round)
 
     def _get_consensus_evaluation(self):
         for team_id in self._cgc.getTeams():
