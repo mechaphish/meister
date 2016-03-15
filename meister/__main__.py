@@ -44,6 +44,10 @@ def main():
             LOG.info("Round #%d", current_round)
             previous_round = current_round
 
+        # Get feedbacks
+        # FIXME: 5-minutes horrible code
+        Evaluator(cgc, round_).run()
+
         # Scheduler strategy
         scheduler = BruteScheduler(cgc=cgc, creators=[
             AFLCreator(cgc),
@@ -57,10 +61,6 @@ def main():
         if (current_round % 2) == 0:
             CBSubmitter(cgc).run()
         # POVSubmitter(cgc).run()
-
-        # Get feedbacks
-        # FIXME: 5-minutes horrible code
-        Evaluator(cgc, round_).run()
 
 
 if __name__ == '__main__':
