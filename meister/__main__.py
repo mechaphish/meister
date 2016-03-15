@@ -7,6 +7,7 @@ from __future__ import print_function, unicode_literals, absolute_import, \
                        division
 
 import os
+import time
 
 import meister.settings
 
@@ -21,6 +22,8 @@ def main():
     """Run the meister."""
     # Initialize APIs
     cgc = meister.cgc.ticlient.TiClient.from_env()
+    while not cgc.ready():
+        time.sleep(5)
 
     # Scheduler strategy
     scheduler = BruteScheduler(cgc=cgc, creators=[

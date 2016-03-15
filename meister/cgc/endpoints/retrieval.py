@@ -6,6 +6,14 @@ import operator
 from meister.cgc.tierror import TiError
 
 class TiRetrieval(object):
+    def ready(self):
+        try:
+            self.getRound()
+            return True
+        except TiError as e:
+            self._LOG.warning("CGC API is down: %s", e.message)
+            return False
+
     def getBinaries(self, round_n):    # pylint: disable=unused-argument
         """Return all available binaries."""
         self._LOG.debug("Fetching binaries for round %s", round_n)
