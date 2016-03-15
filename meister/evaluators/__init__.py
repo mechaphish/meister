@@ -16,18 +16,12 @@ class Evaluator(object):
         LOG.debug("Getting feedback")
         try:
             polls = self._cgc.getFeedback('poll', self._round.num)
-        except TiError as e:
-            LOG.error("Feedback polls error: %s", e.message)
-        try:
             povs = self._cgc.getFeedback('pov', self._round.num)
-        except TiError as e:
-            LOG.error("Feedback povs error: %s", e.message)
-        try:
             cbs = self._cgc.getFeedback('cb', self._round.num)
+            Feedback.create(polls=polls, povs=povs, cbs=cbs, round=self._round)
         except TiError as e:
             LOG.error("Feedback cbs error: %s", e.message)
 
-        Feedback.create(polls=polls, povs=povs, cbs=cbs, round=self._round)
 
     def _get_scores(self):
         LOG.debug("Getting scores")
@@ -44,15 +38,10 @@ class Evaluator(object):
             LOG.debug("Getting consensus evaluation for team %s", )
             try:
                 cbs = self._cgc.getEvaluation('cb', self._round.num, team.name)
-            except TiError as e:
-                LOG.error("CBs error: %s", e.message)
-            try:
                 ids = self._cgc.getEvaluation('ids', self._round.num, team.name)
+                Evaluation.create(cbs=cbs, ids=ids, team=team, round=self._round)
             except TiError as e:
                 LOG.error("IDS error: %s", e.message)
-
-            Evaluation.create(cbs=cbs, ids=ids, team=team, round=self._round)
-
 
     def run(self):
         self._get_feedbacks()
