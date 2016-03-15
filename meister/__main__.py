@@ -38,7 +38,7 @@ def main():
 
         if current_round == previous_round:
             LOG.debug("Still round #%d, waiting", current_round)
-            time.sleep(3)
+            time.sleep(1)
             continue
         else:
             LOG.info("Round #%d", current_round)
