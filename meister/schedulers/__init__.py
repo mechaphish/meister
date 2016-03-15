@@ -80,6 +80,7 @@ class KubernetesScheduler(object):
                         },
                         'env': [
                             {'name': "JOB_ID", 'value': str(job.id)},
+                            {'name': "POSTGRES_USE_SLAVES", 'value': True},
                             {'name': "POSTGRES_DATABASE_USER", 'value': os.environ['POSTGRES_DATABASE_USER']},
                             {'name': "POSTGRES_DATABASE_PASSWORD", 'value': os.environ['POSTGRES_DATABASE_PASSWORD']},
                             {'name': "POSTGRES_DATABASE_NAME", 'value': os.environ['POSTGRES_DATABASE_NAME']},
