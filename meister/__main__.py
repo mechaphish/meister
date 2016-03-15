@@ -15,6 +15,7 @@ import meister.cgc.ticlient
 from meister.creators.afl import AFLCreator
 from meister.creators.rex import RexCreator
 from meister.creators.driller import DrillerCreator
+from meister.creators.patcherex import PatcherexCreator
 from meister.schedulers.brute import BruteScheduler
 
 
@@ -30,6 +31,7 @@ def main():
         AFLCreator(cgc),
         DrillerCreator(cgc),
         RexCreator(cgc),
+        PatcherexCreator(cgc),
     ])
     scheduler.run()
 
