@@ -27,10 +27,7 @@ class BruteScheduler(meister.schedulers.BaseScheduler):
     def run(self):
         """Run the brute scheduler."""
         LOG.debug("Starting brute scheduler")
-        while True:
-            LOG.info("Round #%d", self.round)
-            for job in self.jobs:
-                LOG.debug("Scheduling %s for %s", job.__class__.__name__,
-                          job.cbn_id)
-                self.schedule(job)
-            self.sleep()
+        for job in self.jobs:
+            LOG.debug("Scheduling %s for %s", job.__class__.__name__,
+                      job.cbn_id)
+            self.schedule(job)

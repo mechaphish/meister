@@ -3,7 +3,7 @@
 import meister.creators
 from farnsworth.models.job import PatcherexJob
 
-LOG = meister.creators.LOG.getChild('PATCHEREX')
+LOG = meister.creators.LOG.getChild('patcherex')
 
 
 class PatcherexCreator(meister.creators.BaseCreator):
