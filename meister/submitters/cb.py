@@ -2,9 +2,9 @@
 
 from farnsworth import ChallengeBinaryNode
 from meister.cgc.tierror import TiError
-import meister.creators
+import meister.log
 
-LOG = meister.creators.LOG.getChild('CBSubmitter')
+LOG = meister.log.LOG.getChild('cbsubmitter')
 
 class CBSubmitter(object):
 

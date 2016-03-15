@@ -18,6 +18,8 @@ from meister.creators.driller import DrillerCreator
 from meister.creators.patcherex import PatcherexCreator
 from meister.schedulers.brute import BruteScheduler
 from meister.submitters.cb import CBSubmitter
+from meister.evaluators import Evaluator
+from farnsworth import Round
 import meister.log
 
 LOG = meister.log.LOG.getChild('main')
@@ -32,13 +34,15 @@ def main():
     previous_round = None
     while True:
         current_round = cgc.getRound()
+        round_ = Round.find_or_create(current_round)
+
         if current_round == previous_round:
             LOG.debug("Still round #%d, waiting", current_round)
             time.sleep(3)
             continue
         else:
             LOG.info("Round #%d", current_round)
-            previous_round = cgc.getRound()
+            previous_round = current_round
 
         # Scheduler strategy
         scheduler = BruteScheduler(cgc=cgc, creators=[
@@ -49,13 +53,14 @@ def main():
         ])
         scheduler.run()
 
-        # Submit patched binaries
-        CBSubmitter(cgc).run()
+        # Submit patched binaries every 2 rounds
+        if (current_round % 2) == 0:
+            CBSubmitter(cgc).run()
         # POVSubmitter(cgc).run()
 
         # Get feedbacks
-        # CBFeedback(cgc).run()
-        # POVFeedback(cgc).run()
+        # FIXME: 5-minutes horrible code
+        Evaluator(cgc, round_).run()
 
 
 if __name__ == '__main__':
