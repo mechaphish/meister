@@ -13,11 +13,13 @@ class CBSubmitter(object):
 
     def run(self):
         LOG.debug("Submitting patched binaries")
-        for cbn in ChallengeBinaryNode.unsubmitted_patched():
-            try:
-                self._cgc.uploadRCB(str(cbn.cs_id),
-                                    (str(cbn.parent.name), str(cbn.blob)))
-                cbn.submitted()
-                return          # FIXME: we submit only one patch per round
-            except TiError as e:
-                LOG.error("Submission error: %s", e.message)
+        for cbn in ChallengeBinaryNode.roots():
+            for patch in cbn.unsubmitted_patches:
+                LOG.debug("Submitting patch %s for %s", patch.name, cbn.name)
+                try:
+                    self._cgc.uploadRCB(str(cbn.cs_id),
+                                        (str(cbn.name), str(patch.blob)))
+                    patch.submitted()
+                    break          # FIXME: we submit only one patch per round
+                except TiError as e:
+                    LOG.error("Submission error: %s", e.message)
