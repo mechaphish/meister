@@ -76,7 +76,7 @@ class TiClient(TiSubmission, TiRetrieval):
         files -- sequence of (name,filename,filedata) into the form
         """
 
-        headers = {'User-Agent': 'ti-client'}
+        headers = {'User-Agent': 'mechanical-phish'}
 
         if fields is None:
             method = 'GET'
