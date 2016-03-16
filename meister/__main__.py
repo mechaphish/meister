@@ -53,13 +53,13 @@ def main():
             AFLCreator(cgc),
             DrillerCreator(cgc),
             RexCreator(cgc),
-            PatcherexCreator(cgc),
+            #PatcherexCreator(cgc),
         ])
         scheduler.run()
 
         # Submit patched binaries every 2 rounds
-        if (current_round % 2) == 0:
-            CBSubmitter(cgc).run()
+        #if (current_round % 2) == 0:
+        #    CBSubmitter(cgc).run()
         # POVSubmitter(cgc).run()
 
 
