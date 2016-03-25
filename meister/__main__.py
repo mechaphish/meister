@@ -58,8 +58,7 @@ def main():
         scheduler.run()
 
         # Submit patched binaries every 2 rounds
-        #if (current_round % 2) == 0:
-        #    CBSubmitter(cgc).run()
+        CBSubmitter(cgc).run()
         # POVSubmitter(cgc).run()
 
 
