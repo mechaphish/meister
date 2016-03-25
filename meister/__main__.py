@@ -53,7 +53,7 @@ def main():
             AFLCreator(cgc),
             DrillerCreator(cgc),
             RexCreator(cgc),
-            #PatcherexCreator(cgc),
+            PatcherexCreator(cgc),
         ])
         scheduler.run()
 
