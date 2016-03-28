@@ -18,16 +18,16 @@ class Evaluator(object):
         try:
             polls = self._cgc.getFeedback('poll', self._round.num)
         except TiError as e:
-            LOG.error("Feedback error: %s", e.message)
+            LOG.error("Feedback poll error: %s", e.message)
         try:
             povs = self._cgc.getFeedback('pov', self._round.num)
         except TiError as e:
-            LOG.error("Feedback error: %s", e.message)
+            LOG.error("Feedback pov error: %s", e.message)
         try:
             cbs = self._cgc.getFeedback('cb', self._round.num)
         except TiError as e:
-            LOG.error("Feedback error: %s", e.message)
-        Feedback.create(polls=polls, povs=povs, cbs=cbs, round=self._round)
+            LOG.error("Feedback cb error: %s", e.message)
+        Feedback.update_or_create(self._round, polls=polls, povs=povs, cbs=cbs)
 
 
     def _get_scores(self):
@@ -37,14 +37,14 @@ class Evaluator(object):
             scores = self._cgc.getStatus()['scores']
         except TiError as e:
             LOG.error("Scores error: %s", e.message)
-        Score.create(scores=scores, round=self._round)
+        Score.update_or_create(self._round, scores=scores)
 
 
     def _get_consensus_evaluation(self):
         try:
             for team_id in self._cgc.getTeams():
                 team = Team.find_or_create(team_id)
-                LOG.debug("Getting consensus evaluation for team %s", )
+                LOG.debug("Getting consensus evaluation for team %s", team_id)
                 cbs, ids = {}, {}
                 try:
                     cbs = self._cgc.getEvaluation('cb', self._round.num, team.name)
@@ -54,7 +54,7 @@ class Evaluator(object):
                     ids = self._cgc.getEvaluation('ids', self._round.num, team.name)
                 except TiError as e:
                     LOG.error("Consensus evaluation error: %s", e.message)
-                Evaluation.create(cbs=cbs, ids=ids, team=team, round=self._round)
+                Evaluation.update_or_create(self._round, cbs=cbs, ids=ids, team=team)
         except TiError as e:
             LOG.error("Unable to get teams: %s", e.message)
 

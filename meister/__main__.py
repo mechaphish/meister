@@ -36,6 +36,10 @@ def main():
         current_round = cgc.getRound()
         round_ = Round.find_or_create(current_round)
 
+        # Get feedbacks
+        # FIXME: 5-minutes horrible code
+        Evaluator(cgc, round_).run()
+
         if current_round == previous_round:
             LOG.debug("Still round #%d, waiting", current_round)
             time.sleep(1)
@@ -43,10 +47,6 @@ def main():
         else:
             LOG.info("Round #%d", current_round)
             previous_round = current_round
-
-        # Get feedbacks
-        # FIXME: 5-minutes horrible code
-        Evaluator(cgc, round_).run()
 
         # Scheduler strategy
         scheduler = BruteScheduler(cgc=cgc, creators=[
