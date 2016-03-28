@@ -28,11 +28,13 @@ def main():
     """Run the meister."""
     # Initialize APIs
     cgc = meister.cgc.ticlient.TiClient.from_env()
-    while not cgc.ready():
-        time.sleep(5)
 
     previous_round = None
     while True:
+        # wait for API to be available
+        while not cgc.ready():
+            time.sleep(5)
+
         current_round = cgc.getRound()
         round_ = Round.find_or_create(current_round)
 
