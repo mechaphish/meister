@@ -38,8 +38,14 @@ def main():
         current_round = cgc.getRound()
         round_ = Round.find_or_create(current_round)
 
+        # Jobs scheduled continuously
+        scheduler = BruteScheduler(cgc=cgc, creators=[
+            DrillerCreator(cgc),
+            RexCreator(cgc),
+        ])
+        scheduler.run()
+
         # Get feedbacks
-        # FIXME: 5-minutes horrible code
         Evaluator(cgc, round_).run()
 
         if current_round == previous_round:
@@ -50,14 +56,12 @@ def main():
             LOG.info("Round #%d", current_round)
             previous_round = current_round
 
-        # Scheduler strategy
-        scheduler = BruteScheduler(cgc=cgc, creators=[
+        # Jobs scheduled per round
+        perround_scheduler = BruteScheduler(cgc=cgc, creators=[
             AFLCreator(cgc),
-            DrillerCreator(cgc),
-            RexCreator(cgc),
             PatcherexCreator(cgc),
         ])
-        scheduler.run()
+        perround_scheduler.run()
 
         # Submit patched binaries every 2 rounds
         CBSubmitter(cgc).run()
