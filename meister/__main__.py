@@ -41,7 +41,7 @@ def main():
 
         # Jobs scheduled continuously
         scheduler = BruteScheduler(cgc=cgc, creators=[
-            DrillerCreator(cgc),
+            # DrillerCreator(cgc),
             RexCreator(cgc),
         ])
         scheduler.run()
