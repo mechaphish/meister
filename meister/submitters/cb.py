@@ -12,7 +12,6 @@ class CBSubmitter(object):
         self._cgc = cgc
 
     def run(self):
-        LOG.debug("Submitting patched binaries")
         for cbn in ChallengeBinaryNode.roots():
             for patch in cbn.unsubmitted_patches:
                 LOG.debug("Submitting patch %s for %s", patch.name, cbn.name)
