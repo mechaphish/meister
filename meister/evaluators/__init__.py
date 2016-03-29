@@ -54,7 +54,7 @@ class Evaluator(object):
                     ids = self._cgc.getEvaluation('ids', self._round.num, team.name)
                 except TiError as e:
                     LOG.error("Consensus evaluation error: %s", e.message)
-                Evaluation.update_or_create(self._round, cbs=cbs, ids=ids, team=team)
+                Evaluation.update_or_create(self._round, team, cbs=cbs, ids=ids)
         except TiError as e:
             LOG.error("Unable to get teams: %s", e.message)
 
