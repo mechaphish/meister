@@ -18,6 +18,7 @@ from meister.creators.driller import DrillerCreator
 from meister.creators.patcherex import PatcherexCreator
 from meister.schedulers.brute import BruteScheduler
 from meister.submitters.cb import CBSubmitter
+from meister.submitters.pov import POVSubmitter
 from meister.evaluators import Evaluator
 from farnsworth import Round
 import meister.log
@@ -64,8 +65,8 @@ def main():
         perround_scheduler.run()
 
         # Submit patched binaries every 2 rounds
-        CBSubmitter(cgc).run()
-        # POVSubmitter(cgc).run()
+        # CBSubmitter(cgc).run()
+        POVSubmitter(cgc).run()
 
 
 if __name__ == '__main__':
