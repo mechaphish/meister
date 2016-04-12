@@ -12,7 +12,7 @@ class DrillerCreator(meister.creators.BaseCreator):
     def jobs(self):
         for cbn in self.cbns():
 
-            if cbn.fuzzer_stat is None or cbn.fuzzer_stat.last_path == 0:
+            if cbn.fuzzer_stat is None or cbn.fuzzer_stat.last_path is None:
                 continue
 
             check_time = datetime.datetime.now()
