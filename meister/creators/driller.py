@@ -12,8 +12,11 @@ class DrillerCreator(meister.creators.BaseCreator):
     def jobs(self):
         for cbn in self.cbns():
 
+            if cbn.fuzzer_stat is None or cbn.fuzzer_stat.last_path == 0:
+                continue
+
             check_time = datetime.datetime.now()
-            elapsed = check_time - cbn.fuzzer_state.last_path
+            elapsed = check_time - cbn.fuzzer_stat.last_path
 
             # has a path been found in the last minute?
             if elapsed > datetime.timedelta(minutes=1):
