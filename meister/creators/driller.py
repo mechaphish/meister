@@ -15,11 +15,8 @@ class DrillerCreator(meister.creators.BaseCreator):
             if cbn.fuzzer_stat is None or cbn.fuzzer_stat.last_path is None:
                 continue
 
-            check_time = datetime.datetime.now()
-            elapsed = check_time - cbn.fuzzer_stat.last_path
-
-            # has a path been found in the last minute?
-            if elapsed > datetime.timedelta(minutes=1):
+            # is the fuzzer still working on mutating favorites?
+            if not (cbn.fuzzer_stat.pending_favs > 0):
                 LOG.info("AFL has not found any new paths for 1 minute, scheduling Driller")
                 for test in cbn.undrilled_tests:
                     job = DrillerJob(cbn=cbn,
