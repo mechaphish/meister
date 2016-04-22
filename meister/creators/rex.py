@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import meister.creators
-from farnsworth import RexJob
+from farnsworth.models import RexJob
 
 LOG = meister.creators.LOG.getChild('rex')
 

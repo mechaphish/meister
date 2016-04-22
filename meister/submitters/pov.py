@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from farnsworth import ChallengeBinaryNode, Team
+from farnsworth.models import ChallengeBinaryNode, Team
 from meister.cgc.tierror import TiError
 import meister.log
 

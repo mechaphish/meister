@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from farnsworth import Feedback, Score, Evaluation, Team
+from farnsworth.models import Feedback, Score, Evaluation, Team
 from meister.cgc.tierror import TiError
 import meister.log
 

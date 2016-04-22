@@ -20,7 +20,7 @@ from meister.schedulers.brute import BruteScheduler
 from meister.submitters.cb import CBSubmitter
 from meister.submitters.pov import POVSubmitter
 from meister.evaluators import Evaluator
-from farnsworth import Round
+from farnsworth.models import Round
 import meister.log
 
 LOG = meister.log.LOG.getChild('main')
