@@ -71,7 +71,7 @@ class KubernetesScheduler(object):
                 'containers': [
                     {
                         'name': name,
-                        'image': 'worker',
+                        'image': os.environ['WORKER_IMAGE'],
                         'resources': {
                             'requests': {
                                 'cpu': str(cpu),
