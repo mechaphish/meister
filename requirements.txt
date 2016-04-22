@@ -1,3 +1,4 @@
+httplib
 requests
 python-dotenv
 farnsworth
