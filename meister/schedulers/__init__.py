@@ -12,7 +12,7 @@ import time
 
 # pylint: disable=import-error
 from pykube.http import HTTPClient
-from pykube.objects import ReplicationController, Pod
+from pykube.objects import ReplicationController, Pod, Node
 # pylint: disable=import-error
 from requests.exceptions import HTTPError
 
@@ -39,10 +39,11 @@ class KubernetesScheduler(object):
         """Schedule the job with the specific resources."""
         job.save()
         # FIXME: add attribute to Job
-        if job.worker == 'afl':
-            self._schedule_kube_controller(job)
-        else:
-            self._schedule_kube_pod(job)
+        if self._resources_available(job):
+            if job.worker == 'afl':
+                self._schedule_kube_controller(job)
+            else:
+                self._schedule_kube_pod(job)
         return job
 
     @property
@@ -52,7 +53,7 @@ class KubernetesScheduler(object):
             self._api = HTTPClient(kubernetes.from_env())
         return self._api
 
-    def _kube_pod_template(self, job, restartPolicy='Always'):
+    def _kube_pod_template(self, job, restart_policy='Always'):
         name = "worker-{}".format(job.id)
         # FIXME
         cpu = str(job.limit_cpu) if job.limit_cpu is not None else 2
@@ -67,7 +68,7 @@ class KubernetesScheduler(object):
                 'name': name
             },
             'spec': {
-                'restartPolicy': restartPolicy,
+                'restartPolicy': restart_policy,
                 'containers': [
                     {
                         'name': name,
@@ -90,6 +91,23 @@ class KubernetesScheduler(object):
             }
         }
         return config
+
+    def _resources_available(self, job):
+        """Internal method to check whether the resources for a Job are available."""
+        # TODO: Check if resources are available for the job
+        assert job is not None
+        self._kube_aggregate_resources()
+        return True
+
+    # TODO: We want to cache the results in a worst-case sense for some time
+    # TODO: Use as property instead, so that callers can update it if necessary
+    def _kube_aggregate_resources(self):
+        """Internal helper method to collect aggregate statistics for Kubernetes cluster."""
+        assert isinstance(self.api, HTTPClient)
+        nodes = Node.objects(self.api)
+        assert nodes is not None
+        # TODO: collect available resources per node
+        # TODO: set instance directory to available resources
 
     def _schedule_kube_controller(self, job):
         """Internal method to schedule a never ending job on Kubernetes."""
@@ -116,7 +134,6 @@ class KubernetesScheduler(object):
     def _schedule_kube_pod(self, job):
         """Internal method to schedule a job on Kubernetes."""
         assert isinstance(self.api, HTTPClient)
-        name = "worker-{}".format(job.id)
         config = self._kube_pod_template(job, 'Never')
 
         try:
@@ -127,6 +144,7 @@ class KubernetesScheduler(object):
                 LOG.warning("Job already scheduled %s", job.id)
             else:
                 raise error
+
 
 class BaseScheduler(KubernetesScheduler):
     """Base strategy.
