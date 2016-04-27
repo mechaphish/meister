@@ -23,5 +23,5 @@ class DrillerCreator(meister.creators.BaseCreator):
                                      limit_cpus=1, limit_memory=10, limit_time=120,
                                      payload={'test_id': test.id})
                     if not DrillerJob.queued(job):
-                        LOG.debug("Yielding AFLJob for %s with %s", cbn.id, test.id)
+                        LOG.debug("Yielding DrillerJob for %s with %s", cbn.id, test.id)
                         yield job
