@@ -24,6 +24,14 @@ from farnsworth.models.challenge_binary_node import ChallengeBinaryNode
 LOG = meister.log.LOG.getChild('schedulers')
 
 
+def _cpu2float(cpu):
+    """Internal helper function to convert Kubernetes CPU numbers to float."""
+    if cpu.endswith("m"):
+        cpu = int(cpu[:-1]) / 1000.
+    else:
+        return float(cpu)
+
+
 class KubernetesScheduler(object):
     """Kubernetes scheduler class, should be inherited by actual schedulers."""
 
