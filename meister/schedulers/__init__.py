@@ -58,7 +58,6 @@ class KubernetesScheduler(object):
     def schedule(self, job):
         """Schedule the job with the specific resources."""
         job.save()
-        # FIXME: add attribute to Job
         if self._resources_available(job):
             if job.worker == 'afl':
                 self._schedule_kube_controller(job)
@@ -102,9 +101,12 @@ class KubernetesScheduler(object):
                         'env': [
                             {'name': "JOB_ID", 'value': str(job.id)},
                             {'name': "POSTGRES_USE_SLAVES", 'value': "true"},
-                            {'name': "POSTGRES_DATABASE_USER", 'value': os.environ['POSTGRES_DATABASE_USER']},
-                            {'name': "POSTGRES_DATABASE_PASSWORD", 'value': os.environ['POSTGRES_DATABASE_PASSWORD']},
-                            {'name': "POSTGRES_DATABASE_NAME", 'value': os.environ['POSTGRES_DATABASE_NAME']},
+                            {'name': "POSTGRES_DATABASE_USER",
+                             'value': os.environ['POSTGRES_DATABASE_USER']},
+                            {'name': "POSTGRES_DATABASE_PASSWORD",
+                             'value': os.environ['POSTGRES_DATABASE_PASSWORD']},
+                            {'name': "POSTGRES_DATABASE_NAME",
+                             'value': os.environ['POSTGRES_DATABASE_NAME']},
                         ]
                     }
                 ]
