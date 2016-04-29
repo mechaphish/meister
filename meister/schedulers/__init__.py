@@ -32,6 +32,18 @@ def _cpu2float(cpu):
         return float(cpu)
 
 
+def _memory2int(memory):
+    """Internal helper function to convert Kubernetes memory amount to integers."""
+    multiplier = 1
+    if memory.endswith("Ki"):
+        multiplier = 1024
+    elif memory.endswith("Mi"):
+        multiplier = 1024 ** 2
+    elif memory.endswith("Gi"):
+        multiplier = 1024 ** 3
+    return int(memory[:-2]) * multiplier
+
+
 class KubernetesScheduler(object):
     """Kubernetes scheduler class, should be inherited by actual schedulers."""
 
