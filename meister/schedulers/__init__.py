@@ -6,6 +6,7 @@
 from __future__ import print_function, unicode_literals, absolute_import, \
                        division
 
+import datetime
 import itertools
 import os
 import time
@@ -54,11 +55,16 @@ class KubernetesScheduler(object):
         make sure that all class variables are set up properly.
         """
         self._api = None
+        self._node_capacities = None
+        self._available_resources = None
+        self._resources_cache_timeout = datetime.timedelta(seconds=30)
+        self._resources_timestamp = datetime.datetime(1970, 1, 1, 0, 0, 0)
 
     def schedule(self, job):
         """Schedule the job with the specific resources."""
         job.save()
         if self._resources_available(job):
+            self._resources_update(job)
             if job.worker == 'afl':
                 self._schedule_kube_controller(job)
             else:
@@ -116,20 +122,73 @@ class KubernetesScheduler(object):
 
     def _resources_available(self, job):
         """Internal method to check whether the resources for a Job are available."""
-        # TODO: Check if resources are available for the job
         assert job is not None
-        self._kube_aggregate_resources()
-        return True
+        cpu_available = self._kube_resources['cpu'] >= job.cpu
+        memory_available = self._kube_resources['memory'] >= (job.memory * 1024 ** 3)
+        pod_available = self._kube_resources['pods'] >= 1
+        return cpu_available and memory_available and pod_available
 
-    # TODO: We want to cache the results in a worst-case sense for some time
-    # TODO: Use as property instead, so that callers can update it if necessary
-    def _kube_aggregate_resources(self):
-        """Internal helper method to collect aggregate statistics for Kubernetes cluster."""
+    def _resources_update(self, job):
+        """Internal method to check whether the resources for a Job are available."""
+        assert job is not None
+        self._kube_resources['cpu'] -= job.cpu
+        self._kube_resources['memory'] -= (job.memory * 1024 ** 3)
+        self._kube_resources['pods'] -= 1
+
+    # Currently, we are using aggregate resources instead of per node resources for ease of
+    # scheduling. This is suboptimal because we might run into situation where we think we can
+    # schedule a job but actually cannot. The example below is a generalization of this in case node
+    # specific information is retained.
+    #
+    # There is a possibly problem that we might have to use almost the latest information because
+    # the following might happen:
+    #  - node a has availability 2 cores / 1GB
+    #  - node b has availability 2 cores / 2GB
+    #  - we schedule 2 cores / 1GB, update our dict to substract from a
+    #  - Kubernetes schedules it to run on node b
+    #  - we want to schedule 2 cores / 2GB, our dict thinks we can on b
+    #  - Kubernetes fails to spawn the worker
+    @property
+    def _kube_resources(self):
+        """Internal helper method to collect resource data for Kubernetes cluster."""
         assert isinstance(self.api, HTTPClient)
-        nodes = Node.objects(self.api)
-        assert nodes is not None
-        # TODO: collect available resources per node
-        # TODO: set instance directory to available resources
+
+        # Return cached data
+        if self._resources_cache_timeout <= datetime.datetime() - self._resources_timestamp:
+            return self._available_resources
+
+        # Update node capacities, only ran once for the first update of availabe resources
+        if self._node_capacities is None:
+            nodes = Node.objects(self.api).all()
+            self._node_capacities = {}
+            for node in nodes:
+                cpu = _cpu2float(node.obj['status']['capacity']['cpu'])
+                memory = _memory2int(node.obj['status']['capacity']['memory'])
+                pods = int(node.obj['status']['capacity']['pods'])
+                self._node_capacities[node.name] = {'cpu': cpu,
+                                                    'memory': memory,
+                                                    'pods': pods}
+
+        # Reset available resources
+        self._available_resources = {'cpu': 0.0, 'memory': 0L, 'pods': 0}
+        for capacity in self._node_capacities:
+            self._available_resources['cpu'] += capacity['cpu']
+            self._available_resources['memory'] += capacity['memory']
+            self._available_resources['pods'] += capacity['pods']
+
+        # Collect fresh information from the Kubernetes API about all pods
+        # TODO: Figure out if this also includes pods that are scheduled but not yet running!
+        #       Might result in overflow situations etc.
+        pods = Pod.objects(self.api).all()
+        for pod in pods:
+            # We are assuming that each pod only has one container here
+            limits = pod.obj['spec']['containers'][0]['resources']['limits']
+            self._available_resources['cpu'] -= _cpu2float(limits['cpu'])
+            self._available_resources['memory'] -= _memory2int(limits['memory'])
+            self._available_resources['pods'] -= 1
+        self._resources_timestamp = datetime.datetime.now()
+
+        return self._available_resources
 
     def _schedule_kube_controller(self, job):
         """Internal method to schedule a never ending job on Kubernetes."""
