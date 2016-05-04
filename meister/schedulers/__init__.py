@@ -154,7 +154,7 @@ class KubernetesScheduler(object):
         assert isinstance(self.api, HTTPClient)
 
         # Return cached data
-        if self._resources_cache_timeout <= datetime.datetime() - self._resources_timestamp:
+        if self._resources_cache_timeout <= datetime.datetime.now() - self._resources_timestamp:
             return self._available_resources
 
         # Update node capacities, only ran once for the first update of availabe resources
