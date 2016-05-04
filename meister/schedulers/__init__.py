@@ -171,7 +171,7 @@ class KubernetesScheduler(object):
 
         # Reset available resources
         self._available_resources = {'cpu': 0.0, 'memory': 0L, 'pods': 0}
-        for capacity in self._node_capacities:
+        for capacity in self._node_capacities.values():
             self._available_resources['cpu'] += capacity['cpu']
             self._available_resources['memory'] += capacity['memory']
             self._available_resources['pods'] += capacity['pods']
