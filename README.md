@@ -7,6 +7,13 @@ This repo is for the "master" component of the CGC.
     mv .env.development .env
     meister
 
+## Branches
+
+Branch `master` contains the working version.
+
+Branch `api-monitor` contains the modified version
+to monitor and test the real API when up.
+
 ## CGC TI Client
 
 ```

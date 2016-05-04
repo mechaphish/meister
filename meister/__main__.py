@@ -12,6 +12,7 @@ import time
 import meister.settings
 
 import meister.cgc.ticlient
+import meister.cgc.tierror
 from meister.creators.afl import AFLCreator
 from meister.creators.rex import RexCreator
 from meister.creators.driller import DrillerCreator
@@ -21,6 +22,7 @@ from meister.schedulers.brute import BruteScheduler
 from meister.submitters.cb import CBSubmitter
 from meister.submitters.pov import POVSubmitter
 from meister.evaluators import Evaluator
+from meister.notifier import Notifier
 from farnsworth.models import Round
 import meister.log
 
@@ -32,44 +34,50 @@ def main():
     cgc = meister.cgc.ticlient.TiClient.from_env()
 
     previous_round = None
+    notifier = Notifier()
     while True:
-        # wait for API to be available
-        while not cgc.ready():
-            time.sleep(5)
+        try:
+            # wait for API to be available
+            while not cgc.ready():
+                notifier.api_is_down()
+                time.sleep(5)
 
-        current_round = cgc.getRound()
-        round_ = Round.find_or_create(current_round)
+            notifier.api_is_up()
+            current_round = cgc.getRound()
+            round_ = Round.find_or_create(current_round)
 
-        # Jobs scheduled continuously
-        scheduler = BruteScheduler(cgc=cgc, creators=[
-            DrillerCreator(cgc),
-            RexCreator(cgc),
-            TesterCreator(cgc),
-        ])
-        scheduler.run()
+            # Jobs scheduled continuously
+            scheduler = BruteScheduler(cgc=cgc, creators=[
+                DrillerCreator(cgc),
+                RexCreator(cgc),
+                TesterCreator(cgc),
+            ])
+            scheduler.run()
 
-        # Get feedbacks
-        Evaluator(cgc, round_).run()
+            # Get feedbacks
+            Evaluator(cgc, round_).run()
 
-        if current_round == previous_round:
-            LOG.debug("Still round #%d, waiting", current_round)
-            time.sleep(1)
-            continue
-        else:
-            LOG.info("Round #%d", current_round)
-            previous_round = current_round
+            if current_round == previous_round:
+                LOG.debug("Still round #%d, waiting", current_round)
+                time.sleep(1)
+                continue
+            else:
+                LOG.info("Round #%d", current_round)
+                previous_round = current_round
 
-        # Jobs scheduled per round
-        perround_scheduler = BruteScheduler(cgc=cgc, creators=[
-            AFLCreator(cgc),
-            PatcherexCreator(cgc),
-        ])
-        perround_scheduler.run()
+            # Jobs scheduled per round
+            perround_scheduler = BruteScheduler(cgc=cgc, creators=[
+                AFLCreator(cgc),
+                PatcherexCreator(cgc),
+            ])
+            perround_scheduler.run()
 
-        # Submit patched binaries every 2 rounds
-        # CBSubmitter(cgc).run()
-        POVSubmitter(cgc).run()
+            # Submit patched binaries every 2 rounds
+            # CBSubmitter(cgc).run()
+            POVSubmitter(cgc).run()
 
+        except meister.cgc.tierror.TiError:
+            notifier.api_is_down()
 
 if __name__ == '__main__':
     main()
