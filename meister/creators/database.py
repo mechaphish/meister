@@ -24,17 +24,4 @@ class DatabaseCreator(meister.creators.BaseCreator):
     def jobs(self):
         """Yield every job that is stored in the database."""
         for job in Job.select(id, ).where(Job.started_at.is_null(True)):
-            # Directly setting the __class__ member only works because our
-            # job subclasses do not add extra instance variables, but only
-            # member functions that we are calling.
-            if job.worker == 'afl':
-                job.__class__ = AFLJob
-            elif job.worker == 'driller':
-                job.__class__ = DrillerJob
-            elif job.worker == 'rex':
-                job.__class__ = RexJob
-            elif job.worker == 'patcherex':
-                job.__clas__ = PatcherexJob
-            elif job.worker == 'tester':
-                job.__class__ = TesterJob
-            yield job
+            yield job.subclass()
