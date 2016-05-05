@@ -10,6 +10,7 @@ import datetime
 import itertools
 import os
 import time
+import operator
 
 # pylint: disable=import-error
 from pykube.http import HTTPClient
@@ -123,16 +124,16 @@ class KubernetesScheduler(object):
     def _resources_available(self, job):
         """Internal method to check whether the resources for a Job are available."""
         assert job is not None
-        cpu_available = self._kube_resources['cpu'] >= job.cpu
-        memory_available = self._kube_resources['memory'] >= (job.memory * 1024 ** 3)
+        cpu_available = self._kube_resources['cpu'] >= job.limit_cpu
+        memory_available = self._kube_resources['memory'] >= (job.limit_memory * 1024 ** 3)
         pod_available = self._kube_resources['pods'] >= 1
         return cpu_available and memory_available and pod_available
 
     def _resources_update(self, job):
         """Internal method to check whether the resources for a Job are available."""
         assert job is not None
-        self._kube_resources['cpu'] -= job.cpu
-        self._kube_resources['memory'] -= (job.memory * 1024 ** 3)
+        self._kube_resources['cpu'] -= job.limit_cpu
+        self._kube_resources['memory'] -= (job.limit_memory * 1024 ** 3)
         self._kube_resources['pods'] -= 1
 
     # Currently, we are using aggregate resources instead of per node resources for ease of
@@ -159,7 +160,7 @@ class KubernetesScheduler(object):
             return self._available_resources
 
         # Return cached data
-        if self._resources_cache_timeout <= datetime.datetime.now() - self._resources_timestamp:
+        if (datetime.datetime.now() - self._resources_timestamp) <= self._resources_cache_timeout:
             return self._available_resources
 
         # Update node capacities, only ran once for the first update of availabe resources
@@ -181,15 +182,16 @@ class KubernetesScheduler(object):
             self._available_resources['memory'] += capacity['memory']
             self._available_resources['pods'] += capacity['pods']
 
-        # Collect fresh information from the Kubernetes API about all pods
-        # TODO: Figure out if this also includes pods that are scheduled but not yet running!
-        #       Might result in overflow situations etc.
-        pods = Pod.objects(self.api).all()
+        # Collect fresh information from the Kubernetes API about all running pods
+        pods = filter(operator.attrgetter("ready"), Pod.objects(self.api))
         for pod in pods:
-            # We are assuming that each pod only has one container here
-            limits = pod.obj['spec']['containers'][0]['resources']['limits']
-            self._available_resources['cpu'] -= _cpu2float(limits['cpu'])
-            self._available_resources['memory'] -= _memory2int(limits['memory'])
+            # FIXME: We are assuming that each pod only has one container here
+            try:
+                resources = pod.obj['spec']['containers'][0]['resources']['limits']
+            except KeyError:
+                resources = pod.obj['spec']['containers'][0]['resources']['requests']
+            self._available_resources['cpu'] -= _cpu2float(resources['cpu'])
+            self._available_resources['memory'] -= _memory2int(resources['memory'])
             self._available_resources['pods'] -= 1
         self._resources_timestamp = datetime.datetime.now()
 
