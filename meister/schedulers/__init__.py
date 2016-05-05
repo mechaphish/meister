@@ -153,6 +153,11 @@ class KubernetesScheduler(object):
         """Internal helper method to collect resource data for Kubernetes cluster."""
         assert isinstance(self.api, HTTPClient)
 
+        # meister running locally
+        if 'KUBERNETES_SERVICE_HOST' not in os.environ:
+            self._available_resources = {'cpu': 99999, 'memory': 99999999999999, 'pods': 99999}
+            return self._available_resources
+
         # Return cached data
         if self._resources_cache_timeout <= datetime.datetime.now() - self._resources_timestamp:
             return self._available_resources
