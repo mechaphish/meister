@@ -13,8 +13,8 @@ import time
 import operator
 
 # pylint: disable=import-error
-from pykube.http import HTTPClient
-from pykube.objects import ReplicationController, Pod, Node
+import pykube.http
+import pykube.objects
 # pylint: disable=import-error
 from requests.exceptions import HTTPError
 
@@ -76,7 +76,7 @@ class KubernetesScheduler(object):
     def api(self):
         """Return the API we are working on."""
         if self._api is None:
-            self._api = HTTPClient(kubernetes.from_env())
+            self._api = pykube.http.HTTPClient(kubernetes.from_env())
         return self._api
 
     def _kube_pod_template(self, job, restart_policy='Always'):
@@ -152,7 +152,7 @@ class KubernetesScheduler(object):
     @property
     def _kube_resources(self):
         """Internal helper method to collect resource data for Kubernetes cluster."""
-        assert isinstance(self.api, HTTPClient)
+        assert isinstance(self.api, pykube.http.HTTPClient)
 
         # meister running locally
         if 'KUBERNETES_SERVICE_HOST' not in os.environ:
@@ -165,7 +165,7 @@ class KubernetesScheduler(object):
 
         # Update node capacities, only ran once for the first update of availabe resources
         if self._node_capacities is None:
-            nodes = Node.objects(self.api).all()
+            nodes = pykube.objects.Node.objects(self.api).all()
             self._node_capacities = {}
             for node in nodes:
                 cpu = _cpu2float(node.obj['status']['capacity']['cpu'])
@@ -183,7 +183,8 @@ class KubernetesScheduler(object):
             self._available_resources['pods'] += capacity['pods']
 
         # Collect fresh information from the Kubernetes API about all running pods
-        pods = filter(operator.attrgetter("ready"), Pod.objects(self.api))
+        pods = filter(operator.attrgetter("ready"),
+                      pykube.objects.Pod.objects(self.api))
         for pod in pods:
             # FIXME: We are assuming that each pod only has one container here
             try:
@@ -199,7 +200,7 @@ class KubernetesScheduler(object):
 
     def _schedule_kube_controller(self, job):
         """Internal method to schedule a never ending job on Kubernetes."""
-        assert isinstance(self.api, HTTPClient)
+        assert isinstance(self.api, pykube.http.HTTPClient)
         name = "worker-{}".format(job.id)
         config = {
             'metadata': {'name': name},
@@ -212,7 +213,7 @@ class KubernetesScheduler(object):
 
         try:
             if 'KUBERNETES_SERVICE_HOST' in os.environ:
-                ReplicationController(self.api, config).create()
+                pykube.objects.ReplicationController(self.api, config).create()
         except HTTPError as error:
             if error.response.status_code == 409:
                 LOG.warning("Job already scheduled %s", job.id)
@@ -221,12 +222,12 @@ class KubernetesScheduler(object):
 
     def _schedule_kube_pod(self, job):
         """Internal method to schedule a job on Kubernetes."""
-        assert isinstance(self.api, HTTPClient)
+        assert isinstance(self.api, pykube.http.HTTPClient)
         config = self._kube_pod_template(job, 'Never')
 
         try:
             if 'KUBERNETES_SERVICE_HOST' in os.environ:
-                Pod(self.api, config).create()
+                pykube.objects.Pod(self.api, config).create()
         except HTTPError as error:
             if error.response.status_code == 409:
                 LOG.warning("Job already scheduled %s", job.id)
