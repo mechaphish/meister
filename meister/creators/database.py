@@ -8,7 +8,7 @@ Create jobs from the persistent database.
 """
 
 import meister.creators
-from farnsworth.models.job import Job, AFLJob, DrillerJob, RexJob, PatcherexJob, TesterJob
+from farnsworth.models.job import Job, to_job_type
 
 LOG = meister.creators.LOG.getChild('database')
 
@@ -24,4 +24,4 @@ class DatabaseCreator(meister.creators.BaseCreator):
     def jobs(self):
         """Yield every job that is stored in the database."""
         for job in Job.select(id, ).where(Job.started_at.is_null(True)):
-            yield job.subclass()
+            yield to_job_type(job)
