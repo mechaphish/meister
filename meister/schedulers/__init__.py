@@ -183,8 +183,13 @@ class KubernetesScheduler(object):
             self._available_resources['pods'] += capacity['pods']
 
         # Collect fresh information from the Kubernetes API about all running pods
-        pods = filter(operator.attrgetter("ready"),
-                      pykube.objects.Pod.objects(self.api))
+        # FIXME: Shitty loop to fix https://github.com/kelproject/pykube/issues/10
+        pods = []
+        for pod in pykube.objects.Pod.objects(self.api):
+            try:
+                if pod.ready: pods.append(pod)
+            except KeyError:
+                pass
         for pod in pods:
             # FIXME: We are assuming that each pod only has one container here
             try:
