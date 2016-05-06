@@ -18,7 +18,7 @@ class CBSubmitter(object):
                 try:
                     self._cgc.uploadRCB(str(cbn.cs_id),
                                         (str(cbn.name), str(patch.blob)))
-                    patch.submitted()
+                    patch.submit()
                     break          # FIXME: we submit only one patch per round
                 except TiError as e:
                     LOG.error("Submission error: %s", e.message)
