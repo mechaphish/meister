@@ -15,7 +15,7 @@ class AFLCreator(meister.creators.BaseCreator):
     def jobs(self):
         LOG.debug("Collecting jobs")
         for cbn in self.cbns():
-            job = AFLJob(cbn=cbn, limit_cpus=8, limit_memory=1)
+            job = AFLJob(cbn=cbn, limit_cpu=8, limit_memory=1)
             if not AFLJob.queued(job):
                 LOG.debug("Yielding AFLJob for %s", cbn.id)
                 yield job

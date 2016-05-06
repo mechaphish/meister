@@ -20,7 +20,7 @@ class DrillerCreator(meister.creators.BaseCreator):
                 LOG.info("AFL has not found any new paths for 1 minute, scheduling Driller")
                 for test in cbn.undrilled_tests:
                     job = DrillerJob(cbn=cbn,
-                                     limit_cpus=1, limit_memory=10, limit_time=120,
+                                     limit_cpu=1, limit_memory=10, limit_time=120,
                                      payload={'test_id': test.id})
                     if not DrillerJob.queued(job):
                         LOG.debug("Yielding DrillerJob for %s with %s", cbn.id, test.id)
