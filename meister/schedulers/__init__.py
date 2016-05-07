@@ -84,6 +84,10 @@ class KubernetesScheduler(object):
         # FIXME
         cpu = str(job.limit_cpu) if job.limit_cpu is not None else 2
         memory = str(job.limit_memory) if job.limit_memory is not None else 4
+        if os.environ.get('POSTGRES_USE_SLAVES') is not None:
+            postgres_use_slaves = {'name': "POSTGRES_USE_SLAVES", 'value': "true"}
+        else:
+            postgres_use_slaves = None
         config = {
             'metadata': {
                 'labels': {
@@ -106,16 +110,16 @@ class KubernetesScheduler(object):
                                 'memory': "{}Gi".format(memory)
                             }
                         },
-                        'env': [
+                        'env': filter(None, [
                             {'name': "JOB_ID", 'value': str(job.id)},
-                            {'name': "POSTGRES_USE_SLAVES", 'value': "true"},
+                            postgres_use_slaves,
                             {'name': "POSTGRES_DATABASE_USER",
                              'value': os.environ['POSTGRES_DATABASE_USER']},
                             {'name': "POSTGRES_DATABASE_PASSWORD",
                              'value': os.environ['POSTGRES_DATABASE_PASSWORD']},
                             {'name': "POSTGRES_DATABASE_NAME",
                              'value': os.environ['POSTGRES_DATABASE_NAME']},
-                        ]
+                        ])
                     }
                 ]
             }
