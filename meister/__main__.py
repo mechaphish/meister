@@ -72,9 +72,9 @@ def main():
             ])
             perround_scheduler.run()
 
-            # Submit patched binaries every 2 rounds
-            # CBSubmitter(cgc).run()
-            POVSubmitter(cgc).run()
+            # Submit!
+            CBSubmitter(cgc).run(current_round)
+            # POVSubmitter(cgc).run()
 
         except meister.cgc.tierror.TiError:
             notifier.api_is_down()
