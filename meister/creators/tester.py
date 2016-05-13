@@ -1,15 +1,17 @@
-#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from meister.creators import BaseCreator
+import meister.creators
+from farnsworth.models import ChallengeBinaryNode, TesterJob
 
+LOG = meister.creators.LOG.getChild('rex')
 
-class TestCreator(BaseCreator):
-
+class TesterCreator(meister.creators.BaseCreator):
     @property
     def jobs(self):
-        all_jobs = []
-        # for b in crscommon.api.get_all_binaries():
-        #     for testcase_id in crscommon.api.get_testcases_for_testing(b.ct.id, b.binary_id):
-        #         all_jobs.append(TesterJob(b, testcase_id))
-        return all_jobs
+        for cbn in ChallengeBinaryNode.all_descendants():
+            for test in cbn.all_tests_for_this_cb:
+                job = TesterJob(cbn=cbn, payload={'test_id': test.id},
+                                limit_cpu=8, limit_memory=1)
+                if not TesterJob.queued(job):
+                    LOG.debug("Yielding TesterJob for %s with %s", cbn.id, test.id)
+                    yield job

@@ -16,6 +16,7 @@ from meister.creators.afl import AFLCreator
 from meister.creators.rex import RexCreator
 from meister.creators.driller import DrillerCreator
 from meister.creators.patcherex import PatcherexCreator
+from meister.creators.tester import TesterCreator
 from meister.schedulers.brute import BruteScheduler
 from meister.submitters.cb import CBSubmitter
 from meister.submitters.pov import POVSubmitter
@@ -43,6 +44,7 @@ def main():
         scheduler = BruteScheduler(cgc=cgc, creators=[
             DrillerCreator(cgc),
             RexCreator(cgc),
+            TesterCreator(cgc),
         ])
         scheduler.run()
 
