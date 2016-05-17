@@ -18,7 +18,7 @@ docs:
   tags: ["cgc-linter"]
 
 build_images:
-    only: ["master", "api-monitor"]
+    only: ["master"]
     stage: deploy
     script:
     - angr-build meister
