@@ -16,3 +16,10 @@ lint:
 docs:
   script: "generate_docs"
   tags: ["cgc-linter"]
+
+build_images:
+    only: ["master", "api-monitor"]
+    stage: deploy
+    script:
+    - angr-build meister
+    tags: ["docker-builder"]
