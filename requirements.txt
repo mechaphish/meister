@@ -1,6 +1,6 @@
 requests
 python-dotenv
-farnsworth
+git+ssh://git@git.seclab.cs.ucsb.edu/cgc/farnsworth#egg=farnsworth
 
 git+https://github.com/nebirhos/pykube.git#egg=pykube
 responses
