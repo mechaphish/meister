@@ -8,8 +8,6 @@
 
 lint:
   script:
-    - pip install -r requirements.txt
-    - pip install -e .
     - lint.py
   tags: ["cgc-linter"]
 
