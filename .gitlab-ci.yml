@@ -6,10 +6,10 @@
 #     - nosetests tests
 #   tags: ["cgc-linter"]
 
-lint:
-  script:
-    - lint.py
-  tags: ["cgc-linter"]
+# lint:
+#   script:
+#     - lint.py
+#   tags: ["cgc-linter"]
 
 docs:
   script: "generate_docs"
