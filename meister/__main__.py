@@ -14,12 +14,14 @@ import meister.settings
 import meister.cgc.ticlient
 import meister.cgc.tierror
 from meister.creators.afl import AFLCreator
-from meister.creators.rex import RexCreator
 from meister.creators.driller import DrillerCreator
+from meister.creators.ids import IDSCreator
 from meister.creators.patcherex import PatcherexCreator
+from meister.creators.rex import RexCreator
 from meister.creators.tester import TesterCreator
 from meister.schedulers.brute import BruteScheduler
 from meister.submitters.cb import CBSubmitter
+from meister.submitters.ids import IDSSubmitter
 from meister.submitters.pov import POVSubmitter
 from meister.evaluators import Evaluator
 from meister.notifier import Notifier
@@ -69,12 +71,14 @@ def main():
             perround_scheduler = BruteScheduler(cgc=cgc, creators=[
                 AFLCreator(cgc),
                 PatcherexCreator(cgc),
+                IDSCreator(cgc),
             ])
             perround_scheduler.run()
 
-            # Submit!
+            # Submit! Order matters!
             CBSubmitter(cgc).run(current_round)
-            # POVSubmitter(cgc).run()
+            IDSSubmitter(cgc).run(current_round)
+            POVSubmitter(cgc).run()
 
         except meister.cgc.tierror.TiError:
             notifier.api_is_down()
