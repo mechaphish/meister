@@ -8,7 +8,7 @@ from __future__ import print_function, unicode_literals, absolute_import, \
 
 import os
 
-from farnsworth.models.challenge_binary_node import ChallengeBinaryNode
+from farnsworth.models import ChallengeBinaryNode, ChallengeSet
 import meister.log
 
 LOG = meister.log.LOG.getChild('creators')
@@ -29,6 +29,15 @@ class BaseCreator(object):
     def jobs(self):
         raise NotImplementedError("You have to implemented the jobs property")
 
+    def challenge_sets(self, round_=None):
+        """Return the list of challenge sets that are active in a round.
+
+        :keyword round_: The round number for which the binaries should be
+                         returned (default: current round).
+        """
+        csids = [cbn.cs.id for cbn in self.cbns(round_)]
+        return ChallengeSet.select().where(ChallengeSet.id << csids)
+
     def cbns(self, round_=None):
         """Return the list of binaries that are active in a round.
 
@@ -47,7 +56,7 @@ class BaseCreator(object):
             try:
                 cbn = ChallengeBinaryNode.get(
                     (ChallengeBinaryNode.name == cbid) &
-                    (ChallengeBinaryNode.cs_id == csid)
+                    (ChallengeBinaryNode.cs == ChallengeSet.find_or_create(name=csid))
                 )
             except ChallengeBinaryNode.DoesNotExist:
                 tmp_path = os.path.join("/tmp", "{}-{}-{}".format(round_, csid, cbid))
