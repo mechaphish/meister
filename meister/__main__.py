@@ -76,7 +76,7 @@ def main():
             perround_scheduler.run()
 
             # Submit! Order matters!
-            CBSubmitter(cgc).run(current_round)
+            CBSubmitter(cgc).run(current_round, random_submit=True)
             IDSSubmitter(cgc).run(current_round)
             POVSubmitter(cgc).run()
 

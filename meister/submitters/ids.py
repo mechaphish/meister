@@ -15,6 +15,13 @@ class IDSSubmitter(object):
         # submit only in odd rounds, see FAQ163 & FAQ157
         if (current_round % 2) == 1:
             for cs in ChallengeSet.all():
+                submitted_patches = [True for cbn in cs.cbns
+                                     if len(cbn.submitted_patches) > 0]
+
+                # dont' submit IDS for patched binaries
+                if len(submitted_patches) > 0:
+                    continue
+
                 for ids in cs.unsubmitted_ids_rules:
                     LOG.debug("Submitting IDS rule for %s on round %s",
                               cs.name, current_round)

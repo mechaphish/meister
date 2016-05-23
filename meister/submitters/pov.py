@@ -17,7 +17,7 @@ class POVSubmitter(object):
                 for exploit in cbn.unsubmitted_exploits:
                     LOG.debug("Submitting POV for %s to team %s", cbn.name, team.name)
                     try:
-                        result = self._cgc.uploadPOV(str(cbn.cs_id),
+                        result = self._cgc.uploadPOV(str(cbn.cs.name),
                                                      str(team.name),
                                                      "10",
                                                      str(exploit.blob))
