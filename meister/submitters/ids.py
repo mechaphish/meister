@@ -23,8 +23,8 @@ class IDSSubmitter(object):
                     continue
 
                 for ids in cs.unsubmitted_ids_rules:
-                    LOG.debug("Submitting IDS rule for %s on round %s",
-                              cs.name, current_round)
+                    LOG.info("Submitting IDS rule for %s on round %s",
+                             cs.name, current_round)
                     try:
                         self._cgc.uploadIDS(str(cs.name), str(ids.rules))
                         ids.submit()

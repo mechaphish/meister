@@ -25,8 +25,8 @@ class CBSubmitter(object):
                     continue
 
                 for patch in cbn.unsubmitted_patches:
-                    LOG.debug("Submitting patch %s for %s on round %s",
-                              patch.name, cbn.name, current_round)
+                    LOG.info("Submitting patch %s for %s on round %s",
+                             patch.name, cbn.name, current_round)
                     try:
                         self._cgc.uploadRCB(str(cbn.cs.name),
                                             (str(cbn.name), str(patch.blob)))
