@@ -160,7 +160,7 @@ class KubernetesScheduler(object):
         assert isinstance(self.api, pykube.http.HTTPClient)
 
         # meister running locally
-        if 'KUBERNETES_SERVICE_HOST' not in os.environ:
+        if 'KUBERNETES_SERVICE_HOST' not in os.environ or os.environ['KUBERNETES_SERVICE_HOST'] == "":
             self._available_resources = {'cpu': 99999, 'memory': 99999999999999, 'pods': 99999}
             return self._available_resources
 
