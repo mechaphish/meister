@@ -19,6 +19,7 @@ from meister.creators.ids import IDSCreator
 from meister.creators.patcherex import PatcherexCreator
 from meister.creators.rex import RexCreator
 from meister.creators.tester import TesterCreator
+from meister.creators.wererabbit import WereRabbitCreator
 from meister.schedulers.brute import BruteScheduler
 from meister.submitters.cb import CBSubmitter
 from meister.submitters.ids import IDSSubmitter
@@ -53,6 +54,7 @@ def main():
                 DrillerCreator(cgc),
                 RexCreator(cgc),
                 TesterCreator(cgc),
+                WereRabbitCreator(cgc),
             ])
             scheduler.run()
 
