@@ -16,13 +16,13 @@ class CBSubmitter(object):
         # submit only in odd rounds, see FAQ163 & FAQ157
         if (current_round % 2) == 1:
             for cbn in ChallengeBinaryNode.roots():
-                submitted_ids = cbn.cs.ids_rules.where(IDSRule.submitted_at.is_null(True))
-                # dont' submit CB that has IDS active
-                if len(submitted_ids) > 0:
-                    continue
-                # submit patches for 50% of binaries, so we can test IDs on the other 50%
-                if random_submit and (random.randint(0,1) == 0):
-                    continue
+                # submitted_ids = cbn.cs.ids_rules.where(IDSRule.submitted_at.is_null(True))
+                # # dont' submit CB that has IDS active
+                # if len(submitted_ids) > 0:
+                #     continue
+                # # submit patches for 50% of binaries, so we can test IDs on the other 50%
+                # if random_submit and (random.randint(0,1) == 0):
+                #     continue
 
                 for patch in cbn.unsubmitted_patches:
                     LOG.info("Submitting patch %s for %s on round %s",

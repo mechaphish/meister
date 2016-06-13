@@ -79,7 +79,7 @@ def main():
 
             # Submit! Order matters!
             CBSubmitter(cgc).run(current_round, random_submit=True)
-            IDSSubmitter(cgc).run(current_round)
+            # IDSSubmitter(cgc).run(current_round)
             POVSubmitter(cgc).run()
 
         except meister.cgc.tierror.TiError:
