@@ -63,7 +63,7 @@ class Evaluator(object):
             LOG.error("Unable to get teams: %s", e.message)
 
     def _store_cb(self, cb_info, team):
-        name = "{}-{}-team-{}".format(cb_info['cbid'], self._round.num, team.name)
+        name = "{}-{}-team-{}".format(self._round.num, cb_info['cbid'], team.name)
         try:
             ChallengeBinaryNode.get(ChallengeBinaryNode.name == name)
         except ChallengeBinaryNode.DoesNotExist:
