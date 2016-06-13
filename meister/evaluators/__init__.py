@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 
-from farnsworth.models import Feedback, Score, Evaluation, Team
+import os
+import datetime
+from farnsworth.models import ChallengeBinaryNode, Feedback, Score, Evaluation, Team
 from meister.cgc.tierror import TiError
 import meister.log
 
@@ -48,6 +50,8 @@ class Evaluator(object):
                 cbs, ids = {}, {}
                 try:
                     cbs = self._cgc.getEvaluation('cb', self._round.num, team.name)
+                    for entry in cbs:
+                        self._store_cb(entry, team)
                 except TiError as e:
                     LOG.error("Consensus evaluation error: %s", e.message)
                 try:
@@ -58,6 +62,21 @@ class Evaluator(object):
         except TiError as e:
             LOG.error("Unable to get teams: %s", e.message)
 
+    def _store_cb(self, cb_info, team):
+        name = "{}-{}-team-{}".format(cb_info['cbid'], self._round.num, team.name)
+        try:
+            ChallengeBinaryNode.get(ChallengeBinaryNode.name == name)
+        except ChallengeBinaryNode.DoesNotExist:
+            tmp_path = os.path.join("/tmp", "{}-{}-{}".format(self._round.num, cb_info['csid'], cb_info['cbid']))
+            binary = self._cgc._get_dl(cb_info['uri'], tmp_path, cb_info['hash'])
+            blob = open(tmp_path, 'rb').read()
+            os.remove(tmp_path)
+            ChallengeBinaryNode.create(
+                name=name,
+                cs_id=cb_info['csid'],
+                submitted_at=datetime.datetime.now(),
+                blob=blob
+            )
 
     def run(self):
         self._get_feedbacks()
