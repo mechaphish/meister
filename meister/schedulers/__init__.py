@@ -103,7 +103,7 @@ class KubernetesScheduler(object):
                     {
                         'name': name,
                         'image': os.environ['WORKER_IMAGE'],
-                        'imagePullPolicy': 'Always',
+                        'imagePullPolicy': os.environ['WORKER_IMAGE_PULL_POLICY'],
                         'resources': {
                             'requests': {
                                 'cpu': str(cpu),
