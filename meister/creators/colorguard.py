@@ -13,7 +13,7 @@ class ColorGuardCreator(meister.creators.BaseCreator):
             for test in cbn.not_colorguard_traced:
                 LOG.debug("ColorGuardJob for cbn %s, test %s being created", cbn.id, test.id)
                 job = ColorGuardJob(cbn=cbn, payload={'test_id': test.id},
-                             limit_cpu=1, limit_memory=10)
+                             limit_cpu=1, limit_memory=6)
                 if not ColorGuardJob.queued(job):
                     LOG.debug("Yielding ColorGuardJob for %s with %s", cbn.id, test.id)
                     yield job
