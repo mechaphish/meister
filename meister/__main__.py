@@ -53,6 +53,7 @@ def main():
             scheduler = BruteScheduler(cgc=cgc, creators=[
                 DrillerCreator(cgc),
                 RexCreator(cgc),
+                ColorGuardCreator(cgc),
                 TesterCreator(cgc),
                 WereRabbitCreator(cgc),
             ])
