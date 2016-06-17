@@ -105,7 +105,7 @@ class KubernetesScheduler(object):
                         'image': os.environ['WORKER_IMAGE'],
                         'imagePullPolicy': os.environ['WORKER_IMAGE_PULL_POLICY'],
                         'resources': {
-                            'requests': {
+                            'limits': {
                                 'cpu': str(cpu),
                                 'memory': "{}Gi".format(memory)
                             }
