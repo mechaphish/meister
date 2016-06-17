@@ -20,6 +20,7 @@ from meister.creators.patcherex import PatcherexCreator
 from meister.creators.rex import RexCreator
 from meister.creators.tester import TesterCreator
 from meister.creators.wererabbit import WereRabbitCreator
+from meister.creators.colorguard import ColorGuardCreator
 from meister.schedulers.brute import BruteScheduler
 from meister.submitters.cb import CBSubmitter
 from meister.submitters.ids import IDSSubmitter
