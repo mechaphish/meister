@@ -17,5 +17,5 @@ class WereRabbitCreator(meister.creators.BaseCreator):
             if len(cbn.crashes) > 0:
                 job = WereRabbitJob(cbn=cbn, limit_cpu=4, limit_memory=1)
                 if not WereRabbitJob.queued(job):
-                    LOG.debug("Yielding AFLJob for %s", cbn.id)
+                    LOG.debug("Yielding WereRabbitJob for %s", cbn.id)
                     yield job
