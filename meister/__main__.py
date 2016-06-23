@@ -86,6 +86,3 @@ def main():
 
         except meister.cgc.tierror.TiError:
             notifier.api_is_down()
-
-if __name__ == '__main__':
-    main()
