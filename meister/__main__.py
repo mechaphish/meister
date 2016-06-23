@@ -13,14 +13,14 @@ import meister.settings
 
 import meister.cgc.ticlient
 import meister.cgc.tierror
-from meister.creators.afl import AFLCreator
-from meister.creators.driller import DrillerCreator
-from meister.creators.ids import IDSCreator
-from meister.creators.patcherex import PatcherexCreator
-from meister.creators.rex import RexCreator
-from meister.creators.tester import TesterCreator
-from meister.creators.wererabbit import WereRabbitCreator
-from meister.creators.colorguard import ColorGuardCreator
+from meister.creators.afl_creator import AFLCreator
+from meister.creators.colorguard_creator import ColorGuardCreator
+from meister.creators.driller_creator import DrillerCreator
+from meister.creators.ids_creator import IDSCreator
+from meister.creators.patcherex_creator import PatcherexCreator
+from meister.creators.rex_creator import RexCreator
+from meister.creators.tester_creator import TesterCreator
+from meister.creators.wererabbit_creator import WereRabbitCreator
 from meister.schedulers.brute import BruteScheduler
 from meister.submitters.cb import CBSubmitter
 from meister.submitters.ids import IDSSubmitter
