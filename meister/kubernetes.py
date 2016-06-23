@@ -22,7 +22,7 @@ def from_env():
     host = os.environ.get('KUBERNETES_SERVICE_HOST', 'localhost')
     port = os.environ.get('KUBERNETES_SERVICE_PORT', 8080)
     user = os.environ.get('KUBERNETES_SERVICE_USER', 'admin')
-    token = os.environ.get('KUBERNETES_SERVICE_TOKEN', '')
+    token = os.environ.get('KUBERNETES_SERVICE_TOKEN', 'xxx')
 
     config = {
         'apiVersion': 'v1',
