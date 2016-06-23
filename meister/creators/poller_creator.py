@@ -7,12 +7,17 @@ from farnsworth.models import Test
 LOG = meister.creators.LOG.getChild('poller')
 
 
-class PollCreator(meister.creators.BaseCreator):
+class PollerCreator(meister.creators.BaseCreator):
     @property
     def jobs(self):
         # get only those tests, for which polls need to be created.
-        for curr_test in Test.select().where(Test.poll_created is False):
-            job = PollerJob(payload={'test_id': curr_test.id})
+        for curr_test in Test.select().where(Test.poll_created == False):
+            job = PollerJob(
+                cbn=curr_test.cbn,
+                limit_cpu=-1,
+                limit_memory=-1,
+                payload={'test_id': curr_test.id}
+            )
             if not PollerJob.queued(job):
                 LOG.debug("Yielding PollerJob for %s ", curr_test.id)
                 yield job

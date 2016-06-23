@@ -18,6 +18,7 @@ from meister.creators.colorguard_creator import ColorGuardCreator
 from meister.creators.driller_creator import DrillerCreator
 from meister.creators.ids_creator import IDSCreator
 from meister.creators.patcherex_creator import PatcherexCreator
+from meister.creators.poller_creator import PollerCreator
 from meister.creators.rex_creator import RexCreator
 from meister.creators.tester_creator import TesterCreator
 from meister.creators.wererabbit_creator import WereRabbitCreator
@@ -55,6 +56,7 @@ def main():
                 DrillerCreator(cgc),
                 RexCreator(cgc),
                 ColorGuardCreator(cgc),
+                PollerCreator(cgc),
                 TesterCreator(cgc),
                 WereRabbitCreator(cgc),
             ])
