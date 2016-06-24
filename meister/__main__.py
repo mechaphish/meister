@@ -9,8 +9,9 @@ from __future__ import print_function, unicode_literals, absolute_import, \
 import sys
 import time
 
-import meister.settings
+from farnsworth.models import Round
 
+import meister.settings
 import meister.cgc.ticlient
 import meister.cgc.tierror
 from meister.creators.afl import AFLCreator
@@ -32,7 +33,6 @@ from meister.submitters.ids import IDSSubmitter
 from meister.submitters.pov import POVSubmitter
 from meister.evaluators import Evaluator
 from meister.notifier import Notifier
-from farnsworth.models import Round
 import meister.log
 
 LOG = meister.log.LOG.getChild('main')
