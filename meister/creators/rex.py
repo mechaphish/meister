@@ -3,12 +3,24 @@
 
 from __future__ import absolute_import
 
-from rex import Vulnerability
-
 import meister.creators
 from farnsworth.models import RexJob
 
 LOG = meister.creators.LOG.getChild('rex')
+
+
+class Vulnerability(object):
+    IP_OVERWRITE = "ip_overwrite"
+    PARTIAL_IP_OVERWRITE = "partial_ip_overwrite"
+    UNCONTROLLED_IP_OVERWRITE = "uncontrolled_ip_overwrite"
+    BP_OVERWRITE = "bp_overwrite"
+    PARTIAL_BP_OVERWRITE = "partial_bp_overwrite"
+    WRITE_WHAT_WHERE = "write_what_where"
+    WRITE_X_WHERE = "write_x_where"
+    UNCONTROLLED_WRITE = "uncontrolled_write" # a write where the destination address is uncontrolled
+    ARBITRARY_READ = "arbitrary_read"
+    NULL_DEREFERENCE = "null_dereference"
+
 
 class RexCreator(meister.creators.BaseCreator):
     @property
