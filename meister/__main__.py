@@ -6,7 +6,7 @@
 from __future__ import print_function, unicode_literals, absolute_import, \
                        division
 
-import os
+import sys
 import time
 
 import meister.settings
@@ -37,7 +37,8 @@ import meister.log
 
 LOG = meister.log.LOG.getChild('main')
 
-def main():
+
+def main(args):
     """Run the meister."""
     # Initialize APIs
     cgc = meister.cgc.ticlient.TiClient.from_env()
@@ -96,3 +97,7 @@ def main():
 
         except meister.cgc.tierror.TiError:
             notifier.api_is_down()
+    return 0
+
+if __name__ == '__main__':
+    sys.exit(main(sys.argv))
