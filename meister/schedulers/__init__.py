@@ -169,24 +169,8 @@ class KubernetesScheduler(object):
         if (datetime.datetime.now() - self._resources_timestamp) <= self._resources_cache_timeout:
             return self._available_resources
 
-        # Update node capacities, only ran once for the first update of availabe resources
-        if self._node_capacities is None:
-            nodes = pykube.objects.Node.objects(self.api).all()
-            self._node_capacities = {}
-            for node in nodes:
-                cpu = _cpu2float(node.obj['status']['capacity']['cpu'])
-                memory = _memory2int(node.obj['status']['capacity']['memory'])
-                pods = int(node.obj['status']['capacity']['pods'])
-                self._node_capacities[node.name] = {'cpu': cpu,
-                                                    'memory': memory,
-                                                    'pods': pods}
-
         # Reset available resources
-        self._available_resources = {'cpu': 0.0, 'memory': 0L, 'pods': 0}
-        for capacity in self._node_capacities.values():
-            self._available_resources['cpu'] += capacity['cpu']
-            self._available_resources['memory'] += capacity['memory']
-            self._available_resources['pods'] += capacity['pods']
+        self._available_resources = self._kube_total_capacity
 
         # Collect fresh information from the Kubernetes API about all running pods
         # FIXME: Shitty loop to fix https://github.com/kelproject/pykube/issues/10
@@ -208,6 +192,34 @@ class KubernetesScheduler(object):
         self._resources_timestamp = datetime.datetime.now()
 
         return self._available_resources
+
+    @property
+    def _kube_total_capacity(self):
+        """Internal helper method to return the total capacity on the Kubernetes cluster."""
+        resourcs = {'cpu': 0.0, 'memory': 0L, 'pods': 0}
+        for capacity in self._kube_node_capacities.values():
+            resources['cpu'] += capacity['cpu']
+            resources['memory'] += capacity['memory']
+            resources['pods'] += capacity['pods']
+        return resources
+
+    @property
+    def _kube_node_capacities(self):
+        """Internal helper method to collect the total capacity on the Kubernetes cluster."""
+        assert isinstance(self.api, pykube.http.HTTPClient)
+
+        # Update node capacities, only ran once for the first update of availabe resources
+        if self._node_capacities is None:
+            nodes = pykube.objects.Node.objects(self.api).all()
+            self._node_capacities = {}
+            for node in nodes:
+                cpu = _cpu2float(node.obj['status']['capacity']['cpu'])
+                memory = _memory2int(node.obj['status']['capacity']['memory'])
+                pods = int(node.obj['status']['capacity']['pods'])
+                self._node_capacities[node.name] = {'cpu': cpu,
+                                                    'memory': memory,
+                                                    'pods': pods}
+        return self._node_capacities
 
     def _schedule_kube_controller(self, job):
         """Internal method to schedule a never ending job on Kubernetes."""
