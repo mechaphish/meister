@@ -53,7 +53,7 @@ def main(args):
 
             notifier.api_is_up()
             current_round = cgc.getRound()
-            round_ = Round.find_or_create(num = current_round)
+            round_ = Round.find_or_create(num=current_round)
 
             # Jobs scheduled continuously
             scheduler = BruteScheduler(cgc=cgc, creators=[
