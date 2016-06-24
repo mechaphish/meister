@@ -70,7 +70,8 @@ class KubernetesScheduler(object):
                 self._schedule_kube_controller(job)
             else:
                 self._schedule_kube_pod(job)
-        return job
+            return True
+        return False
 
     @property
     def api(self):
