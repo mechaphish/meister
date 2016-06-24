@@ -259,6 +259,17 @@ class KubernetesScheduler(object):
             else:
                 raise error
 
+    def terminate(self, name, worker):
+        """Terminate worker 'name' of type 'worker'."""
+        assert isintance(self.api, pykube.http.HTTPClient)
+        # TODO: job might have shutdown gracefully in-between being identified
+        # and being asked to get terminated.
+        # TODO: Get rid of the AFL replication controller special case.
+        if worker == 'afl':
+            pykube.objects.ReplicationController(self.api, config).delete(name=name)
+        else:
+            pykube.objects.Pod(self.api, config).delete(name=name)
+
 
 class BaseScheduler(KubernetesScheduler):
     """Base strategy.
