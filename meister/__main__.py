@@ -29,7 +29,6 @@ from meister.creators.tester import TesterCreator
 from meister.creators.wererabbit import WereRabbitCreator
 from meister.schedulers.brute import BruteScheduler
 from meister.submitters.cb import CBSubmitter
-from meister.submitters.ids import IDSSubmitter
 from meister.submitters.pov import POVSubmitter
 from meister.evaluators import Evaluator
 from meister.notifier import Notifier
@@ -92,7 +91,6 @@ def main(args):
 
             # Submit! Order matters!
             CBSubmitter(cgc).run(current_round, random_submit=True)
-            # IDSSubmitter(cgc).run(current_round)
             POVSubmitter(cgc).run()
 
         except meister.cgc.tierror.TiError:
