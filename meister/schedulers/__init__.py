@@ -177,9 +177,11 @@ class KubernetesScheduler(object):
         pods = []
         for pod in pykube.objects.Pod.objects(self.api):
             try:
-                if pod.ready: pods.append(pod)
-            except KeyError:
-                pass
+                if pod.ready:
+                    pods.append(pod)
+            except KeyError, e:
+                LOG.error("Hit a KeyError %s", e)
+
         for pod in pods:
             # FIXME: We are assuming that each pod only has one container here
             try:
