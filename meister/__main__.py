@@ -67,6 +67,9 @@ def main(args):
                 NetworkPollCreator(cgc),
                 TesterCreator(cgc),
                 WereRabbitCreator(cgc),
+                AFLCreator(cgc),
+                PatcherexCreator(cgc),
+                IDSCreator(cgc),
             ])
             scheduler.run()
 
@@ -80,14 +83,6 @@ def main(args):
             else:
                 LOG.info("Round #%d", current_round)
                 previous_round = current_round
-
-            # Jobs scheduled per round
-            perround_scheduler = BruteScheduler(cgc=cgc, creators=[
-                AFLCreator(cgc),
-                PatcherexCreator(cgc),
-                IDSCreator(cgc),
-            ])
-            perround_scheduler.run()
 
             # Submit! Order matters!
             CBSubmitter(cgc).run(current_round, random_submit=True)
