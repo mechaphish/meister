@@ -3,7 +3,7 @@ python-dotenv
 git+ssh://git@git.seclab.cs.ucsb.edu/cgc/farnsworth#egg=farnsworth
 
 git+https://github.com/nebirhos/pykube.git#egg=pykube
-git+https://git.seclab.cs.ucsb.edu/cgc/rex#egg=rex
+git+ssh://git@git.seclab.cs.ucsb.edu/cgc/rex#egg=rex
 responses
 nose>=1.3.7
 nose-timer>=0.5.0
