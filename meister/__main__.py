@@ -19,6 +19,8 @@ from meister.creators.driller import DrillerCreator
 from meister.creators.ids import IDSCreator
 from meister.creators.patcherex import PatcherexCreator
 from meister.creators.poller import PollerCreator
+from meister.creators.pollsanitizer import NetworkPollSanitizerCreator
+from meister.creators.networkpoll import NetworkPollCreator
 from meister.creators.rex import RexCreator
 from meister.creators.tester import TesterCreator
 from meister.creators.wererabbit import WereRabbitCreator
@@ -57,6 +59,8 @@ def main():
                 RexCreator(cgc),
                 ColorGuardCreator(cgc),
                 PollerCreator(cgc),
+                NetworkPollSanitizerCreator(cgc),
+                NetworkPollCreator(cgc),
                 TesterCreator(cgc),
                 WereRabbitCreator(cgc),
             ])

@@ -7,12 +7,15 @@ from farnsworth.models import RawRoundPoll
 LOG = meister.creators.LOG.getChild('pollsanitizer')
 
 
-class NetworkPollSanitizer(meister.creators.BaseCreator):
+class NetworkPollSanitizerCreator(meister.creators.BaseCreator):
     @property
     def jobs(self):
         # get only un sanitized raw polls to sanitize
-        for curr_unsan_poll in RawRoundPoll.select().where(RawRoundPoll.sanitized is False):
-            job = PollSanitizerJob(payload={'rrp_id': curr_unsan_poll.id})
+        for curr_unsan_poll in RawRoundPoll.select().where(RawRoundPoll.sanitized == False):
+            job = PollSanitizerJob(
+                limit_cpu=-1,
+                limit_memory=-1,
+                payload={'rrp_id': curr_unsan_poll.id})
             if not PollSanitizerJob.queued(job):
                 LOG.debug("Yielding PollSanitizerJob for %s ", curr_unsan_poll.id)
                 yield job
