@@ -4,7 +4,7 @@
 from __future__ import absolute_import
 
 import meister.creators
-from farnsworth.models import RexJob
+from farnsworth.models import RexJob, PovFuzzer1Job, PovFuzzer2Job
 
 LOG = meister.creators.LOG.getChild('rex')
 
@@ -39,4 +39,18 @@ class RexCreator(meister.creators.BaseCreator):
 
                 if not RexJob.queued(job):
                     LOG.debug("Yielding RexJob for %s with %s", cbn.id, crash.id)
+                    yield job
+
+                if crash.crash_kind in [Vulnerability.IP_OVERWRITE]:
+                    # TODO: I want to make this 8 cpu's, but we need to fix it so we don't use up all resources by
+                    # scheduling a million jobs
+                    job = PovFuzzer1Job(cbn=cbn, payload={'crash_id': crash.id},
+                                        limit_cpu=1, limit_memory=10)
+                    yield job
+
+                if crash.crash_kind in [Vulnerability.ARBITRARY_READ]:
+                    # TODO: I want to make this 8 cpu's, but we need to fix it so we don't use up all resources by
+                    # scheduling a million jobs
+                    job = PovFuzzer2Job(cbn=cbn, payload={'crash_id': crash.id},
+                                        limit_cpu=1, limit_memory=10)
                     yield job
