@@ -29,28 +29,31 @@ class RexCreator(meister.creators.BaseCreator):
             for crash in cbn.crashes:
 
                 # ignore crashes of kind null_dereference, uncontrolled_ip_overwrite, and uncontrolled_write
-                if crash.crash_kind in [Vulnerability.NULL_DEREFERENCE, Vulnerability.UNCONTROLLED_IP_OVERWRITE, \
+                if crash.kind in [Vulnerability.NULL_DEREFERENCE, Vulnerability.UNCONTROLLED_IP_OVERWRITE, \
                         Vulnerability.UNCONTROLLED_WRITE]:
                     continue
 
-                # TODO: in rare cases Rex needs more memory, can we try to handle cases where Rex needs upto 40G?
-                job = RexJob(cbn=cbn, payload={'crash_id': crash.id},
-                             limit_cpu=1, limit_memory=10)
-
-                if not RexJob.queued(job):
-                    LOG.debug("Yielding RexJob for %s with %s", cbn.id, crash.id)
-                    yield job
-
-                if crash.crash_kind in [Vulnerability.IP_OVERWRITE]:
+                elif crash.kind in [Vulnerability.IP_OVERWRITE]:
                     # TODO: I want to make this 8 cpu's, but we need to fix it so we don't use up all resources by
                     # scheduling a million jobs
                     job = PovFuzzer1Job(cbn=cbn, payload={'crash_id': crash.id},
                                         limit_cpu=1, limit_memory=10)
-                    yield job
+                    if not PovFuzzer1Job.queued(job):
+                        yield job
 
-                if crash.crash_kind in [Vulnerability.ARBITRARY_READ]:
+                elif crash.kind in [Vulnerability.ARBITRARY_READ]:
                     # TODO: I want to make this 8 cpu's, but we need to fix it so we don't use up all resources by
                     # scheduling a million jobs
                     job = PovFuzzer2Job(cbn=cbn, payload={'crash_id': crash.id},
                                         limit_cpu=1, limit_memory=10)
-                    yield job
+                    if not PovFuzzer2Job.queued(job):
+                        yield job
+
+                else:
+                    # TODO: in rare cases Rex needs more memory, can we try to handle cases where Rex needs upto 40G?
+                    job = RexJob(cbn=cbn, payload={'crash_id': crash.id},
+                                 limit_cpu=1, limit_memory=10)
+
+                    if not RexJob.queued(job):
+                        LOG.debug("Yielding RexJob for %s with %s", cbn.id, crash.id)
+                        yield job
