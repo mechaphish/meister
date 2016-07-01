@@ -93,8 +93,7 @@ class PriorityScheduler(meister.schedulers.BaseScheduler):
 
         # Kill workers
         for worker, job_id in workers_to_kill.items():
-            self.terminate(worker, worker_type[worker])     # TODO: refactor out the worker type
-            LOG.debug("Killing worker for job %d", job_id)
+            LOG.debug("Killing worker for job %s", job_id)
 
         # Schedule jobs
         for job in jobs_to_run:
