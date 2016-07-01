@@ -98,7 +98,7 @@ class PriorityScheduler(meister.schedulers.BaseScheduler):
 
         # Schedule jobs
         for job in jobs_to_run:
-            if job.id in job_ids_to_ignore:
+            if job.id not in job_ids_to_ignore:
                 LOG.debug("Scheduling %s for %s", job.__class__.__name__,
                           job.cbn_id)
                 self.schedule(job)
