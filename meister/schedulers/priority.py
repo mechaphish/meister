@@ -26,7 +26,8 @@ class PriorityScheduler(meister.schedulers.BaseScheduler):
 
     def __init__(self, *args, **kwargs):
         """Create a priority strategy object."""
-        super(self.__class__, self).__init__(*args, **kwargs)
+        super(PriorityScheduler, self).__init__(*args, **kwargs)
+        LOG.debug("PriorityScheduler time!")
 
     def run(self):
         """Run jobs based on priority."""
@@ -54,6 +55,9 @@ class PriorityScheduler(meister.schedulers.BaseScheduler):
             # We need to get the original JOB_ID in case the job is updated, hence saving it.
             job.save()
             jobs_to_run.append(job)
+
+        LOG.debug("Can I schedule the highest priority job? %s",
+                  _can_schedule(jobs_to_schedule[0])
 
         while jobs_to_schedule and _can_schedule(jobs_to_schedule[0]):
             _schedule(jobs_to_schedule.pop(0))
@@ -85,7 +89,8 @@ class PriorityScheduler(meister.schedulers.BaseScheduler):
         # Schedule jobs
         for job in jobs_to_run:
             if job.id in job_ids_to_ignore:
-                LOG.debug("Starting new worker for job %d", job.id)
+                LOG.debug("Scheduling %s for %s", job.__class__.__name__,
+                          job.cbn_id)
                 self.schedule(job)
             else:
                 LOG.debug("Worker already taking care of job %d", job.id)
