@@ -15,7 +15,7 @@ class IDSCreator(meister.creators.BaseCreator):
     def jobs(self):
         LOG.debug("Collecting jobs")
         for cs in self.challenge_sets():
-            job = IDSJob(payload={'cs_id': cs.id}, limit_cpu=1, limit_memory=1)
+            job = IDSJob(payload={'cs_id': cs.id}, limit_cpu=1, limit_memory=1, priority=15)
             if not IDSJob.queued(job):
                 LOG.debug("Yielding IDSJob for %s", cs.id)
                 yield job
