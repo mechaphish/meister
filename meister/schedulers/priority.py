@@ -56,8 +56,11 @@ class PriorityScheduler(meister.schedulers.BaseScheduler):
             job.save()
             jobs_to_run.append(job)
 
-        LOG.debug("Can I schedule the highest priority job? %s",
-                  _can_schedule(jobs_to_schedule[0]))
+        if jobs_to_schedule:
+            LOG.debug("Can I schedule the highest priority job? %s",
+                    _can_schedule(jobs_to_schedule[0]))
+        else:
+            LOG.debug("No jobs to schedule, tabula rasa!")
 
         while jobs_to_schedule and _can_schedule(jobs_to_schedule[0]):
             _schedule(jobs_to_schedule.pop(0))
