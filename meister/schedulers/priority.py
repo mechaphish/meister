@@ -13,7 +13,9 @@ import operator
 
 from requests.exceptions import RequestException
 
-LOG = meister.strategies.LOG.getChild('priority')
+import meister.schedulers
+
+LOG = meister.schedulers.LOG.getChild('priority')
 
 
 class Priority(meister.strategies.BaseStrategy):
