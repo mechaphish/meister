@@ -13,8 +13,6 @@ import operator
 
 from requests.exceptions import RequestException
 
-from meister.schedulers.afl_scheduler import AFLScheduler
-
 LOG = meister.strategies.LOG.getChild('priority')
 
 
