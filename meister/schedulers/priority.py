@@ -80,6 +80,8 @@ class PriorityScheduler(meister.schedulers.BaseScheduler):
             else:
                 LOG.warning("Encountered a Pod that is not ready: %s", pod)
 
+        LOG.debug("Jobs not running: %s", set(job.id for job in jobs_to_schedule))
+
         job_ids_to_run = set(job.id for job in jobs_to_run)
         LOG.debug("Jobs to run: %s", job_ids_to_run)
 
