@@ -265,12 +265,15 @@ class KubernetesScheduler(object):
         # TODO: job might have shutdown gracefully in-between being identified
         # and being asked to get terminated.
         # TODO: Get rid of the AFL replication controller special case.
-        config = {'metadata': {'name': name}}
         if worker == 'afl':
-            config['kind'] = 'ReplicationController'
+            config = {'metadata': {'name': name.rsplit("-", 1)[0]},
+                      'kind': 'ReplicationController'}
+            LOG.debug("Killing rc %s", config['metadata']['name'])
             pykube.objects.ReplicationController(self.api, config).delete()
         else:
-            config['kind'] = 'Pod'
+            config = {'metadata': {'name': name},
+                      'kind': 'Pod'}
+            LOG.debug("Killing pod %s", config['metadata']['name'])
             pykube.objects.Pod(self.api, config).delete()
 
 
