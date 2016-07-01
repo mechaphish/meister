@@ -11,6 +11,7 @@ from __future__ import print_function, unicode_literals, absolute_import, \
 
 import operator
 
+import pykube.objects
 from requests.exceptions import RequestException
 
 import meister.schedulers
