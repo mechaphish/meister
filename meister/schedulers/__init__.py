@@ -198,7 +198,7 @@ class KubernetesScheduler(object):
     @property
     def _kube_total_capacity(self):
         """Internal helper method to return the total capacity on the Kubernetes cluster."""
-        resourcs = {'cpu': 0.0, 'memory': 0L, 'pods': 0}
+        resources = {'cpu': 0.0, 'memory': 0L, 'pods': 0}
         for capacity in self._kube_node_capacities.values():
             resources['cpu'] += capacity['cpu']
             resources['memory'] += capacity['memory']
