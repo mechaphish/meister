@@ -270,11 +270,11 @@ class KubernetesScheduler(object):
                       'kind': 'ReplicationController'}
             LOG.debug("Killing rc %s", config['metadata']['name'])
             pykube.objects.ReplicationController(self.api, config).delete()
-        else:
-            config = {'metadata': {'name': name},
-                      'kind': 'Pod'}
-            LOG.debug("Killing pod %s", config['metadata']['name'])
-            pykube.objects.Pod(self.api, config).delete()
+
+        config = {'metadata': {'name': name},
+                    'kind': 'Pod'}
+        LOG.debug("Killing pod %s", config['metadata']['name'])
+        pykube.objects.Pod(self.api, config).delete()
 
 
 class BaseScheduler(KubernetesScheduler):
