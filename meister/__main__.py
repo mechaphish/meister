@@ -37,8 +37,10 @@ import meister.log
 LOG = meister.log.LOG.getChild('main')
 
 
-def main(args):
+def main(args=None):
     """Run the meister."""
+    if args is None:
+        args = []
     # Initialize APIs
     cgc = meister.cgc.ticlient.TiClient.from_env()
 
