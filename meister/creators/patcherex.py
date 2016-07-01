@@ -15,6 +15,8 @@ class PatcherexCreator(meister.creators.BaseCreator):
     def jobs(self):
         LOG.debug("Collecting jobs")
         for cbn in self.cbns():
-            job = PatcherexJob.get_or_create(cbn=cbn, limit_cpu=1, limit_memory=10)
+            job, _ = PatcherexJob.get_or_create(cbn=cbn,
+                                                limit_cpu=1,
+                                                limit_memory=10)
             LOG.debug("Yielding PatcherexJob for %s", cbn.id)
             yield job
