@@ -73,7 +73,7 @@ class PriorityScheduler(meister.schedulers.BaseScheduler):
             else:
                 LOG.warning("Encountered a Pod that is not ready: %s", pod)
 
-        job_ids_to_run = set(job.id for job in jobs_scheduled)
+        job_ids_to_run = set(job.id for job in jobs_to_run)
         workers_to_kill = {k: v for k, v in job_ids.items() if v not in job_ids_to_run}
         job_ids_to_ignore = {v for v in job_ids.values() if v in job_ids_to_run}
 
@@ -86,6 +86,6 @@ class PriorityScheduler(meister.schedulers.BaseScheduler):
         for job in jobs_to_run:
             if job.id in job_ids_to_ignore:
                 LOG.debug("Starting new worker for job %d", job.id)
-                self.schedule(jobs)
+                self.schedule(job)
             else:
                 LOG.debug("Worker already taking care of job %d", job.id)
