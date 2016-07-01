@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-"""Brute strategy.
+"""Priority Scheduler.
 
 Schedule everything whenver it is available.
 """
@@ -18,8 +18,8 @@ import meister.schedulers
 LOG = meister.schedulers.LOG.getChild('priority')
 
 
-class Priority(meister.strategies.BaseStrategy):
-    """Priority strategy.
+class PriorityScheduler(meister.schedulers.BaseScheduler):
+    """Priority scheduler.
 
     Always have the highest priority jobs running, kill what we need to run.
     """
