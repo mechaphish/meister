@@ -78,7 +78,7 @@ class PriorityScheduler(meister.schedulers.BaseScheduler):
                     job_ids[pod_name] = pod.obj['metadata']['labels']['job_id']
                     worker_type[pod_name] = pod.obj['metadata']['labels']['worker']
             else:
-                LOG.warning("Encountered a Pod that is not ready: %s", pod)
+                LOG.warning("Encountered a Pod that is not ready: %s", pod.obj['metadata']['name'])
 
         LOG.debug("Jobs not running: %s", set(job.id for job in jobs_to_schedule))
 
