@@ -21,6 +21,5 @@ class PovFuzzer2Creator(meister.creators.BaseCreator):
                 job = PovFuzzer2Job(cbn=cbn, payload={'crash_id': crash.id},
                         limit_cpu=1, limit_memory=10)
 
-                if not PovFuzzer2Job.queued(job):
-                    LOG.debug("Yielding PovFuzzer1Job for %s with %s", cbn.id, crash.id)
-                    yield job
+                LOG.debug("Yielding PovFuzzer1Job for %s with %s", cbn.id, crash.id)
+                yield job
