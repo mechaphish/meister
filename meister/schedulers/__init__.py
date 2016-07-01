@@ -266,9 +266,9 @@ class KubernetesScheduler(object):
         # and being asked to get terminated.
         # TODO: Get rid of the AFL replication controller special case.
         if worker == 'afl':
-            pykube.objects.ReplicationController(self.api, config).delete(name=name)
+            pykube.objects.ReplicationController(self.api).delete(name=name)
         else:
-            pykube.objects.Pod(self.api, config).delete(name=name)
+            pykube.objects.Pod(self.api).delete(name=name)
 
 
 class BaseScheduler(KubernetesScheduler):
