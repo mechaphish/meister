@@ -27,7 +27,7 @@ from meister.creators.povfuzzer1 import PovFuzzer1Creator
 from meister.creators.povfuzzer2 import PovFuzzer2Creator
 from meister.creators.tester import TesterCreator
 from meister.creators.wererabbit import WereRabbitCreator
-from meister.schedulers.brute import BruteScheduler
+from meister.schedulers.priority import PriorityScheduler
 from meister.submitters.cb import CBSubmitter
 from meister.submitters.pov import POVSubmitter
 from meister.evaluators import Evaluator
@@ -58,7 +58,7 @@ def main(args=None):
             round_ = Round.find_or_create(num=current_round)
 
             # Jobs scheduled continuously
-            scheduler = BruteScheduler(cgc=cgc, creators=[
+            scheduler = PriorityScheduler(cgc=cgc, creators=[
                 DrillerCreator(cgc),
                 RexCreator(cgc),
                 PovFuzzer1Creator(cgc),
