@@ -9,7 +9,7 @@ from .rex import Vulnerability
 
 LOG = meister.creators.LOG.getChild('povfuzzer2job')
 
-class RexCreator(meister.creators.BaseCreator):
+class PovFuzzer2Creator(meister.creators.BaseCreator):
     @property
     def jobs(self):
         for cbn in self.cbns():

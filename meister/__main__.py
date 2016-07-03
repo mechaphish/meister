@@ -22,6 +22,8 @@ from meister.creators.poller import PollerCreator
 from meister.creators.pollsanitizer import NetworkPollSanitizerCreator
 from meister.creators.networkpoll import NetworkPollCreator
 from meister.creators.rex import RexCreator
+from meister.creators.povfuzzer1 import PovFuzzer1Creator
+from meister.creators.povfuzzer2 import PovFuzzer2Creator
 from meister.creators.tester import TesterCreator
 from meister.creators.wererabbit import WereRabbitCreator
 from meister.schedulers.brute import BruteScheduler
@@ -57,6 +59,8 @@ def main():
             scheduler = BruteScheduler(cgc=cgc, creators=[
                 DrillerCreator(cgc),
                 RexCreator(cgc),
+                PovFuzzer1Creator(cgc),
+                PovFuzzer2Creator(cgc),
                 ColorGuardCreator(cgc),
                 PollerCreator(cgc),
                 NetworkPollSanitizerCreator(cgc),
