@@ -9,9 +9,10 @@ from __future__ import print_function, unicode_literals, absolute_import, \
 import sys
 import time
 
-from farnsworth.models import Round
-
+# leave this import before everything else!
 import meister.settings
+
+from farnsworth.models import Round
 import meister.cgc.ticlient
 import meister.cgc.tierror
 from meister.creators.afl import AFLCreator

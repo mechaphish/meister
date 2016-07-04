@@ -80,6 +80,11 @@ class KubernetesScheduler(object):
             self._api = pykube.http.HTTPClient(kubernetes.from_env())
         return self._api
 
+    def _is_kubernetes_unavailable(self):
+        """return True if running without Kubernetes"""
+        return ('KUBERNETES_SERVICE_HOST' not in os.environ or
+                os.environ['KUBERNETES_SERVICE_HOST'] == "")
+
     def _kube_pod_template(self, job, restart_policy='Always'):
         name = "worker-{}".format(job.id)
         # FIXME
@@ -160,11 +165,6 @@ class KubernetesScheduler(object):
         """Internal helper method to collect resource data for Kubernetes cluster."""
         assert isinstance(self.api, pykube.http.HTTPClient)
 
-        # meister running locally
-        if 'KUBERNETES_SERVICE_HOST' not in os.environ or os.environ['KUBERNETES_SERVICE_HOST'] == "":
-            self._available_resources = {'cpu': 99999, 'memory': 99999999999999, 'pods': 99999}
-            return self._available_resources
-
         # Return cached data
         if (datetime.datetime.now() - self._resources_timestamp) <= self._resources_cache_timeout:
             return self._available_resources
@@ -237,8 +237,7 @@ class KubernetesScheduler(object):
         }
 
         try:
-            if 'KUBERNETES_SERVICE_HOST' in os.environ:
-                pykube.objects.ReplicationController(self.api, config).create()
+            pykube.objects.ReplicationController(self.api, config).create()
         except HTTPError as error:
             if error.response.status_code == 409:
                 LOG.warning("Job already scheduled %s", job.id)
@@ -251,8 +250,7 @@ class KubernetesScheduler(object):
         config = self._kube_pod_template(job, 'Never')
 
         try:
-            if 'KUBERNETES_SERVICE_HOST' in os.environ:
-                pykube.objects.Pod(self.api, config).create()
+            pykube.objects.Pod(self.api, config).create()
         except HTTPError as error:
             if error.response.status_code == 409:
                 LOG.warning("Job already scheduled %s", job.id)
@@ -318,3 +316,8 @@ class BaseScheduler(KubernetesScheduler):
     def jobs(self):
         """Return all jobs that all creators want to run."""
         return itertools.chain.from_iterable(c.jobs for c in self.creators)
+
+    def dry_run(self):
+        """Run without actually scheduling"""
+        for job in self.jobs:
+            job.save()
