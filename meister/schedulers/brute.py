@@ -3,7 +3,7 @@
 
 """Brute scheduler.
 
-Schedule everything whenver it is available.
+Schedule everything whenever it is available.
 """
 
 from __future__ import print_function, unicode_literals, absolute_import, \
@@ -26,6 +26,9 @@ class BruteScheduler(meister.schedulers.BaseScheduler):
 
     def run(self):
         """Run the brute scheduler."""
+        if self._is_kubernetes_unavailable():
+            return self.dry_run()
+
         LOG.debug("Starting brute scheduler")
         for job in self.jobs:
             LOG.debug("Scheduling %s for %s", job.__class__.__name__,

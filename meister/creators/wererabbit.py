@@ -15,7 +15,8 @@ class WereRabbitCreator(meister.creators.BaseCreator):
         LOG.debug("Collecting jobs")
         for cbn in self.cbns():
             if len(cbn.crashes) > 0:
-                job = WereRabbitJob(cbn=cbn, limit_cpu=4, limit_memory=4)
-                if not WereRabbitJob.queued(job):
-                    LOG.debug("Yielding WereRabbitJob for %s", cbn.id)
-                    yield job
+                job, _ = WereRabbitJob.get_or_create(cbn=cbn,
+                                                     limit_cpu=4,
+                                                     limit_memory=4)
+                LOG.debug("Yielding WereRabbitJob for %s", cbn.id)
+                yield job

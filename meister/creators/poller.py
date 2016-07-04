@@ -12,12 +12,9 @@ class PollerCreator(meister.creators.BaseCreator):
     def jobs(self):
         # get only those tests, for which polls need to be created.
         for curr_test in Test.select().where(Test.poll_created == False):
-            job = PollerJob(
-                cbn=curr_test.cbn,
-                limit_cpu=-1,
-                limit_memory=-1,
-                payload={'test_id': curr_test.id}
-            )
-            if not PollerJob.queued(job):
-                LOG.debug("Yielding PollerJob for %s ", curr_test.id)
-                yield job
+            job, _ = PollerJob.get_or_create(cbn=curr_test.cbn,
+                                             limit_cpu=-1,
+                                             limit_memory=-1,
+                                             payload={'test_id': curr_test.id})
+            LOG.debug("Yielding PollerJob for %s ", curr_test.id)
+            yield job

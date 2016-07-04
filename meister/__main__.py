@@ -6,11 +6,13 @@
 from __future__ import print_function, unicode_literals, absolute_import, \
                        division
 
-import os
+import sys
 import time
 
+# leave this import before everything else!
 import meister.settings
 
+from farnsworth.models import Round
 import meister.cgc.ticlient
 import meister.cgc.tierror
 from meister.creators.afl import AFLCreator
@@ -26,19 +28,20 @@ from meister.creators.povfuzzer1 import PovFuzzer1Creator
 from meister.creators.povfuzzer2 import PovFuzzer2Creator
 from meister.creators.tester import TesterCreator
 from meister.creators.wererabbit import WereRabbitCreator
-from meister.schedulers.brute import BruteScheduler
+from meister.schedulers.priority import PriorityScheduler
 from meister.submitters.cb import CBSubmitter
-from meister.submitters.ids import IDSSubmitter
 from meister.submitters.pov import POVSubmitter
 from meister.evaluators import Evaluator
 from meister.notifier import Notifier
-from farnsworth.models import Round
 import meister.log
 
 LOG = meister.log.LOG.getChild('main')
 
-def main():
+
+def main(args=None):
     """Run the meister."""
+    if args is None:
+        args = []
     # Initialize APIs
     cgc = meister.cgc.ticlient.TiClient.from_env()
 
@@ -53,10 +56,10 @@ def main():
 
             notifier.api_is_up()
             current_round = cgc.getRound()
-            round_ = Round.find_or_create(num = current_round)
+            round_ = Round.find_or_create(num=current_round)
 
             # Jobs scheduled continuously
-            scheduler = BruteScheduler(cgc=cgc, creators=[
+            scheduler = PriorityScheduler(cgc=cgc, creators=[
                 DrillerCreator(cgc),
                 RexCreator(cgc),
                 PovFuzzer1Creator(cgc),
@@ -67,6 +70,9 @@ def main():
                 NetworkPollCreator(cgc),
                 TesterCreator(cgc),
                 WereRabbitCreator(cgc),
+                AFLCreator(cgc),
+                PatcherexCreator(cgc),
+                IDSCreator(cgc),
             ])
             scheduler.run()
 
@@ -81,18 +87,13 @@ def main():
                 LOG.info("Round #%d", current_round)
                 previous_round = current_round
 
-            # Jobs scheduled per round
-            perround_scheduler = BruteScheduler(cgc=cgc, creators=[
-                AFLCreator(cgc),
-                PatcherexCreator(cgc),
-                IDSCreator(cgc),
-            ])
-            perround_scheduler.run()
-
             # Submit! Order matters!
             CBSubmitter(cgc).run(current_round, random_submit=True)
-            # IDSSubmitter(cgc).run(current_round)
             POVSubmitter(cgc).run()
 
         except meister.cgc.tierror.TiError:
             notifier.api_is_down()
+    return 0
+
+if __name__ == '__main__':
+    sys.exit(main(sys.argv))

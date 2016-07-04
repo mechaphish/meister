@@ -34,9 +34,8 @@ class RexCreator(meister.creators.BaseCreator):
                     continue
 
                 # TODO: in rare cases Rex needs more memory, can we try to handle cases where Rex needs upto 40G?
-                job = RexJob(cbn=cbn, payload={'crash_id': crash.id},
-                             limit_cpu=1, limit_memory=10)
+                job, _ = RexJob.get_or_create(cbn=cbn, payload={'crash_id': crash.id},
+                                              limit_cpu=1, limit_memory=10)
 
-                if not RexJob.queued(job):
-                    LOG.debug("Yielding RexJob for %s with %s", cbn.id, crash.id)
-                    yield job
+                LOG.debug("Yielding RexJob for %s with %s", cbn.id, crash.id)
+                yield job

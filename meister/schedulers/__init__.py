@@ -70,7 +70,8 @@ class KubernetesScheduler(object):
                 self._schedule_kube_controller(job)
             else:
                 self._schedule_kube_pod(job)
-        return job
+            return True
+        return False
 
     @property
     def api(self):
@@ -78,6 +79,11 @@ class KubernetesScheduler(object):
         if self._api is None:
             self._api = pykube.http.HTTPClient(kubernetes.from_env())
         return self._api
+
+    def _is_kubernetes_unavailable(self):
+        """return True if running without Kubernetes"""
+        return ('KUBERNETES_SERVICE_HOST' not in os.environ or
+                os.environ['KUBERNETES_SERVICE_HOST'] == "")
 
     def _kube_pod_template(self, job, restart_policy='Always'):
         name = "worker-{}".format(job.id)
@@ -159,42 +165,23 @@ class KubernetesScheduler(object):
         """Internal helper method to collect resource data for Kubernetes cluster."""
         assert isinstance(self.api, pykube.http.HTTPClient)
 
-        # meister running locally
-        if 'KUBERNETES_SERVICE_HOST' not in os.environ or os.environ['KUBERNETES_SERVICE_HOST'] == "":
-            self._available_resources = {'cpu': 99999, 'memory': 99999999999999, 'pods': 99999}
-            return self._available_resources
-
         # Return cached data
         if (datetime.datetime.now() - self._resources_timestamp) <= self._resources_cache_timeout:
             return self._available_resources
 
-        # Update node capacities, only ran once for the first update of availabe resources
-        if self._node_capacities is None:
-            nodes = pykube.objects.Node.objects(self.api).all()
-            self._node_capacities = {}
-            for node in nodes:
-                cpu = _cpu2float(node.obj['status']['capacity']['cpu'])
-                memory = _memory2int(node.obj['status']['capacity']['memory'])
-                pods = int(node.obj['status']['capacity']['pods'])
-                self._node_capacities[node.name] = {'cpu': cpu,
-                                                    'memory': memory,
-                                                    'pods': pods}
-
         # Reset available resources
-        self._available_resources = {'cpu': 0.0, 'memory': 0L, 'pods': 0}
-        for capacity in self._node_capacities.values():
-            self._available_resources['cpu'] += capacity['cpu']
-            self._available_resources['memory'] += capacity['memory']
-            self._available_resources['pods'] += capacity['pods']
+        self._available_resources = self._kube_total_capacity
 
         # Collect fresh information from the Kubernetes API about all running pods
         # FIXME: Shitty loop to fix https://github.com/kelproject/pykube/issues/10
         pods = []
         for pod in pykube.objects.Pod.objects(self.api):
             try:
-                if pod.ready: pods.append(pod)
-            except KeyError:
-                pass
+                if pod.ready:
+                    pods.append(pod)
+            except KeyError, e:
+                LOG.error("Hit a KeyError %s", e)
+
         for pod in pods:
             # FIXME: We are assuming that each pod only has one container here
             try:
@@ -207,6 +194,34 @@ class KubernetesScheduler(object):
         self._resources_timestamp = datetime.datetime.now()
 
         return self._available_resources
+
+    @property
+    def _kube_total_capacity(self):
+        """Internal helper method to return the total capacity on the Kubernetes cluster."""
+        resources = {'cpu': 0.0, 'memory': 0L, 'pods': 0}
+        for capacity in self._kube_node_capacities.values():
+            resources['cpu'] += capacity['cpu']
+            resources['memory'] += capacity['memory']
+            resources['pods'] += capacity['pods']
+        return resources
+
+    @property
+    def _kube_node_capacities(self):
+        """Internal helper method to collect the total capacity on the Kubernetes cluster."""
+        assert isinstance(self.api, pykube.http.HTTPClient)
+
+        # Update node capacities, only ran once for the first update of availabe resources
+        if self._node_capacities is None:
+            nodes = pykube.objects.Node.objects(self.api).all()
+            self._node_capacities = {}
+            for node in nodes:
+                cpu = _cpu2float(node.obj['status']['capacity']['cpu'])
+                memory = _memory2int(node.obj['status']['capacity']['memory'])
+                pods = int(node.obj['status']['capacity']['pods'])
+                self._node_capacities[node.name] = {'cpu': cpu,
+                                                    'memory': memory,
+                                                    'pods': pods}
+        return self._node_capacities
 
     def _schedule_kube_controller(self, job):
         """Internal method to schedule a never ending job on Kubernetes."""
@@ -222,8 +237,7 @@ class KubernetesScheduler(object):
         }
 
         try:
-            if 'KUBERNETES_SERVICE_HOST' in os.environ:
-                pykube.objects.ReplicationController(self.api, config).create()
+            pykube.objects.ReplicationController(self.api, config).create()
         except HTTPError as error:
             if error.response.status_code == 409:
                 LOG.warning("Job already scheduled %s", job.id)
@@ -236,13 +250,29 @@ class KubernetesScheduler(object):
         config = self._kube_pod_template(job, 'Never')
 
         try:
-            if 'KUBERNETES_SERVICE_HOST' in os.environ:
-                pykube.objects.Pod(self.api, config).create()
+            pykube.objects.Pod(self.api, config).create()
         except HTTPError as error:
             if error.response.status_code == 409:
                 LOG.warning("Job already scheduled %s", job.id)
             else:
                 raise error
+
+    def terminate(self, name, worker):
+        """Terminate worker 'name' of type 'worker'."""
+        assert isinstance(self.api, pykube.http.HTTPClient)
+        # TODO: job might have shutdown gracefully in-between being identified
+        # and being asked to get terminated.
+        # TODO: Get rid of the AFL replication controller special case.
+        if worker == 'afl':
+            config = {'metadata': {'name': name.rsplit("-", 1)[0]},
+                      'kind': 'ReplicationController'}
+            LOG.debug("Killing rc %s", config['metadata']['name'])
+            pykube.objects.ReplicationController(self.api, config).delete()
+
+        config = {'metadata': {'name': name},
+                    'kind': 'Pod'}
+        LOG.debug("Killing pod %s", config['metadata']['name'])
+        pykube.objects.Pod(self.api, config).delete()
 
 
 class BaseScheduler(KubernetesScheduler):
@@ -286,3 +316,8 @@ class BaseScheduler(KubernetesScheduler):
     def jobs(self):
         """Return all jobs that all creators want to run."""
         return itertools.chain.from_iterable(c.jobs for c in self.creators)
+
+    def dry_run(self):
+        """Run without actually scheduling"""
+        for job in self.jobs:
+            job.save()
