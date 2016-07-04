@@ -16,6 +16,6 @@ class AFLCreator(meister.creators.BaseCreator):
         LOG.debug("Collecting jobs")
         for cbn in self.cbns():
             job, _ = AFLJob.get_or_create(cbn=cbn, limit_cpu=8, limit_memory=4)
-            job.priority = 50
+            job.priority = 100 # There should *ALWAYS* be one AFL job running per challenge
             LOG.debug("Yielding AFLJob for %s", cbn.id)
             yield job
