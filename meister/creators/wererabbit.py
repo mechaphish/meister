@@ -18,5 +18,8 @@ class WereRabbitCreator(meister.creators.BaseCreator):
                 job, _ = WereRabbitJob.get_or_create(cbn=cbn,
                                                      limit_cpu=4,
                                                      limit_memory=4)
+
+                job.priority = 100 # There should *ALWAYS* be one WereRabbit job running if we have a crash
                 LOG.debug("Yielding WereRabbitJob for %s", cbn.id)
+
                 yield job

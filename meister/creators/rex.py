@@ -22,6 +22,19 @@ class Vulnerability(object):
     NULL_DEREFERENCE = "null_dereference"
 
 
+priority_map = {
+        Vulnerability.IP_OVERWRITE: 100,
+        Vulnerability.PARTIAL_IP_OVERWRITE: 80,
+        Vulnerability.ARBITRARY_READ: 75,
+        Vulnerability.WRITE_WHAT_WHERE: 50,
+        Vulnerability.WRITE_X_WHERE: 25,
+        Vulnerability.BP_OVERWRITE: 10, # doesn't appear to be exploitable in CGC
+        Vulnerability.PARTIAL_BP_OVERWRITE: 5,
+        Vulnerability.UNCONTROLLED_WRITE: 0,
+        Vulnerability.UNCONTROLLED_IP_OVERWRITE: 0,
+        Vulnerability.NULL_DEREFERENCE: 0,
+        }
+
 class RexCreator(meister.creators.BaseCreator):
     @property
     def jobs(self):
@@ -36,6 +49,9 @@ class RexCreator(meister.creators.BaseCreator):
                 # TODO: in rare cases Rex needs more memory, can we try to handle cases where Rex needs upto 40G?
                 job, _ = RexJob.get_or_create(cbn=cbn, payload={'crash_id': crash.id},
                                               limit_cpu=1, limit_memory=10)
+
+                # determine priority
+                job.priority = priority_map[crash.kind]
 
                 LOG.debug("Yielding RexJob for %s with %s", cbn.id, crash.id)
                 yield job
