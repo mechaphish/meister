@@ -18,8 +18,8 @@ class PovFuzzer1Creator(meister.creators.BaseCreator):
                 if crash.kind != Vulnerability.IP_OVERWRITE:
                     continue
 
-                job = PovFuzzer1Job(cbn=cbn, payload={'crash_id': crash.id},
-                        limit_cpu=1, limit_memory=10)
+                job, _ = PovFuzzer1Job.get_or_create(cbn=cbn, payload={'crash_id': crash.id},
+                                                     limit_cpu=1, limit_memory=10)
 
                 LOG.debug("Yielding PovFuzzer1Job for %s with %s", cbn.id, crash.id)
                 yield job
