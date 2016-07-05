@@ -26,5 +26,11 @@ class DrillerCreator(meister.creators.BaseCreator):
                                                       limit_time=120,
                                                       payload={'test_id': test.id})
                     LOG.debug("Yielding DrillerJob for %s with %s", cbn.id, test.id)
+
                     job.priority = 20
+
+                    # Driller jobs are more important if we have not found any crashes for a challenge
+                    if len(cbn.crashes) == 0:
+                        job.priority = 40
+
                     yield job
