@@ -27,7 +27,7 @@ class DrillerCreator(meister.creators.BaseCreator):
                     LOG.debug("Yielding DrillerJob for %s with %s", cbn.id, test.id)
 
                     job.priority = 20
-                    if not cbn.found_crash():
+                    if not cbn.found_crash:
                         job.priority = 100
 
                     yield job
