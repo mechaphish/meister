@@ -35,7 +35,7 @@ class PriorityScheduler(meister.schedulers.BaseScheduler):
             return self.dry_run()
 
         # Sorting is not necessarily stable, and only by priority, we have other requirements too.
-        jobs_to_schedule = sorted((j for j in self.jobs if j.completed_at is not None),
+        jobs_to_schedule = sorted((j for j in self.jobs if j.completed_at is None),
                                   key=operator.attrgetter('priority'), reverse=True)
         jobs_to_run = []
 
