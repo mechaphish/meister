@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import datetime
 import meister.creators
 from farnsworth.models.job import DrillerJob
 
@@ -17,7 +16,7 @@ class DrillerCreator(meister.creators.BaseCreator):
 
             # is the fuzzer still working on mutating favorites?
             if not cbn.fuzzer_stat.pending_favs > 0:
-                LOG.info("AFL has not found any new paths for 1 minute, scheduling Driller")
+                LOG.info("AFL has no pending favs (old-school Driller style scheduling), scheduling Driller")
                 LOG.debug("Found {} undrilled tests".format(len(cbn.undrilled_tests)))
                 for test in cbn.tests:
                     job, _ = DrillerJob.get_or_create(cbn=cbn,
@@ -27,10 +26,6 @@ class DrillerCreator(meister.creators.BaseCreator):
                                                       payload={'test_id': test.id})
                     LOG.debug("Yielding DrillerJob for %s with %s", cbn.id, test.id)
 
-                    job.priority = 20
-
-                    # Driller jobs are more important if we have not found any crashes for a challenge
-                    if len(cbn.crashes) == 0:
-                        job.priority = 40
+                    job.priority = 30
 
                     yield job
