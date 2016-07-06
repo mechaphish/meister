@@ -19,6 +19,7 @@ from meister.creators.afl import AFLCreator
 from meister.creators.colorguard import ColorGuardCreator
 from meister.creators.driller import DrillerCreator
 from meister.creators.ids import IDSCreator
+from meister.creators.function_identifier import FunctionIdentifierCreator
 from meister.creators.patcherex import PatcherexCreator
 from meister.creators.poller import PollerCreator
 from meister.creators.pollsanitizer import NetworkPollSanitizerCreator
@@ -73,6 +74,7 @@ def main(args=None):
                 AFLCreator(cgc),
                 PatcherexCreator(cgc),
                 IDSCreator(cgc),
+                FunctionIdentifierCreator(cgc),
             ])
             scheduler.run()
 
