@@ -3,7 +3,7 @@
 
 """Module containing the BaseStrategy."""
 
-from __future__ import absolute_import, unicode_literals
+from __future__ import absolute_import, division, unicode_literals
 
 import datetime
 import itertools
@@ -210,7 +210,7 @@ class KubernetesScheduler(object):
 
         LOG.debug("Resources available: %s cores, %s GiB, %s pods",
                   self._available_resources['cpu'],
-                  self._available_resources['memory'],
+                  self._available_resources['memory'] // (1024**3),
                   self._available_resources['pods'])
 
         return self._available_resources
@@ -224,7 +224,8 @@ class KubernetesScheduler(object):
             resources['memory'] += capacity['memory']
             resources['pods'] += capacity['pods']
         LOG.debug("Total cluster capacity: %s cores, %s GiB, %s pods",
-                  resources['cpu'], resources['memory'], resources['pods'])
+                  resources['cpu'], resources['memory'] // (1024**3),
+                  resources['pods'])
         return resources
 
     @property
