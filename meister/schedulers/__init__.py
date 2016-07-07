@@ -3,18 +3,16 @@
 
 """Module containing the BaseStrategy."""
 
-from __future__ import unicode_literals, absolute_import
+from __future__ import absolute_import, unicode_literals
 
 import datetime
 import itertools
+import operator
 import os
 import time
-import operator
 
-# pylint: disable=import-error
 import pykube.http
 import pykube.objects
-# pylint: disable=import-error
 from requests.exceptions import HTTPError
 
 import meister.log
