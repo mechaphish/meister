@@ -289,7 +289,12 @@ class BaseScheduler(KubernetesScheduler):
         """Return all jobs that all creators want to run."""
         return itertools.chain.from_iterable(c.jobs for c in self.creators)
 
-    def dry_run(self):
-        """Run without actually scheduling"""
-        for job in self.jobs:
-            job.save()
+    def run(self):
+        """Run the scheduler."""
+        if self._is_kubernetes_unavailable():
+            # Run without actually scheduling
+            for job in self.jobs:
+                job.save()
+        else:
+            # Run internal scheduler method
+            self._run()

@@ -24,11 +24,8 @@ class BruteScheduler(meister.schedulers.BaseScheduler):
         """Create a brute-force scheduler object."""
         super(BruteScheduler, self).__init__(**kwargs)
 
-    def run(self):
+    def _run(self):
         """Run the brute scheduler."""
-        if self._is_kubernetes_unavailable():
-            return self.dry_run()
-
         LOG.debug("Starting brute scheduler")
         for job in self.jobs:
             LOG.debug("Scheduling %s for %s", job.__class__.__name__,

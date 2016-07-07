@@ -28,11 +28,8 @@ class PriorityScheduler(meister.schedulers.BaseScheduler):
         super(PriorityScheduler, self).__init__(*args, **kwargs)
         LOG.debug("PriorityScheduler time!")
 
-    def run(self):
+    def _run(self):
         """Run jobs based on priority."""
-        if self._is_kubernetes_unavailable():
-            return self.dry_run()
-
         # Sorting is not necessarily stable, and only by priority, we have other requirements too.
         jobs_to_schedule = sorted((j for j in self.jobs if j.completed_at is None),
                                   key=operator.attrgetter('priority'), reverse=True)
