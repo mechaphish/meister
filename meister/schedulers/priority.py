@@ -110,3 +110,5 @@ class PriorityScheduler(meister.schedulers.BaseScheduler):
                 self.schedule(job)
             else:
                 LOG.debug("Worker already taking care of job %d", job.id)
+
+        self._kube_resources
