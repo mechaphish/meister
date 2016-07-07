@@ -78,13 +78,16 @@ class KubernetesScheduler(object):
             self._api = pykube.http.HTTPClient(kubernetes.from_env())
         return self._api
 
+    def _worker_name(self, job):
+        return "worker-{:04d}".format(job.id)
+
     def _is_kubernetes_unavailable(self):
         """return True if running without Kubernetes"""
         return ('KUBERNETES_SERVICE_HOST' not in os.environ or
                 os.environ['KUBERNETES_SERVICE_HOST'] == "")
 
     def _kube_pod_template(self, job, restart_policy='Always'):
-        name = "worker-{:04d}".format(job.id)
+        name = self._worker_name(job)
         # FIXME
         cpu = str(job.limit_cpu) if job.limit_cpu is not None else 2
         memory = str(job.limit_memory) if job.limit_memory is not None else 4
@@ -234,8 +237,8 @@ class KubernetesScheduler(object):
             else:
                 raise error
 
-    def terminate(self, name):
-        """Terminate worker 'name' of type 'worker'."""
+    def terminate(self, job):
+        """Terminate worker 'name'."""
         assert isinstance(self.api, pykube.http.HTTPClient)
         # TODO: job might have shutdown gracefully in-between being identified
         # and being asked to get terminated; do we need to check if it exists?
