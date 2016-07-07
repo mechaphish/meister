@@ -90,7 +90,7 @@ class KubernetesScheduler(object):
                 os.environ['KUBERNETES_SERVICE_HOST'] == "")
 
     def _kube_pod_template(self, job, restart_policy='OnFailure'):
-        name = self._worker_name(job)
+        name = self._worker_name(job.id)
         # FIXME
         cpu = str(job.limit_cpu) if job.limit_cpu is not None else 2
         memory = str(job.limit_memory) if job.limit_memory is not None else 4
