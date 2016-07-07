@@ -63,7 +63,7 @@ class KubernetesScheduler(object):
     def schedule(self, job):
         """Schedule the job with the specific resources."""
         job.save()
-        self.terminate(self._worker_name(job))
+        self.terminate(self._worker_name(job.id))
         if self._resources_available(job):
             self._resources_update(job)
             self._schedule_kube_pod(job)
@@ -77,8 +77,10 @@ class KubernetesScheduler(object):
             self._api = pykube.http.HTTPClient(kubernetes.from_env())
         return self._api
 
-    def _worker_name(self, job):
-        return "worker-{}".format(job.id)
+    @classmethod
+    def _worker_name(cls, job_id):
+        """Return the worker name for a specific job_id."""
+        return "worker-{}".format(job_id)
 
     def _is_kubernetes_unavailable(self):
         """return True if running without Kubernetes"""
