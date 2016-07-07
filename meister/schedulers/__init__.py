@@ -62,6 +62,7 @@ class KubernetesScheduler(object):
 
     def schedule(self, job):
         """Schedule the job with the specific resources."""
+        LOG.debug("Scheduling job for job id %s", job.id)
         job.save()
         self.terminate(self._worker_name(job.id))
         if self._resources_available(job):
@@ -238,7 +239,7 @@ class KubernetesScheduler(object):
     def _schedule_kube_pod(self, job):
         """Internal method to schedule a job on Kubernetes."""
         assert isinstance(self.api, pykube.http.HTTPClient)
-        config = self._kube_pod_template(job, 'Never')
+        config = self._kube_pod_template(job)
 
         try:
             pykube.objects.Pod(self.api, config).create()
