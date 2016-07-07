@@ -72,31 +72,35 @@ class PriorityScheduler(meister.schedulers.BaseScheduler):
         # and which are sorted differently, we need to solve the resource requirement equations for
         # the lowest priority we want to schedule, so that we maximize the use of our resources.
 
+        job_ids_to_run = set(job.id for job in jobs_to_run)
+        LOG.debug("Jobs to run: %s", job_ids_to_run)
+
+        assert isinstance(job_ids_to_run[0], (int, long))
+
         # Collect all current jobs
-        job_ids = {}
+        job_ids_to_kill, job_ids_to_ignore = [], []
         for pod in pykube.objects.Pod.objects(self.api):
             if pod.ready:
                 if 'job_id' in pod.obj['metadata']['labels']:
-                    pod_name = pod.obj['metadata']['name']
-                    job_ids[pod_name] = pod.obj['metadata']['labels']['job_id']
+                    job_id = int(pod.obj['metadata']['labels']['job_id'])
+                    if job_id in job_ids_to_run:
+                        job_ids_to_ignore.append(job_id)
+                    else:
+                        job_ids_to_kill.append(job_id)
             else:
                 LOG.warning("Encountered a Pod that is not ready: %s", pod.obj['metadata']['name'])
 
+        assert isinstance(job_ids_to_kill[0], (int, long))
+        assert isinstance(job_ids_to_ignore[0], (int, long))
+
         LOG.debug("Jobs not running: %s", set(job.id for job in jobs_to_schedule))
-
-        job_ids_to_run = set(str(job.id) for job in jobs_to_run)
-        LOG.debug("Jobs to run: %s", job_ids_to_run)
-
-        workers_to_kill = {k: v for k, v in job_ids.items() if str(v) not in job_ids_to_run}
-        LOG.debug("Killing: %s", workers_to_kill)
-
-        job_ids_to_ignore = {v for v in job_ids.values() if str(v) in job_ids_to_run}
-        LOG.debug("Not touching: %s", job_ids_to_ignore)
+        LOG.debug("Terminating workers: %s", job_ids_to_kill)
+        LOG.debug("Workers running already: %s", job_ids_to_ignore)
 
         # Kill workers
-        for worker, job_id in workers_to_kill.items():
+        for job_id in job_ids_to_kill:
             LOG.debug("Killing worker for job %s", job_id)
-            self.terminate(worker)     # TODO: refactor out the worker type
+            self.terminate(self._worker_name(job_id))
 
         # Schedule jobs
         for job in jobs_to_run:
