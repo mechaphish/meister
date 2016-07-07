@@ -79,7 +79,7 @@ class KubernetesScheduler(object):
         return self._api
 
     def _worker_name(self, job):
-        return "worker-{:04d}".format(job.id)
+        return "worker-{}".format(job.id)
 
     def _is_kubernetes_unavailable(self):
         """return True if running without Kubernetes"""
