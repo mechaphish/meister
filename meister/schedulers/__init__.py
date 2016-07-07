@@ -181,7 +181,10 @@ class KubernetesScheduler(object):
         for pod in pykube.objects.Pod.objects(self.api):
             try:
                 if pod.ready:
-                    LOG.debug("Pod %s is taking up resources", pod.name)
+                    try:
+                        LOG.debug("Pod %s is taking up resources", pod.name)
+                    except requests.exceptions.HTTPError, e:
+                        LOG.error("Somehow failed at HTTP %s", e)
                     pods.append(pod)
                 elif pod.completed:
                     LOG.debug("Deleting completed pod '%s'", pod.name)
