@@ -1,6 +1,6 @@
 requests
 python-dotenv
-git+ssh://git@git.seclab.cs.ucsb.edu/cgc/farnsworth#egg=farnsworth
+git+ssh://git@git.seclab.cs.ucsb.edu/cgc/farnsworth@refactor/meister#egg=farnsworth
 git+ssh://git@git.seclab.cs.ucsb.edu/cgc/pykube#egg=pykube
 responses
 nose>=1.3.7
