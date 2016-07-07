@@ -64,7 +64,7 @@ class KubernetesScheduler(object):
     def schedule(self, job):
         """Schedule the job with the specific resources."""
         job.save()
-        self.terminate(job)
+        self.terminate(self._worker_name(job))
         if self._resources_available(job):
             self._resources_update(job)
             self._schedule_kube_pod(job)
