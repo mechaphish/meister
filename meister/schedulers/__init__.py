@@ -237,7 +237,7 @@ class KubernetesScheduler(object):
             else:
                 raise error
 
-    def terminate(self, job):
+    def terminate(self, name):
         """Terminate worker 'name'."""
         assert isinstance(self.api, pykube.http.HTTPClient)
         # TODO: job might have shutdown gracefully in-between being identified
