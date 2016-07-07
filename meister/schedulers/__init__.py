@@ -55,7 +55,7 @@ class KubernetesScheduler(object):
         self._api = None
         self._node_capacities = None
         self._available_resources = None
-        self._resources_cache_timeout = datetime.timedelta(seconds=30)
+        self._resources_cache_timeout = datetime.timedelta(seconds=1)
         self._resources_timestamp = datetime.datetime(1970, 1, 1, 0, 0, 0)
 
     def schedule(self, job):
