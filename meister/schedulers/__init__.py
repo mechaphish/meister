@@ -247,6 +247,7 @@ class KubernetesScheduler(object):
             if error.response.status_code == 409:
                 LOG.warning("Job already scheduled %s", job.id)
             else:
+                LOG.debug("Error: %s", error.response.content)
                 raise error
 
     def terminate(self, name):
