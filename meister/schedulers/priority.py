@@ -90,8 +90,11 @@ class PriorityScheduler(meister.schedulers.BaseScheduler):
             else:
                 LOG.warning("Encountered a Pod that is not ready: %s", pod.obj['metadata']['name'])
 
-        assert isinstance(job_ids_to_kill[0], (int, long))
-        assert isinstance(job_ids_to_ignore[0], (int, long))
+        if job_ids_to_kill:
+            assert isinstance(job_ids_to_kill[0], (int, long))
+
+        if job_ids_to_ignore:
+            assert isinstance(job_ids_to_ignore[0], (int, long))
 
         LOG.debug("Jobs not running: %s", set(job.id for job in jobs_to_schedule))
         LOG.debug("Terminating workers: %s", job_ids_to_kill)
