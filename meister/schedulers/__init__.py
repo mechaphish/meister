@@ -64,6 +64,7 @@ class KubernetesScheduler(object):
     def schedule(self, job):
         """Schedule the job with the specific resources."""
         job.save()
+        self.terminate(job)
         if self._resources_available(job):
             self._resources_update(job)
             self._schedule_kube_pod(job)
@@ -237,9 +238,9 @@ class KubernetesScheduler(object):
         """Terminate worker 'name' of type 'worker'."""
         assert isinstance(self.api, pykube.http.HTTPClient)
         # TODO: job might have shutdown gracefully in-between being identified
-        # and being asked to get terminated.
+        # and being asked to get terminated; do we need to check if it exists?
         config = {'metadata': {'name': name},
-                    'kind': 'Pod'}
+                  'kind': 'Pod'}
         LOG.debug("Killing pod %s", config['metadata']['name'])
         pykube.objects.Pod(self.api, config).delete()
 
