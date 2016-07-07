@@ -181,7 +181,13 @@ class KubernetesScheduler(object):
         for pod in pykube.objects.Pod.objects(self.api):
             try:
                 if pod.ready:
+                    LOG.debug("Pod %s is taking up resources", pod.name)
                     pods.append(pod)
+                elif pod.completed:
+                    LOG.debug("Deleting completed pod '%s'", pod.name)
+                    pod.delete()
+                else:
+                    LOG.debug("Pod %s is in a weird state", pod.name)
             except KeyError, e:
                 LOG.error("Hit a KeyError %s", e)
 
