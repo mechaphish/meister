@@ -28,6 +28,7 @@ from meister.creators.rex import RexCreator
 from meister.creators.povfuzzer1 import PovFuzzer1Creator
 from meister.creators.povfuzzer2 import PovFuzzer2Creator
 from meister.creators.tester import TesterCreator
+from meister.creators.cbtester import CbTesterCreator
 from meister.creators.wererabbit import WereRabbitCreator
 from meister.schedulers.priority import PriorityScheduler
 from meister.submitters.cb import CBSubmitter
@@ -70,6 +71,7 @@ def main(args=None):
                 # NetworkPollSanitizerCreator(cgc),
                 # NetworkPollCreator(cgc),
                 # TesterCreator(cgc),
+                CbTesterCreator(cgc),
                 WereRabbitCreator(cgc),
                 AFLCreator(cgc),
                 PatcherexCreator(cgc),
