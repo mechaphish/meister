@@ -66,10 +66,7 @@ class KubernetesScheduler(object):
         job.save()
         if self._resources_available(job):
             self._resources_update(job)
-            if job.worker == 'afl':
-                self._schedule_kube_controller(job)
-            else:
-                self._schedule_kube_pod(job)
+            self._schedule_kube_pod(job)
             return True
         return False
 
@@ -223,27 +220,6 @@ class KubernetesScheduler(object):
                                                     'pods': pods}
         return self._node_capacities
 
-    def _schedule_kube_controller(self, job):
-        """Internal method to schedule a never ending job on Kubernetes."""
-        assert isinstance(self.api, pykube.http.HTTPClient)
-        name = "worker-{}".format(job.id)
-        config = {
-            'metadata': {'name': name},
-            'spec': {
-                'replicas': 1,
-                'selector': {'job_id': str(job.id)},
-                'template': self._kube_pod_template(job)
-            }
-        }
-
-        try:
-            pykube.objects.ReplicationController(self.api, config).create()
-        except HTTPError as error:
-            if error.response.status_code == 409:
-                LOG.warning("Job already scheduled %s", job.id)
-            else:
-                raise error
-
     def _schedule_kube_pod(self, job):
         """Internal method to schedule a job on Kubernetes."""
         assert isinstance(self.api, pykube.http.HTTPClient)
@@ -257,18 +233,11 @@ class KubernetesScheduler(object):
             else:
                 raise error
 
-    def terminate(self, name, worker):
+    def terminate(self, name):
         """Terminate worker 'name' of type 'worker'."""
         assert isinstance(self.api, pykube.http.HTTPClient)
         # TODO: job might have shutdown gracefully in-between being identified
         # and being asked to get terminated.
-        # TODO: Get rid of the AFL replication controller special case.
-        if worker == 'afl':
-            config = {'metadata': {'name': name.rsplit("-", 1)[0]},
-                      'kind': 'ReplicationController'}
-            LOG.debug("Killing rc %s", config['metadata']['name'])
-            pykube.objects.ReplicationController(self.api, config).delete()
-
         config = {'metadata': {'name': name},
                     'kind': 'Pod'}
         LOG.debug("Killing pod %s", config['metadata']['name'])

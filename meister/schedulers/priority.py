@@ -74,13 +74,12 @@ class PriorityScheduler(meister.schedulers.BaseScheduler):
         # the lowest priority we want to schedule, so that we maximize the use of our resources.
 
         # Collect all current jobs
-        job_ids, worker_type = {}, {}
+        job_ids = {}
         for pod in pykube.objects.Pod.objects(self.api):
             if pod.ready:
                 if 'job_id' in pod.obj['metadata']['labels']:
                     pod_name = pod.obj['metadata']['name']
                     job_ids[pod_name] = pod.obj['metadata']['labels']['job_id']
-                    worker_type[pod_name] = pod.obj['metadata']['labels']['worker']
             else:
                 LOG.warning("Encountered a Pod that is not ready: %s", pod.obj['metadata']['name'])
 
@@ -91,13 +90,14 @@ class PriorityScheduler(meister.schedulers.BaseScheduler):
 
         workers_to_kill = {k: v for k, v in job_ids.items() if v not in job_ids_to_run}
         LOG.debug("Killing: %s", workers_to_kill)
+
         job_ids_to_ignore = {v for v in job_ids.values() if str(v) in job_ids_to_run}
         LOG.debug("Not touching: %s", job_ids_to_ignore)
 
         # Kill workers
         for worker, job_id in workers_to_kill.items():
             LOG.debug("Killing worker for job %s", job_id)
-            self.terminate(worker, worker_type[worker])     # TODO: refactor out the worker type
+            self.terminate(worker)     # TODO: refactor out the worker type
 
         # Schedule jobs
         for job in jobs_to_run:
