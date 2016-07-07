@@ -268,8 +268,9 @@ class KubernetesScheduler(object):
         # and being asked to get terminated; do we need to check if it exists?
         config = {'metadata': {'name': name},
                   'kind': 'Pod'}
-        LOG.debug("Killing pod %s", config['metadata']['name'])
-        pykube.objects.Pod(self.api, config).delete()
+        if pykube.objects.Pod(self.api, config).exists():
+            LOG.debug("Terminating pod %s", config['metadata']['name'])
+            pykube.objects.Pod(self.api, config).delete()
 
 
 class BaseScheduler(KubernetesScheduler):
