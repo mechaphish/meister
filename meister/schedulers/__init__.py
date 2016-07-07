@@ -208,6 +208,11 @@ class KubernetesScheduler(object):
             self._available_resources['pods'] -= 1
         self._resources_timestamp = datetime.datetime.now()
 
+        LOG.debug("Resources available: %s cores, %s GiB, %s pods",
+                  self._available_resources['cpu'],
+                  self._available_resources['memory'],
+                  self._available_resources['pods'])
+
         return self._available_resources
 
     @property
@@ -218,6 +223,8 @@ class KubernetesScheduler(object):
             resources['cpu'] += capacity['cpu']
             resources['memory'] += capacity['memory']
             resources['pods'] += capacity['pods']
+        LOG.debug("Total cluster capacity: %s cores, %s GiB, %s pods",
+                  resources['cpu'], resources['memory'], resources['pods'])
         return resources
 
     @property
