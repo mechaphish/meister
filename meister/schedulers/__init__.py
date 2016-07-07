@@ -274,7 +274,7 @@ class BaseScheduler(KubernetesScheduler):
         self.cgc = kwargs.pop('cgc')
         self.sleepytime = kwargs.pop('sleepytime', 3)
         self.creators = kwargs.pop('creators', [])
-        super(self.__class__, self).__init__(**kwargs)
+        super(BaseScheduler, self).__init__(**kwargs)
 
         LOG.debug("Scheduler sleepytime: %d", self.sleepytime)
         LOG.debug("Job creators: %s", ", ".join(c.__class__.__name__
