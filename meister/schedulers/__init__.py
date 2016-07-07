@@ -82,8 +82,9 @@ class KubernetesScheduler(object):
         """Return the worker name for a specific job_id."""
         return "worker-{}".format(job_id)
 
-    def _is_kubernetes_unavailable(self):
-        """return True if running without Kubernetes"""
+    @classmethod
+    def _is_kubernetes_unavailable(cls):
+        """Check if running without Kubernetes"""
         return ('KUBERNETES_SERVICE_HOST' not in os.environ or
                 os.environ['KUBERNETES_SERVICE_HOST'] == "")
 
@@ -264,15 +265,12 @@ class BaseScheduler(KubernetesScheduler):
         :argument cgc: a CGCAPI object, so that we can talk to the CGC API.
         :keyword sleepytime: the amount to sleep between strategy runs.
         """
-        cgc = kwargs.pop('cgc')
-        sleepytime = kwargs.pop('sleepytime', 3)
-        creators = kwargs.pop('creators', [])
-        super(BaseScheduler, self).__init__(**kwargs)
+        self.cgc = kwargs.pop('cgc')
+        self.sleepytime = kwargs.pop('sleepytime', 3)
+        self.creators = kwargs.pop('creators', [])
+        super(self.__class__, self).__init__(**kwargs)
 
-        self.cgc = cgc
-        self.sleepytime = sleepytime
         LOG.debug("Scheduler sleepytime: %d", self.sleepytime)
-        self.creators = creators if creators is not None else []
         LOG.debug("Job creators: %s", ", ".join(c.__class__.__name__
                                                 for c in self.creators))
 
