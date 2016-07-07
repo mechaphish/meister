@@ -11,9 +11,9 @@ import operator
 import os
 import time
 
+import pykube.exceptions
 import pykube.http
 import pykube.objects
-from requests.exceptions import HTTPError
 
 import meister.log
 import meister.kubernetes as kubernetes
@@ -182,7 +182,7 @@ class KubernetesScheduler(object):
                 if pod.pending or pod.ready:
                     try:
                         LOG.debug("Pod %s is taking up resources", pod.name)
-                    except requests.exceptions.HTTPError, e:
+                    except pykube.exceptions.HTTPError, e:
                         LOG.error("Somehow failed at HTTP %s", e)
                     pods.append(pod)
                 elif pod.failed:
@@ -252,7 +252,7 @@ class KubernetesScheduler(object):
 
         try:
             pykube.objects.Pod(self.api, config).create()
-        except HTTPError as error:
+        except pykube.exceptions.HTTPError as error:
             if error.response.status_code == 409:
                 LOG.warning("Job already scheduled %s", job.id)
             else:
