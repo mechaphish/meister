@@ -20,6 +20,7 @@ class Vulnerability(object):
     UNCONTROLLED_WRITE = "uncontrolled_write" # a write where the destination address is uncontrolled
     ARBITRARY_READ = "arbitrary_read"
     NULL_DEREFERENCE = "null_dereference"
+    UNKNOWN = "unknown"
 
 
 priority_map = {
@@ -41,9 +42,10 @@ class RexCreator(meister.creators.BaseCreator):
         for cbn in self.cbns():
             for crash in cbn.crashes:
 
-                # ignore crashes of kind null_dereference, uncontrolled_ip_overwrite, and uncontrolled_write
+                # ignore crashes of kind null_dereference, uncontrolled_ip_overwrite, uncontrolled_write
+                # and unknown
                 if crash.kind in [Vulnerability.NULL_DEREFERENCE, Vulnerability.UNCONTROLLED_IP_OVERWRITE, \
-                        Vulnerability.UNCONTROLLED_WRITE]:
+                        Vulnerability.UNCONTROLLED_WRITE, Vulnerability.UNKNOWN]:
                     continue
 
                 # TODO: in rare cases Rex needs more memory, can we try to handle cases where Rex needs upto 40G?
@@ -51,7 +53,11 @@ class RexCreator(meister.creators.BaseCreator):
                                               limit_cpu=1, limit_memory=10)
 
                 # determine priority
-                job.priority = priority_map[crash.kind]
+                if crash.kind in priority_map.keys():
 
-                LOG.debug("Yielding RexJob for %s with %s", cbn.id, crash.id)
-                yield job
+                    job.priority = priority_map[crash.kind]
+
+                    LOG.debug("Yielding RexJob for %s with crash %s priority %d", cbn.id, crash.id, job.priority)
+                    yield job
+                else:
+                    LOG.error("No priority for crash kind '%s', this is a bug", crash.kind)
