@@ -69,7 +69,8 @@ class Evaluator(object):
         except ChallengeBinaryNode.DoesNotExist:
             tmp_path = os.path.join("/tmp", "{}-{}-{}".format(self._round.num, cb_info['csid'], cb_info['cbid']))
             binary = self._cgc._get_dl(cb_info['uri'], tmp_path, cb_info['hash'])
-            blob = open(tmp_path, 'rb').read()
+            with open(tmp_path, 'rb') as fp:
+                blob = fp.read()
             os.remove(tmp_path)
             cs = ChallengeSet.get_or_create(name=cb_info['csid'])
             ChallengeBinaryNode.create(
