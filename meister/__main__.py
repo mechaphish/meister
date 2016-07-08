@@ -17,6 +17,7 @@ from farnsworth.models import Round
 import meister.cgc.ticlient
 import meister.cgc.tierror
 from meister.creators.afl import AFLCreator
+from meister.creators.cache import CacheCreator
 from meister.creators.cbtester import CbTesterCreator
 from meister.creators.colorguard import ColorGuardCreator
 from meister.creators.driller import DrillerCreator
@@ -75,6 +76,7 @@ def main(args=None):
                 CbTesterCreator(cgc),
                 WereRabbitCreator(cgc),
                 AFLCreator(cgc),
+                CacheCreator(cgc),
                 PatcherexCreator(cgc),
                 IDSCreator(cgc),
                 FunctionIdentifierCreator(cgc),
