@@ -78,7 +78,7 @@ class Evaluator(object):
             with open(tmp_path, 'rb') as fp:
                 blob = fp.read()
             os.remove(tmp_path)
-            cs = ChallengeSet.get_or_create(name=cb_info['csid'])
+            cs, _ = ChallengeSet.get_or_create(name=cb_info['csid'])
             ChallengeBinaryNode.create(
                 name=name,
                 cs=cs,
