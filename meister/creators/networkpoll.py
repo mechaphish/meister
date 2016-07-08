@@ -12,8 +12,6 @@ class NetworkPollCreator(meister.creators.BaseCreator):
     def jobs(self):
         # get only unprocessed traffic files and schedule them.
         for curr_round_traffic in RawRoundTraffic.select().where(RawRoundTraffic.processed == False):
-            job, _ = NetworkPollJob.get_or_create(limit_cpu=-1,
-                                                  limit_memory=-1,
-                                                  payload={'rrt_id': curr_round_traffic.id})
+            job, _ = NetworkPollJob.get_or_create(payload={'rrt_id': curr_round_traffic.id})
             LOG.debug("Yielding NetworkPollJob for %s ", curr_round_traffic.id)
             yield job
