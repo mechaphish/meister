@@ -61,7 +61,7 @@ class BaseCreator(object):
             except ChallengeBinaryNode.DoesNotExist:
                 tmp_path = os.path.join("/tmp", "{}-{}-{}".format(round_, csid, cbid))
                 binary = self.cgc._get_dl(binary['uri'], tmp_path, binary['hash'])
-                with open(tmp_path, 'rb'):
+                with open(tmp_path, 'rb') as f:
                     blob = f.read()
                 os.remove(tmp_path)
                 cs, _ = ChallengeSet.get_or_create(name=csid)
