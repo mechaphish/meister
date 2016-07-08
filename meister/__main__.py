@@ -13,9 +13,11 @@ import time
 import meister.settings
 
 from farnsworth.models import Round
+
 import meister.cgc.ticlient
 import meister.cgc.tierror
 from meister.creators.afl import AFLCreator
+from meister.creators.cbtester import CbTesterCreator
 from meister.creators.colorguard import ColorGuardCreator
 from meister.creators.driller import DrillerCreator
 from meister.creators.ids import IDSCreator
@@ -29,12 +31,12 @@ from meister.creators.povfuzzer1 import PovFuzzer1Creator
 from meister.creators.povfuzzer2 import PovFuzzer2Creator
 from meister.creators.tester import TesterCreator
 from meister.creators.wererabbit import WereRabbitCreator
-from meister.schedulers.priority import PriorityScheduler
-from meister.submitters.cb import CBSubmitter
-from meister.submitters.pov import POVSubmitter
 from meister.evaluators import Evaluator
 from meister.notifier import Notifier
 import meister.log
+from meister.schedulers.priority import PriorityScheduler
+from meister.submitters.cb import CBSubmitter
+from meister.submitters.pov import POVSubmitter
 
 LOG = meister.log.LOG.getChild('main')
 
@@ -70,6 +72,7 @@ def main(args=None):
                 # NetworkPollSanitizerCreator(cgc),
                 # NetworkPollCreator(cgc),
                 # TesterCreator(cgc),
+                CbTesterCreator(cgc),
                 WereRabbitCreator(cgc),
                 AFLCreator(cgc),
                 PatcherexCreator(cgc),
