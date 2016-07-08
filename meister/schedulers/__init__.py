@@ -11,6 +11,7 @@ import operator
 import os
 import time
 
+import pykube.exceptions
 import pykube.http
 import pykube.objects
 import requests.exceptions
@@ -263,9 +264,13 @@ class KubernetesScheduler(object):
             if error.response.status_code == 409:
                 LOG.warning("Job already scheduled %s", job.id)
             else:
-                LOG.error("HTTPError %s: %s", error.response.status_code,
+                LOG.error("requests.HTTPError %s: %s",
+                          error.response.status_code,
                           error.response.content)
-                #raise error
+        except pykube.exceptions.HTTPError as error:
+            LOG.error("pykube.HTTPError %s", error)
+            # TODO: We need to properly inspect the error
+            # raise error
 
     def terminate(self, name):
         """Terminate worker 'name'."""
