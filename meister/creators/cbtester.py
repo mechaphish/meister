@@ -1,28 +1,30 @@
+#!/usr/bin/env/python
 # -*- coding: utf-8 -*-
 
-import meister.creators
+from __future__ import absolute_import, unicode_literals
+
 from farnsworth.models import CBTesterJob
 from farnsworth.models import ValidPoll
 
+import meister.creators
 LOG = meister.creators.LOG.getChild('cb_tester')
 
 
 class CbTesterCreator(meister.creators.BaseCreator):
     @property
     def jobs(self):
-        # get only polls for which scores have not been computed.
-        for curr_valid_poll in ValidPoll.select().where(ValidPoll.has_scores_computed == False and
-                                                        ValidPoll.round == None):
-            target_cs = curr_valid_poll.cs
-            # create job for unpatched binary
-            LOG.debug("Yielding CBTesterJob for Poll ID :%s for unpatched binary", curr_valid_poll.id)
-            yield CBTesterJob.get_or_create(limit_cpu=-1, limit_memory=-1, payload={'poll_id': curr_valid_poll.id,
-                                                                                    'cs_id': target_cs.id})
-            all_patch_types = target_cs.cbns_by_patch_type()
-            # for each of patch types create Tester Jobs
-            for curr_patch_type in all_patch_types:
-                LOG.debug("Yielding CBTesterJob for Poll ID :%s for patched binary %s", curr_valid_poll.id,
-                          curr_patch_type)
-                yield CBTesterJob.get_or_create(limit_cpu=-1, limit_memory=-1, payload={'poll_id': curr_valid_poll.id,
-                                                                                        'cs_id': target_cs.id,
-                                                                                        'patch_type': curr_patch_type})
+        # Get only polls for which scores have not been computed.
+        for poll in ValidPoll.select().where((ValidPoll.has_scores_computed == False) &
+                                             (ValidPoll.round == None)):
+            target_cs = poll.cs
+            # Create job for unpatched binary
+            LOG.debug("Yielding CBTesterJob for poll %s (unpatched)", poll.id)
+            yield CBTesterJob.get_or_create(payload={'poll_id': poll.id,
+                                                     'cs_id': target_cs.id})
+
+            # For each of patch types create Tester Jobs
+            for patch_type in target_cs.cbns_by_patch_type():
+                LOG.debug("Yielding CBTesterJob for poll %s (patched %s)", poll.id, patch_type)
+                yield CBTesterJob.get_or_create(payload={'poll_id': poll.id,
+                                                         'cs_id': target_cs.id,
+                                                         'patch_type': patch_type})
