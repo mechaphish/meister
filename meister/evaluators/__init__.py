@@ -45,7 +45,7 @@ class Evaluator(object):
     def _get_consensus_evaluation(self):
         try:
             for team_id in self._cgc.getTeams():
-                team = Team.get_or_create(name=team_id)
+                team, _ = Team.get_or_create(name=team_id)
                 LOG.debug("Getting consensus evaluation for team %s", team_id)
                 cbs, ids = {}, {}
                 try:
