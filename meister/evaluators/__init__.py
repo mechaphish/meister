@@ -1,12 +1,18 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+from __future__ import absolute_import, unicode_literals
 
 import os
 import datetime
-from farnsworth.models import ChallengeBinaryNode, Feedback, Score, Evaluation, Team
+
+from farnsworth.models import (ChallengeSet, ChallengeBinaryNode, Feedback,
+                               Score, Evaluation, Team)
+
 from meister.cgc.tierror import TiError
 import meister.log
-
 LOG = meister.log.LOG.getChild('feedback')
+
 
 class Evaluator(object):
 
