@@ -59,7 +59,7 @@ def main(args=None):
 
             notifier.api_is_up()
             current_round = cgc.getRound()
-            round_ = Round.find_or_create(num=current_round)
+            round_, _ = Round.get_or_create(num=current_round)
 
             # Jobs scheduled continuously
             scheduler = PriorityScheduler(cgc=cgc, creators=[

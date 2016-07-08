@@ -56,14 +56,15 @@ class BaseCreator(object):
             try:
                 cbn = ChallengeBinaryNode.get(
                     (ChallengeBinaryNode.name == cbid) &
-                    (ChallengeBinaryNode.cs == ChallengeSet.find_or_create(name=csid))
+                    (ChallengeBinaryNode.cs == ChallengeSet.get_or_create(name=csid)[0])
                 )
             except ChallengeBinaryNode.DoesNotExist:
                 tmp_path = os.path.join("/tmp", "{}-{}-{}".format(round_, csid, cbid))
                 binary = self.cgc._get_dl(binary['uri'], tmp_path, binary['hash'])
-                blob = open(tmp_path, 'rb').read()
+                with open(tmp_path, 'rb') as f:
+                    blob = f.read()
                 os.remove(tmp_path)
-                cbn = ChallengeBinaryNode(name=cbid, cs_id=csid, blob=blob)
-                cbn.save()
+                cs, _ = ChallengeSet.get_or_create(name=csid)
+                cbn, _ = ChallengeBinaryNode.get_or_create(name=cbid, cs=cs, blob=blob)
             LOG.debug("Found cbid: %s", cbid)
             yield cbn
