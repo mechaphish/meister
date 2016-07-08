@@ -3,20 +3,17 @@
 
 """Module containing the BaseStrategy."""
 
-from __future__ import print_function, unicode_literals, absolute_import, \
-                       division
+from __future__ import absolute_import, division, unicode_literals
 
 import datetime
 import itertools
+import operator
 import os
 import time
-import operator
 
-# pylint: disable=import-error
 import pykube.http
 import pykube.objects
-# pylint: disable=import-error
-from requests.exceptions import HTTPError
+import requests.exceptions
 
 import meister.log
 import meister.kubernetes as kubernetes
@@ -58,12 +55,15 @@ class KubernetesScheduler(object):
         self._api = None
         self._node_capacities = None
         self._available_resources = None
-        self._resources_cache_timeout = datetime.timedelta(seconds=30)
+        self._resources_cache_timeout = datetime.timedelta(seconds=1)
         self._resources_timestamp = datetime.datetime(1970, 1, 1, 0, 0, 0)
+        self._overprovision = 2.
 
     def schedule(self, job):
         """Schedule the job with the specific resources."""
+        LOG.debug("Scheduling job for job id %s", job.id)
         job.save()
+        self.terminate(self._worker_name(job.id))
         if self._resources_available(job):
             self._resources_update(job)
             self._schedule_kube_pod(job)
@@ -77,13 +77,19 @@ class KubernetesScheduler(object):
             self._api = pykube.http.HTTPClient(kubernetes.from_env())
         return self._api
 
-    def _is_kubernetes_unavailable(self):
-        """return True if running without Kubernetes"""
+    @classmethod
+    def _worker_name(cls, job_id):
+        """Return the worker name for a specific job_id."""
+        return "worker-{}".format(job_id)
+
+    @classmethod
+    def _is_kubernetes_unavailable(cls):
+        """Check if running without Kubernetes"""
         return ('KUBERNETES_SERVICE_HOST' not in os.environ or
                 os.environ['KUBERNETES_SERVICE_HOST'] == "")
 
-    def _kube_pod_template(self, job, restart_policy='Always'):
-        name = "worker-{}".format(job.id)
+    def _kube_pod_template(self, job, restart_policy='OnFailure'):
+        name = self._worker_name(job.id)
         # FIXME
         cpu = str(job.limit_cpu) if job.limit_cpu is not None else 2
         memory = str(job.limit_memory) if job.limit_memory is not None else 4
@@ -174,8 +180,21 @@ class KubernetesScheduler(object):
         pods = []
         for pod in pykube.objects.Pod.objects(self.api):
             try:
-                if pod.ready:
+                if pod.pending or pod.ready:
+                    try:
+                        LOG.debug("Pod %s is taking up resources", pod.name)
+                    except requests.exceptions.HTTPError, e:
+                        LOG.error("Somehow failed at HTTP %s", e)
                     pods.append(pod)
+                elif pod.failed:
+                    LOG.debug("Pod %s failed", pod.name)
+                elif pod.unknown:
+                    LOG.warning("Pod %s in unknown state", pod.name)
+                elif pod.succeeded:
+                    LOG.debug("Pod %s succeeded", pod.name)
+                    pod.delete()
+                else:
+                    LOG.debug("Pod %s is in a weird state", pod.name)
             except KeyError, e:
                 LOG.error("Hit a KeyError %s", e)
 
@@ -190,6 +209,11 @@ class KubernetesScheduler(object):
             self._available_resources['pods'] -= 1
         self._resources_timestamp = datetime.datetime.now()
 
+        LOG.debug("Resources available: %s cores, %s GiB, %s pods",
+                  self._available_resources['cpu'],
+                  self._available_resources['memory'] // (1024**3),
+                  self._available_resources['pods'])
+
         return self._available_resources
 
     @property
@@ -200,6 +224,14 @@ class KubernetesScheduler(object):
             resources['cpu'] += capacity['cpu']
             resources['memory'] += capacity['memory']
             resources['pods'] += capacity['pods']
+
+        resources['cpu'] *= self._overprovision
+        resources['memory'] *= self._overprovision
+        resources['pods'] *= self._overprovision
+
+        LOG.debug("Total cluster capacity: %s cores, %s GiB, %s pods",
+                  resources['cpu'], resources['memory'] // (1024**3),
+                  resources['pods'])
         return resources
 
     @property
@@ -223,25 +255,28 @@ class KubernetesScheduler(object):
     def _schedule_kube_pod(self, job):
         """Internal method to schedule a job on Kubernetes."""
         assert isinstance(self.api, pykube.http.HTTPClient)
-        config = self._kube_pod_template(job, 'Never')
+        config = self._kube_pod_template(job)
 
         try:
             pykube.objects.Pod(self.api, config).create()
-        except HTTPError as error:
+        except requests.exceptions.HTTPError as error:
             if error.response.status_code == 409:
                 LOG.warning("Job already scheduled %s", job.id)
             else:
-                raise error
+                LOG.error("HTTPError %s: %s", error.response.status_code,
+                          error.response.content)
+                #raise error
 
     def terminate(self, name):
-        """Terminate worker 'name' of type 'worker'."""
+        """Terminate worker 'name'."""
         assert isinstance(self.api, pykube.http.HTTPClient)
         # TODO: job might have shutdown gracefully in-between being identified
-        # and being asked to get terminated.
+        # and being asked to get terminated; do we need to check if it exists?
         config = {'metadata': {'name': name},
-                    'kind': 'Pod'}
-        LOG.debug("Killing pod %s", config['metadata']['name'])
-        pykube.objects.Pod(self.api, config).delete()
+                  'kind': 'Pod'}
+        if pykube.objects.Pod(self.api, config).exists():
+            LOG.debug("Terminating pod %s", config['metadata']['name'])
+            pykube.objects.Pod(self.api, config).delete()
 
 
 class BaseScheduler(KubernetesScheduler):
@@ -259,15 +294,12 @@ class BaseScheduler(KubernetesScheduler):
         :argument cgc: a CGCAPI object, so that we can talk to the CGC API.
         :keyword sleepytime: the amount to sleep between strategy runs.
         """
-        cgc = kwargs.pop('cgc')
-        sleepytime = kwargs.pop('sleepytime', 3)
-        creators = kwargs.pop('creators', [])
+        self.cgc = kwargs.pop('cgc')
+        self.sleepytime = kwargs.pop('sleepytime', 3)
+        self.creators = kwargs.pop('creators', [])
         super(BaseScheduler, self).__init__(**kwargs)
 
-        self.cgc = cgc
-        self.sleepytime = sleepytime
         LOG.debug("Scheduler sleepytime: %d", self.sleepytime)
-        self.creators = creators if creators is not None else []
         LOG.debug("Job creators: %s", ", ".join(c.__class__.__name__
                                                 for c in self.creators))
 
@@ -286,7 +318,12 @@ class BaseScheduler(KubernetesScheduler):
         """Return all jobs that all creators want to run."""
         return itertools.chain.from_iterable(c.jobs for c in self.creators)
 
-    def dry_run(self):
-        """Run without actually scheduling"""
-        for job in self.jobs:
-            job.save()
+    def run(self):
+        """Run the scheduler."""
+        if self._is_kubernetes_unavailable():
+            # Run without actually scheduling
+            for job in self.jobs:
+                job.save()
+        else:
+            # Run internal scheduler method
+            self._run()
