@@ -71,9 +71,10 @@ class Evaluator(object):
             binary = self._cgc._get_dl(cb_info['uri'], tmp_path, cb_info['hash'])
             blob = open(tmp_path, 'rb').read()
             os.remove(tmp_path)
+            cs = ChallengeSet.get_or_create(name=cb_info['csid'])
             ChallengeBinaryNode.create(
                 name=name,
-                cs_id=cb_info['csid'],
+                cs=cs,
                 submitted_at=datetime.datetime.now(),
                 blob=blob
             )
