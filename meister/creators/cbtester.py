@@ -14,8 +14,7 @@ class CbTesterCreator(meister.creators.BaseCreator):
     @property
     def jobs(self):
         # Get only polls for which scores have not been computed.
-        for poll in ValidPoll.select().where((ValidPoll.has_scores_computed == False) &
-                                             (ValidPoll.round == None)):
+        for poll in ValidPoll.select().where(ValidPoll.has_scores_computed == False):
             target_cs = poll.cs
             # Create job for unpatched binary
             LOG.debug("Yielding CBTesterJob for poll %s (unpatched)", poll.id)
@@ -28,3 +27,6 @@ class CbTesterCreator(meister.creators.BaseCreator):
                 yield CBTesterJob.get_or_create(payload={'poll_id': poll.id,
                                                          'cs_id': target_cs.id,
                                                          'patch_type': patch_type})
+            # Set scores computed flag and save
+            poll.has_scores_computed = True
+            poll.save()
