@@ -66,8 +66,8 @@ class KubernetesScheduler(object):
         job.save()
         self.terminate(self._worker_name(job.id))
         if self._resources_available(job):
-            self._resources_update(job)
             self._schedule_kube_pod(job)
+            self._resources_update(job)
             return True
         return False
 
