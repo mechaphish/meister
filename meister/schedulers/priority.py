@@ -76,7 +76,11 @@ class PriorityScheduler(meister.schedulers.BaseScheduler):
 
         # Collect all current jobs
         job_ids_to_kill, job_ids_to_ignore = [], []
-        for pod in pykube.objects.Pod.objects(self.api):
+        pending_pods = pykube.objects.Pod.objects(self.api).filter(field_selector={"status.phase": "Pending"})
+        running_pods = pykube.objects.Pod.objects(self.api).filter(field_selector={"status.phase": "Running"})
+        # Delay in API calls may result in change of number of pending/running pods
+        pods = [p for p in pending_pods] + [p for p in running_pods]
+        for pod in pods:
             if 'job_id' in pod.obj['metadata']['labels']:
                 job_id = int(pod.obj['metadata']['labels']['job_id'])
                 if job_id in job_ids_to_run:
