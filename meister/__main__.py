@@ -69,10 +69,6 @@ def main(args=None):
                 PovFuzzer1Creator(cgc),
                 PovFuzzer2Creator(cgc),
                 ColorGuardCreator(cgc),
-                # PollerCreator(cgc),
-                # NetworkPollSanitizerCreator(cgc),
-                # NetworkPollCreator(cgc),
-                # TesterCreator(cgc),
                 CbTesterCreator(cgc),
                 WereRabbitCreator(cgc),
                 AFLCreator(cgc),
@@ -80,8 +76,14 @@ def main(args=None):
                 PatcherexCreator(cgc),
                 IDSCreator(cgc),
                 FunctionIdentifierCreator(cgc),
+                # VM jobs
+                PollerCreator(cgc),
+                NetworkPollSanitizerCreator(cgc),
+                NetworkPollCreator(cgc),
+                TesterCreator(cgc),
             ])
             scheduler.run()
+
 
             # Get feedbacks
             Evaluator(cgc, round_).run()

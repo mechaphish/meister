@@ -14,5 +14,6 @@ class PollerCreator(meister.creators.BaseCreator):
         for curr_test in Test.select().where(Test.poll_created == False):
             job, _ = PollerJob.get_or_create(cbn=curr_test.cbn,
                                              payload={'test_id': curr_test.id})
-            LOG.debug("Yielding PollerJob for %s ", curr_test.id)
-            yield job
+            LOG.debug("Creating PollerJob for %s ", curr_test.id)
+            # yield job
+        return iter(())

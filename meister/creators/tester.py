@@ -14,5 +14,6 @@ class TesterCreator(meister.creators.BaseCreator):
                                                  payload={'test_id': test.id},
                                                  limit_cpu=8,
                                                  limit_memory=1)
-                LOG.debug("Yielding TesterJob for %s with %s", cbn.id, test.id)
-                yield job
+                LOG.debug("Creating TesterJob for %s with %s", cbn.id, test.id)
+                # yield job
+        return iter(())
