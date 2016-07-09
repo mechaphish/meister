@@ -77,15 +77,18 @@ class PriorityScheduler(meister.schedulers.BaseScheduler):
         # Collect all current jobs
         job_ids_to_kill, job_ids_to_ignore = [], []
         for pod in pykube.objects.Pod.objects(self.api):
-            if pod.ready:
-                if 'job_id' in pod.obj['metadata']['labels']:
-                    job_id = int(pod.obj['metadata']['labels']['job_id'])
-                    if job_id in job_ids_to_run:
-                        job_ids_to_ignore.append(job_id)
-                    else:
+            if 'job_id' in pod.obj['metadata']['labels']:
+                job_id = int(pod.obj['metadata']['labels']['job_id'])
+                if job_id in job_ids_to_run:
+                    job_ids_to_ignore.append(job_id)
+                else:
+                    # We do not kill jobs that have been completed to keep the logs around. We do
+                    # want to kill jobs that are still in the processing stage though.
+                    if pod.ready and (pod.running or pod.pending):
                         job_ids_to_kill.append(job_id)
-            else:
-                LOG.warning("Encountered a Pod that is not ready: %s", pod.obj['metadata']['name'])
+                    else:
+                        LOG.warning("Encountered a Pod that is not ready (running or completed): %s",
+                                    pod.obj['metadata']['name'])
 
         if job_ids_to_kill:
             assert isinstance(job_ids_to_kill[0], (int, long))
