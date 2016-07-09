@@ -84,7 +84,8 @@ class PriorityScheduler(meister.schedulers.BaseScheduler):
                 else:
                     # We do not kill jobs that have been completed to keep the logs around. We do
                     # want to kill jobs that are still in the processing stage though.
-                    if pod.ready and (pod.running or pod.pending):
+                    # See states docs http://kubernetes.io/docs/user-guide/pod-states/
+                    if pod.running or pod.pending:
                         job_ids_to_kill.append(job_id)
                     else:
                         LOG.warning("Encountered a Pod that is not ready (running or completed): %s",

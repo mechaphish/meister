@@ -181,7 +181,7 @@ class KubernetesScheduler(object):
         pods = []
         for pod in pykube.objects.Pod.objects(self.api):
             try:
-                if pod.pending or pod.ready:
+                if pod.pending or pod.running:
                     try:
                         LOG.debug("Pod %s is taking up resources", pod.name)
                     except requests.exceptions.HTTPError, e:
