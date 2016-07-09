@@ -193,7 +193,11 @@ class KubernetesScheduler(object):
                     LOG.warning("Pod %s in unknown state", pod.name)
                 elif pod.succeeded:
                     LOG.debug("Pod %s succeeded", pod.name)
-                    pod.delete()
+                    # TODO: We might want to reactivate this for the final event
+                    # for performance reason (we do not need to loop over them
+                    # the next time, this might become critical for scheduler
+                    # performance if we have had a lot of jobs).
+                    # pod.delete()
                 else:
                     LOG.debug("Pod %s is in a weird state", pod.name)
             except KeyError, e:
