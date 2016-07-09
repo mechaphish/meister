@@ -76,10 +76,10 @@ def main(args=None):
                 PatcherexCreator(cgc),
                 IDSCreator(cgc),
                 FunctionIdentifierCreator(cgc),
+                NetworkPollCreator(cgc),
                 # VM jobs
                 PollerCreator(cgc),
                 NetworkPollSanitizerCreator(cgc),
-                NetworkPollCreator(cgc),
                 TesterCreator(cgc),
             ])
             scheduler.run()
