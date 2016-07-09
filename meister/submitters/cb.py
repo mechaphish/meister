@@ -37,10 +37,10 @@ class CBSubmitter(object):
                                 LOG.info("Submitting patch %s for %s on round %s",
                                          patch.name, cbn.name, current_round)
                                 try:
-                                    no_submissions = False
                                     self._cgc.uploadRCB(str(cbn.cs.name),
                                                         (str(cbn.name), str(patch.blob)))
                                     patch.submit()
+                                    no_submissions = False
                                     self.submitted_bins[cs_key] = patch_val
                                     # FIXME: we submit only one patch type at once
                                     break
