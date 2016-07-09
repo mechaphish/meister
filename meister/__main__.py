@@ -25,8 +25,8 @@ from meister.creators.ids import IDSCreator
 from meister.creators.function_identifier import FunctionIdentifierCreator
 from meister.creators.patcherex import PatcherexCreator
 from meister.creators.poller import PollerCreator
-from meister.creators.pollsanitizer import NetworkPollSanitizerCreator
-from meister.creators.networkpoll import NetworkPollCreator
+from meister.creators.network_poll import NetworkPollCreator
+from meister.creators.network_poll_sanitizer import NetworkPollSanitizerCreator
 from meister.creators.rex import RexCreator
 from meister.creators.povfuzzer1 import PovFuzzer1Creator
 from meister.creators.povfuzzer2 import PovFuzzer2Creator
