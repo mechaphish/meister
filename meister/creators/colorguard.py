@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import meister.creators
-from farnsworth.models import ColorGuardJob, TracerCache
+from farnsworth.models import ColorGuardJob
 
 LOG = meister.creators.LOG.getChild('colorguard')
 
