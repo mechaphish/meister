@@ -129,7 +129,19 @@ class KubernetesScheduler(object):
                              'value': os.environ['POSTGRES_DATABASE_PASSWORD']},
                             {'name': "POSTGRES_DATABASE_NAME",
                              'value': os.environ['POSTGRES_DATABASE_NAME']},
-                        ])
+                        ]),
+                        'volumeMounts': [
+                            {
+                                'name': 'devshm',
+                                'mountPath': '/dev/shm',
+                            }
+                        ]
+                    }
+                ],
+                'volumes': [
+                    {
+                        'name': 'devshm',
+                        'emptyDir': { 'medium': 'Memory' }
                     }
                 ]
             }
