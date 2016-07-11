@@ -10,8 +10,8 @@ class ColorGuardCreator(meister.creators.BaseCreator):
     def jobs(self):
         for cbn in self.cbns():
 
-            if cbn.tracer_cache.exists():
-                LOG.debug("Tracer cache found for %s, scheduling ColorGuard", cbn.name)
+            if cbn.completed_caching or cbn.tracer_cache.exists():
+                LOG.debug("Caching complete for %s, scheduling ColorGuard", cbn.name)
                 for test in cbn.tests:
                     LOG.debug("ColorGuardJob for %s, test %s being created", cbn.name, test.id)
                     job, _ = ColorGuardJob.get_or_create(cbn=cbn,
@@ -26,5 +26,6 @@ class ColorGuardCreator(meister.creators.BaseCreator):
 
                     LOG.debug("Yielding ColorGuardJob for %s with %s", cbn.id, test.id)
                     yield job
+
             else:
-                LOG.debug("No tracer caches for %s, refusing to schedule ColorGuard", cbn.name)
+                LOG.debug("Caching incomplete for %s, refusing to schedule ColorGuard", cbn.name)
