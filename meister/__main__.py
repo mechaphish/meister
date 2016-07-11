@@ -64,23 +64,23 @@ def main(args=None):
 
             # Jobs scheduled continuously
             scheduler = PriorityScheduler(cgc=cgc, creators=[
-                DrillerCreator(cgc),
-                RexCreator(cgc),
-                PovFuzzer1Creator(cgc),
-                PovFuzzer2Creator(cgc),
-                ColorGuardCreator(cgc),
-                CbTesterCreator(cgc),
-                WereRabbitCreator(cgc),
-                AFLCreator(cgc),
-                CacheCreator(cgc),
+                # DrillerCreator(cgc),
+                # RexCreator(cgc),
+                # PovFuzzer1Creator(cgc),
+                # PovFuzzer2Creator(cgc),
+                # ColorGuardCreator(cgc),
+                # CbTesterCreator(cgc),
+                # WereRabbitCreator(cgc),
+                # AFLCreator(cgc),
+                # CacheCreator(cgc),
                 PatcherexCreator(cgc),
-                IDSCreator(cgc),
-                FunctionIdentifierCreator(cgc),
+                # IDSCreator(cgc),
+                # FunctionIdentifierCreator(cgc),
                 NetworkPollCreator(cgc),
-                # VM jobs
-                PollerCreator(cgc),
+                # # VM jobs
+                # PollerCreator(cgc),
                 NetworkPollSanitizerCreator(cgc),
-                TesterCreator(cgc),
+                # TesterCreator(cgc),
             ])
             scheduler.run()
 
