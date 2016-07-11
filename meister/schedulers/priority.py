@@ -72,7 +72,8 @@ class PriorityScheduler(meister.schedulers.BaseScheduler):
         job_ids_to_run = set(job.id for job in jobs_to_run)
         LOG.debug("Jobs to run: %s", job_ids_to_run)
 
-        assert isinstance(list(job_ids_to_run)[0], (int, long))
+        if job_ids_to_run:
+            assert isinstance(list(job_ids_to_run)[0], (int, long))
 
         # Collect all current jobs
         job_ids_to_kill, job_ids_to_ignore = [], []
