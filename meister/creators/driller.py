@@ -22,7 +22,7 @@ class DrillerCreator(meister.creators.BaseCreator):
                     job, _ = DrillerJob.get_or_create(cbn=cbn,
                                                       limit_cpu=1,
                                                       limit_memory=10,
-                                                      limit_time=120,
+                                                      limit_time=15 * 60,
                                                       payload={'test_id': test.id})
                     LOG.debug("Yielding DrillerJob for %s with %s", cbn.id, test.id)
 
