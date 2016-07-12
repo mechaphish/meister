@@ -15,8 +15,8 @@ class PollCreatorCreator(meister.creators.BaseCreator):
     def jobs(self):
         # get only those tests, for which polls need to be created.
         for curr_test in Test.select().where(Test.poll_created == False):
-            job, _ = PollCreatorJob.get_or_create(cbn=curr_test.cbn,
-                                           payload={'test_id': curr_test.id})
+            job, _ = PollCreatorJob.get_or_create(cs=curr_test.cbn.cs, cbn=curr_test.cbn,
+                                                  payload={'test_id': curr_test.id})
             LOG.debug("Creating PollJob for %s ", curr_test.id)
             # yield job
         return iter(())
