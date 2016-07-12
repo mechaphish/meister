@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from farnsworth.models import ChallengeBinaryNode, Team
+from farnsworth.models import ChallengeSet, Team
 from meister.cgc.tierror import TiError
 import meister.log
 
@@ -13,15 +13,16 @@ class POVSubmitter(object):
 
     def run(self):
         for team in Team.opponents():
-            for cbn in ChallengeBinaryNode.roots():
-                for exploit in cbn.unsubmitted_exploits:
-                    LOG.info("Submitting POV for %s to team %s", cbn.name, team.name)
+            for cs in ChallengeSet.fielded_in_round():
+                for exploit in cs.unsubmitted_exploits:
+                    LOG.info("Submitting POV for %s to team %s", cs.name, team.name)
+                    throws = 10
                     try:
-                        result = self._cgc.uploadPOV(str(cbn.cs.name),
+                        result = self._cgc.uploadPOV(str(cs.name),
                                                      str(team.name),
-                                                     "10",
+                                                     str(throws),
                                                      str(exploit.blob))
-                        exploit.submitted_to(teams=team.name)
+                        exploit.submit_to(teams=team.name, throws=throws)
                         LOG.debug("Submitted POV! Response: %s", result)
                         break
                     except TiError as e:

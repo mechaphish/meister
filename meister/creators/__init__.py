@@ -51,13 +51,11 @@ class BaseCreator(object):
         for binary in self.cgc.getBinaries(round_):
             cbid = binary['cbid']
             csid = binary['csid']
+            sha256 = binary['hash']
             # Note: this has to run single-threaded, otherwise we might add the
             # same binary twice to the database.
             try:
-                cbn = ChallengeBinaryNode.get(
-                    (ChallengeBinaryNode.name == cbid) &
-                    (ChallengeBinaryNode.cs == ChallengeSet.get_or_create(name=csid)[0])
-                )
+                cbn = ChallengeBinaryNode.get(ChallengeBinaryNode.sha256 == sha256)
             except ChallengeBinaryNode.DoesNotExist:
                 tmp_path = os.path.join("/tmp", "{}-{}-{}".format(round_, csid, cbid))
                 binary = self.cgc._get_dl(binary['uri'], tmp_path, binary['hash'])
@@ -65,6 +63,6 @@ class BaseCreator(object):
                     blob = f.read()
                 os.remove(tmp_path)
                 cs, _ = ChallengeSet.get_or_create(name=csid)
-                cbn, _ = ChallengeBinaryNode.get_or_create(name=cbid, cs=cs, blob=blob)
+                cbn = ChallengeBinaryNode.create(name=cbid, cs=cs, blob=blob, sha256=sha256)
             LOG.debug("Found cbid: %s", cbid)
             yield cbn
