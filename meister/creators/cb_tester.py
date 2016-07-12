@@ -1,4 +1,4 @@
-#!/usr/bin/env/python
+#!/usr/bin/env/python2
 # -*- coding: utf-8 -*-
 
 from __future__ import absolute_import, unicode_literals
@@ -10,7 +10,7 @@ import meister.creators
 LOG = meister.creators.LOG.getChild('cb_tester')
 
 
-class CbTesterCreator(meister.creators.BaseCreator):
+class CBTesterCreator(meister.creators.BaseCreator):
     @property
     def jobs(self):
         # Get only polls for which scores have not been computed.

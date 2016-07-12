@@ -1,8 +1,11 @@
+#!/usr/bin/env python2
 # -*- coding: utf-8 -*-
 
-import meister.creators
+from __future__ import absolute_import
+
 from farnsworth.models import ChallengeBinaryNode, TesterJob
 
+import meister.creators
 LOG = meister.creators.LOG.getChild('rex')
 
 class TesterCreator(meister.creators.BaseCreator):
