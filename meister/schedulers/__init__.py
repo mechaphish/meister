@@ -120,6 +120,7 @@ class KubernetesScheduler(object):
                                 'memory': "{}Gi".format(memory)
                             }
                         },
+                        'command': ["bash", "-c", "source /etc/bash_completion.d/virtualenvwrapper && workon angr && worker"],
                         'env': filter(None, [
                             {'name': "JOB_ID", 'value': str(job.id)},
                             postgres_use_slaves,

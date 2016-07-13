@@ -6,8 +6,15 @@ from __future__ import absolute_import, unicode_literals
 import os
 import datetime
 
-from farnsworth.models import (ChallengeSet, ChallengeBinaryNode, Feedback,
-                               Score, Evaluation, Team)
+from farnsworth.models import (
+    ChallengeBinaryNode,
+    ChallengeBinaryNodeFielding,
+    ChallengeSet,
+    Evaluation,
+    Feedback,
+    Score,
+    Team
+)
 
 from meister.cgc.tierror import TiError
 import meister.log
@@ -62,6 +69,8 @@ class Evaluator(object):
                     LOG.error("Consensus evaluation error: %s", e.message)
                 try:
                     ids = self._cgc.getEvaluation('ids', self._round.num, team.name)
+                    for entry in ids:
+                        self._store_ids(entry, team)
                 except TiError as e:
                     LOG.error("Consensus evaluation error: %s", e.message)
                 Evaluation.update_or_create(self._round, team, cbs=cbs, ids=ids)
@@ -69,22 +78,27 @@ class Evaluator(object):
             LOG.error("Unable to get teams: %s", e.message)
 
     def _store_cb(self, cb_info, team):
-        name = "{}-{}-team-{}".format(self._round.num, cb_info['cbid'], team.name)
         try:
-            ChallengeBinaryNode.get(ChallengeBinaryNode.name == name)
+            cbn = ChallengeBinaryNode.get(ChallengeBinaryNode.sha256 == cb_info['hash'])
         except ChallengeBinaryNode.DoesNotExist:
-            tmp_path = os.path.join("/tmp", "{}-{}-{}".format(self._round.num, cb_info['csid'], cb_info['cbid']))
+            tmp_path = os.path.join("/tmp", "{}-{}".format(cb_info['cbid'], cb_info['hash']))
             binary = self._cgc._get_dl(cb_info['uri'], tmp_path, cb_info['hash'])
             with open(tmp_path, 'rb') as fp:
                 blob = fp.read()
             os.remove(tmp_path)
             cs, _ = ChallengeSet.get_or_create(name=cb_info['csid'])
-            ChallengeBinaryNode.create(
-                name=name,
+            cbn = ChallengeBinaryNode.create(
+                name=cb_info['cbid'],
                 cs=cs,
-                submitted_at=datetime.datetime.now(),
-                blob=blob
+                blob=blob,
+                sha256=cb_info['hash']
             )
+        ChallengeBinaryNodeFielding.get_or_create(cbn=cbn, team=team,
+                                                  available_round=self._round)
+
+    def _store_ids(self, ids_info, team):
+        # FIXME
+        pass
 
     def run(self):
         self._get_feedbacks()
