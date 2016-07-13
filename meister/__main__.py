@@ -30,6 +30,7 @@ from meister.creators.network_poll_sanitizer import NetworkPollSanitizerCreator
 from meister.creators.rex import RexCreator
 from meister.creators.povfuzzer1 import PovFuzzer1Creator
 from meister.creators.povfuzzer2 import PovFuzzer2Creator
+from meister.creators.rop_cache import RopCacheCreator
 from meister.creators.tester import TesterCreator
 from meister.creators.were_rabbit import WereRabbitCreator
 from meister.evaluators import Evaluator
@@ -73,6 +74,7 @@ def main(args=None):
                 WereRabbitCreator(cgc),
                 AFLCreator(cgc),
                 CacheCreator(cgc),
+                RopCacheCreator(cgc),
                 PatcherexCreator(cgc),
                 IDSCreator(cgc),
                 FunctionIdentifierCreator(cgc),
