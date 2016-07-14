@@ -23,9 +23,11 @@ class ColorGuardCreator(meister.creators.BaseCreator):
                                                          limit_memory=6)
 
                     job.priority = 20
-                    # if the testcase came from Rex, bump up the priority by four
+
+                    # testcases found by Rex have the potential to be incredibly powerful POVs
+                    # the priority should be the max
                     if test.job.worker == "rex":
-                        job.priority = 80
+                        job.priority = 100
 
                     LOG.debug("Yielding ColorGuardJob for %s with %s", cbn.id, test.id)
                     yield job
