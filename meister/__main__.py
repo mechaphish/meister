@@ -70,7 +70,7 @@ def main(args=None):
                 PovFuzzer1Creator(cgc),
                 PovFuzzer2Creator(cgc),
                 ColorGuardCreator(cgc),
-                CbTesterCreator(cgc),
+                CBTesterCreator(cgc),
                 WereRabbitCreator(cgc),
                 AFLCreator(cgc),
                 CacheCreator(cgc),
