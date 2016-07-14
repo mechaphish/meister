@@ -1,17 +1,16 @@
-#!/usr/bin/env python
+#!/usr/bin/env python2
 # -*- coding: utf-8 -*-
 
-"""Job creator."""
-
-from __future__ import print_function, unicode_literals, absolute_import, \
-                       division
+from __future__ import absolute_import, unicode_literals
 
 import os
 
 from farnsworth.models import ChallengeBinaryNode, ChallengeSet
-import meister.log
 
+import meister.log
 LOG = meister.log.LOG.getChild('creators')
+
+"""Job creator."""
 
 
 class BaseCreator(object):
@@ -35,6 +34,7 @@ class BaseCreator(object):
         :keyword round_: The round number for which the binaries should be
                          returned (default: current round).
         """
+        # FIXME: Why are we not doing return set(csids)?
         csids = [cbn.cs.id for cbn in self.cbns(round_)]
         return ChallengeSet.select().where(ChallengeSet.id << csids)
 

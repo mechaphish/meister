@@ -4,8 +4,8 @@
 from __future__ import absolute_import, unicode_literals
 
 from farnsworth.models import RexJob
-import meister.creators
 
+import meister.creators
 LOG = meister.creators.LOG.getChild('rex')
 
 

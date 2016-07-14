@@ -94,6 +94,19 @@ class KubernetesScheduler(object):
         # FIXME
         cpu = str(job.limit_cpu) if job.limit_cpu is not None else 2
         memory = str(job.limit_memory) if job.limit_memory is not None else 4
+        volumes = [{'name': 'devshm', 'emptyDir': {'medium': 'Memory'}}]
+        volume_mounts = [{'name': 'devshm', 'mountPath': '/dev/shm'}]
+        security_context = {}
+
+        if job.kvm_access:
+            volumes.append({'name': 'devkvm', 'hostPath': {'path': '/dev/kvm'}})
+            volume_mounts.append({'name': 'devkvm', 'mountPath': '/dev/kvm'})
+            security_context['privileged'] = True
+
+        if job.data_access:
+            volumes.append({'name': 'data', 'hostPath': {'path': '/data'}})
+            volume_mounts.append({'name': 'data', 'mountPath': '/data'})
+
         if os.environ.get('POSTGRES_USE_SLAVES') is not None:
             postgres_use_slaves = {'name': "POSTGRES_USE_SLAVES", 'value': "true"}
         else:
@@ -130,20 +143,11 @@ class KubernetesScheduler(object):
                             {'name': "POSTGRES_DATABASE_NAME",
                              'value': os.environ['POSTGRES_DATABASE_NAME']},
                         ]),
-                        'volumeMounts': [
-                            {
-                                'name': 'devshm',
-                                'mountPath': '/dev/shm',
-                            }
-                        ]
+                        'volumeMounts': volume_mounts,
+                        'securityContext': security_context
                     }
                 ],
-                'volumes': [
-                    {
-                        'name': 'devshm',
-                        'emptyDir': { 'medium': 'Memory' }
-                    }
-                ]
+                'volumes': volumes
             }
         }
         return config

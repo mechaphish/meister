@@ -3,10 +3,10 @@
 
 from __future__ import absolute_import
 
-import meister.creators
 from farnsworth.models import PovFuzzer2Job
-from .rex import Vulnerability
 
+import meister.creators
+from .rex import Vulnerability
 LOG = meister.creators.LOG.getChild('povfuzzer2job')
 
 class PovFuzzer2Creator(meister.creators.BaseCreator):
