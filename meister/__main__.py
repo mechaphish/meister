@@ -18,7 +18,7 @@ import meister.cgc.ticlient
 import meister.cgc.tierror
 from meister.creators.afl import AFLCreator
 from meister.creators.cache import CacheCreator
-from meister.creators.cbtester import CBTesterCreator
+from meister.creators.cb_tester import CBTesterCreator
 from meister.creators.colorguard import ColorGuardCreator
 from meister.creators.driller import DrillerCreator
 from meister.creators.ids import IDSCreator
