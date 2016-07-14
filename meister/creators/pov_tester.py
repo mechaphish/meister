@@ -20,9 +20,8 @@ class PovTesterCreator(meister.creators.BaseCreator):
     @property
     def jobs(self):
         for curr_team in Team.opponents():
-            # TODO: only currently active CS
-            # Is this correct?
-            for curr_cs in ChallengeSetFielding.all():
+            # for each, currently active CS
+            for curr_cs in self.challenge_sets():
                 # Get Latest submitted CS
                 curr_cs_fieldings = PovTestHelper.get_latest_cs_fielding(curr_team, curr_cs)
                 # if there is any CS fielded?
