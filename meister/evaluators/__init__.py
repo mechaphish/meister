@@ -8,8 +8,8 @@ import datetime
 
 from farnsworth.models import (
     ChallengeBinaryNode,
-    ChallengeBinaryNodeFielding,
     ChallengeSet,
+    ChallengeSetFielding,
     Evaluation,
     Feedback,
     Score,
@@ -78,6 +78,9 @@ class Evaluator(object):
             LOG.error("Unable to get teams: %s", e.message)
 
     def _store_cb(self, cb_info, team):
+        """
+        FIXME: refactor this shit
+        """
         try:
             cbn = ChallengeBinaryNode.get(ChallengeBinaryNode.sha256 == cb_info['hash'])
         except ChallengeBinaryNode.DoesNotExist:
@@ -93,8 +96,13 @@ class Evaluator(object):
                 blob=blob,
                 sha256=cb_info['hash']
             )
-        ChallengeBinaryNodeFielding.get_or_create(cbn=cbn, team=team,
-                                                  available_round=self._round)
+        try:
+            csf = ChallengeSetFielding.get((ChallengeSetFielding.cs == cbn.cs) & \
+                                           (ChallengeSetFielding.team == team) & \
+                                           (ChallengeSetFielding.available_round == self._round))
+            csf.add_cbns_if_missing(cbn)
+        except ChallengeSetFielding.DoesNotExist:
+            csf = ChallengeSetFielding.create(cs=cbn.cs, team=team, cbns=[cbn], available_round=self._round)
 
     def _store_ids(self, ids_info, team):
         # FIXME
