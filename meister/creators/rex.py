@@ -3,7 +3,7 @@
 
 from __future__ import absolute_import, unicode_literals
 
-from farnsworth.models import RexJob
+from farnsworth.models import RexJob, Exploit, Crash
 
 import meister.creators
 LOG = meister.creators.LOG.getChild('rex')
@@ -23,7 +23,6 @@ class Vulnerability(object):
     NULL_DEREFERENCE = "null_dereference"
     UNKNOWN = "unknown"
 
-
 PRIORITY_MAP = {Vulnerability.IP_OVERWRITE: 100,
                 Vulnerability.PARTIAL_IP_OVERWRITE: 80,
                 Vulnerability.ARBITRARY_READ: 75,
@@ -35,30 +34,62 @@ PRIORITY_MAP = {Vulnerability.IP_OVERWRITE: 100,
                 Vulnerability.UNCONTROLLED_IP_OVERWRITE: 0,
                 Vulnerability.NULL_DEREFERENCE: 0}
 
+# the base Rex priority
+BASE_PRIORITY = 20
+
 
 class RexCreator(meister.creators.BaseCreator):
+
+    @staticmethod
+    def _exploitable_crashes(crashes):
+        # ignore crashes of kind null_dereference, uncontrolled_ip_overwrite,
+        # uncontrolled_write and unknown
+        non_exploitable = [Vulnerability.NULL_DEREFERENCE,
+                          Vulnerability.UNCONTROLLED_IP_OVERWRITE,
+                          Vulnerability.UNCONTROLLED_WRITE,
+                          Vulnerability.UNKNOWN]
+
+        return crashes.where(~(Crash.kind << non_exploitable) & (Crash.triaged != True))
+
+    @staticmethod
+    def _normalize_sort(base, ordered_crashes):
+
+        top = max(ordered_crashes)[0]
+        for p, c in ordered_crashes:
+            yield max(base, 100 - p), c
+
     @property
     def jobs(self):
         for cbn in self.cbns():
-            for crash in cbn.crashes:
-                # ignore crashes of kind null_dereference, uncontrolled_ip_overwrite,
-                # uncontrolled_write and unknown
-                if crash.kind in [Vulnerability.NULL_DEREFERENCE,
-                                  Vulnerability.UNCONTROLLED_IP_OVERWRITE,
-                                  Vulnerability.UNCONTROLLED_WRITE,
-                                  Vulnerability.UNKNOWN]:
-                    continue
+            # does this fetch blobs? can we do the filter with the query?
+            crashes = self._exploitable_crashes(cbn.crashes)
 
-                # TODO: in rare cases Rex needs more memory, can we try to handle cases where Rex
-                # needs upto 40G?
-                job, _ = RexJob.get_or_create(cbn=cbn, payload={'crash_id': crash.id},
-                                              limit_cpu=1, limit_memory=10)
+            categories = dict()
+            for vulnerability in PRIORITY_MAP.keys():
+                ordered_crashes = crashes.where(Crash.kind == vulnerability).order_by(Crash.created_at.desc())
+                cnt = ordered_crashes.count()
+                if cnt > 0:
+                    categories[vulnerability] = zip(range(cnt), (ordered_crashes))
 
-                # determine priority
-                if crash.kind in PRIORITY_MAP:
-                    job.priority = PRIORITY_MAP[crash.kind]
+            # normalize by ids
+            for kind in categories:
+                for priority, crash in self._normalize_sort(BASE_PRIORITY, categories[kind]):
+                    # TODO: in rare cases Rex needs more memory, can we try to handle cases where Rex
+                    # needs upto 40G?
+                    job, _ = RexJob.get_or_create(cbn=cbn, payload={'crash_id': crash.id},
+                                                  limit_cpu=1, limit_memory=10)
+                    job.priority = priority
+
+                    # we have type1s? lower the priority of ip_overwrites
+                    if cbn.exploits.where(Exploit.pov_type == 'type1').count() > 0:
+                        if crash.kind == 'ip_overwrite':
+                            job.priority -= (100 - BASE_PRIORITY) / 2
+
+                    if cbn.exploits.where(Exploit.pov_type == 'type2').count() > 0:
+                        if crash.kind == 'arbitrary_read':
+                            job.priority -= (100 - BASE_PRIORITY) / 2
+
                     LOG.debug("Yielding RexJob for %s with crash %s priority %d",
-                              cbn.id, crash.id, job.priority)
+                              cbn.name, crash.id, job.priority)
+
                     yield job
-                else:
-                    LOG.error("No priority for crash kind '%s', this is a bug", crash.kind)
