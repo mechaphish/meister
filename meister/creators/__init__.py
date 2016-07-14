@@ -66,7 +66,7 @@ class BaseCreator(object):
                 cs, _ = ChallengeSet.get_or_create(name=csid)
                 cbn = ChallengeBinaryNode.create(name=cbid, cs=cs, blob=blob, sha256=sha256)
             try:
-                team = Team.get_our()
+                team, _ = Team.get_or_create(name=Team.OUR_NAME)
                 csf = ChallengeSetFielding.get((ChallengeSetFielding.cs == cbn.cs) & \
                                                (ChallengeSetFielding.team == team) & \
                                                (ChallengeSetFielding.available_round == round_))
