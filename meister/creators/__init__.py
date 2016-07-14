@@ -5,7 +5,7 @@ from __future__ import absolute_import, unicode_literals
 
 import os
 
-from farnsworth.models import ChallengeBinaryNode, ChallengeSet
+from farnsworth.models import ChallengeBinaryNode, ChallengeSet, ChallengeSetFielding, Round, Team
 
 import meister.log
 LOG = meister.log.LOG.getChild('creators')
@@ -45,10 +45,11 @@ class BaseCreator(object):
                          returned (default: current round).
         """
         if round_ is None:
-            round_ = self.cgc.getRound()
+            round_, _ = Round.get_or_create(num=self.cgc.getRound())
 
         LOG.debug("Fetching binaries for round %s", round_)
-        for binary in self.cgc.getBinaries(round_):
+        binaries = self.cgc.getBinaries(round_.num)
+        for binary in binaries:
             cbid = binary['cbid']
             csid = binary['csid']
             sha256 = binary['hash']
@@ -57,12 +58,21 @@ class BaseCreator(object):
             try:
                 cbn = ChallengeBinaryNode.get(ChallengeBinaryNode.sha256 == sha256)
             except ChallengeBinaryNode.DoesNotExist:
-                tmp_path = os.path.join("/tmp", "{}-{}-{}".format(round_, csid, cbid))
+                tmp_path = os.path.join("/tmp", "{}-{}-{}".format(round_.num, csid, cbid))
                 binary = self.cgc._get_dl(binary['uri'], tmp_path, binary['hash'])
                 with open(tmp_path, 'rb') as f:
                     blob = f.read()
                 os.remove(tmp_path)
                 cs, _ = ChallengeSet.get_or_create(name=csid)
                 cbn = ChallengeBinaryNode.create(name=cbid, cs=cs, blob=blob, sha256=sha256)
+            try:
+                team = Team.get_our()
+                csf = ChallengeSetFielding.get((ChallengeSetFielding.cs == cbn.cs) & \
+                                               (ChallengeSetFielding.team == team) & \
+                                               (ChallengeSetFielding.available_round == round_))
+                csf.add_cbns_if_missing(cbn)
+            except ChallengeSetFielding.DoesNotExist:
+                csf = ChallengeSetFielding.create(cs=cbn.cs, team=team, cbns=[cbn], available_round=round_)
+
             LOG.debug("Found cbid: %s", cbid)
             yield cbn
