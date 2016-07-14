@@ -34,6 +34,7 @@ class BaseCreator(object):
         :keyword round_: The round number for which the binaries should be
                          returned (default: current round).
         """
+        # FIXME: Why are we not doing return set(csids)?
         csids = [cbn.cs.id for cbn in self.cbns(round_)]
         return ChallengeSet.select().where(ChallengeSet.id << csids)
 
