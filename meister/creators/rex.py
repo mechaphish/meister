@@ -4,8 +4,8 @@
 from __future__ import absolute_import, unicode_literals
 
 from farnsworth.models import RexJob, Exploit, Crash
-import meister.creators
 
+import meister.creators
 LOG = meister.creators.LOG.getChild('rex')
 
 
@@ -39,6 +39,7 @@ PRIORITY_MAP = {Vulnerability.IP_OVERWRITE: 100,
 # the base Rex priority
 BASE_PRIORITY = 20
 
+
 class RexCreator(meister.creators.BaseCreator):
 
     @staticmethod
@@ -61,9 +62,7 @@ class RexCreator(meister.creators.BaseCreator):
 
     @property
     def jobs(self):
-
         for cbn in self.cbns():
-
             # does this fetch blobs? can we do the filter with the query?
             crashes = self._exploitable_crashes(cbn.crashes)
 
@@ -76,14 +75,11 @@ class RexCreator(meister.creators.BaseCreator):
 
             # normalize by ids
             for kind in categories:
-
                 for priority, crash in self._normalize_sort(BASE_PRIORITY, categories[kind]):
-
                     # TODO: in rare cases Rex needs more memory, can we try to handle cases where Rex
                     # needs upto 40G?
                     job, _ = RexJob.get_or_create(cbn=cbn, payload={'crash_id': crash.id},
                                                   limit_cpu=1, limit_memory=10)
-
                     job.priority = priority
 
                     # we have type1s? lower the priority of ip_overwrites
@@ -94,7 +90,6 @@ class RexCreator(meister.creators.BaseCreator):
                     if cbn.exploits.where(Exploit.pov_type == 'type2').count() > 0:
                         if crash.kind == 'arbitrary_read':
                             job.priority -= (100 - BASE_PRIORITY) / 2
-
 
                     LOG.debug("Yielding RexJob for %s with crash %s priority %d",
                               cbn.name, crash.id, job.priority)
