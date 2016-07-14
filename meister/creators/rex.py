@@ -23,7 +23,6 @@ class Vulnerability(object):
     NULL_DEREFERENCE = "null_dereference"
     UNKNOWN = "unknown"
 
-
 PRIORITY_MAP = {Vulnerability.IP_OVERWRITE: 100,
                 Vulnerability.PARTIAL_IP_OVERWRITE: 80,
                 Vulnerability.ARBITRARY_READ: 75,
@@ -34,7 +33,6 @@ PRIORITY_MAP = {Vulnerability.IP_OVERWRITE: 100,
                 Vulnerability.UNCONTROLLED_WRITE: 0,
                 Vulnerability.UNCONTROLLED_IP_OVERWRITE: 0,
                 Vulnerability.NULL_DEREFERENCE: 0}
-
 
 # the base Rex priority
 BASE_PRIORITY = 20
