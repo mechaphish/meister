@@ -19,8 +19,6 @@ import requests.exceptions
 import meister.log
 import meister.kubernetes as kubernetes
 
-from farnsworth.models.challenge_binary_node import ChallengeBinaryNode
-
 LOG = meister.log.LOG.getChild('schedulers')
 
 
@@ -316,10 +314,9 @@ class BaseScheduler(KubernetesScheduler):
         The Base Strategy assumes that the Farnsworth API is setup already,
         and uses it directly.
 
-        :argument cgc: a CGCAPI object, so that we can talk to the CGC API.
         :keyword sleepytime: the amount to sleep between strategy runs.
+        :keyword creators: list of creators yielding jobs.
         """
-        self.cgc = kwargs.pop('cgc')
         self.sleepytime = kwargs.pop('sleepytime', 3)
         self.creators = kwargs.pop('creators', [])
         super(BaseScheduler, self).__init__(**kwargs)
@@ -332,11 +329,6 @@ class BaseScheduler(KubernetesScheduler):
         """Sleep a pre-defined interval."""
         LOG.debug("Sleepytime...")
         time.sleep(self.sleepytime)
-
-    @property
-    def round(self):
-        """Return the number of the active round."""
-        return self.cgc.getRound()
 
     @property
     def jobs(self):
