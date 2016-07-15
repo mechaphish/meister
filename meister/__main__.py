@@ -25,12 +25,13 @@ from meister.creators.patcherex import PatcherexCreator
 from meister.creators.poll_creator import PollCreatorCreator
 from meister.creators.network_poll_creator import NetworkPollCreatorCreator
 from meister.creators.network_poll_sanitizer import NetworkPollSanitizerCreator
+from meister.creators.patch_performance import PatchPerformanceCreator
 from meister.creators.rex import RexCreator
 from meister.creators.povfuzzer1 import PovFuzzer1Creator
 from meister.creators.povfuzzer2 import PovFuzzer2Creator
 from meister.creators.rop_cache import RopCacheCreator
-from meister.creators.tester import TesterCreator
 from meister.creators.were_rabbit import WereRabbitCreator
+from meister.creators.pov_tester import PovTesterCreator
 import meister.log
 from meister.schedulers.priority import PriorityScheduler
 
@@ -55,7 +56,6 @@ def main(args=[]):
             PovFuzzer1Creator(),
             PovFuzzer2Creator(),
             ColorGuardCreator(),
-            CBTesterCreator(),
             WereRabbitCreator(),
             AFLCreator(),
             CacheCreator(),
@@ -64,10 +64,12 @@ def main(args=[]):
             IDSCreator(),
             FunctionIdentifierCreator(),
             NetworkPollCreatorCreator(),
+            PatchPerformanceCreator(),
             # VM jobs
             PollCreatorCreator(),
             NetworkPollSanitizerCreator(),
-            TesterCreator(),
+            CBTesterCreator(),
+            PovTesterCreator()
         ])
         scheduler.run()
 
