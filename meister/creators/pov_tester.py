@@ -7,7 +7,7 @@ from farnsworth.models import PovTesterJob
 from farnsworth.models import Team, Exploit
 
 import meister.creators
-from meister.pov_test_helper import PovTestHelper
+from meister.helpers.pov_test import PovTestHelper
 
 LOG = meister.creators.LOG.getChild('pov_tester')
 
