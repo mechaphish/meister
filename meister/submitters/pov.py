@@ -1,10 +1,14 @@
-#!/usr/bin/env python
+#!/usr/bin/env/python
+# -*- coding: utf-8 -*-
+
+from __future__ import absolute_import, unicode_literals
+
+import random
 
 from farnsworth.models import ChallengeSet, Team
 from meister.cgc.tierror import TiError
 from meister.pov_test_helper import PovTestHelper
 import meister.log
-import random
 
 LOG = meister.log.LOG.getChild('povsubmitter')
 

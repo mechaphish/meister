@@ -4,7 +4,7 @@
 from __future__ import absolute_import, unicode_literals
 
 from farnsworth.models import PovTesterJob
-from farnsworth.models import Team, ChallengeSetFielding, Exploit
+from farnsworth.models import Team, Exploit
 
 import meister.creators
 from meister.pov_test_helper import PovTestHelper

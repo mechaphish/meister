@@ -1,3 +1,7 @@
+#!/usr/bin/env/python
+# -*- coding: utf-8 -*-
+
+from __future__ import absolute_import, unicode_literals
 
 from farnsworth.models import ChallengeSetFielding, IDSRuleFielding, PovTestResult, Round, IDSRule, Exploit, ChallengeBinaryNode
 
