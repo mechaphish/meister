@@ -63,7 +63,6 @@ class PovTestHelper(object):
         predicate = ChallengeBinaryNode.cs == target_cs
         return query.where(predicate)
 
-
     @staticmethod
     def get_exploit_test_results(target_exploit, cs_fielding, ids_fielding):
         """
@@ -92,8 +91,9 @@ class PovTestHelper(object):
         :param target_cs: CS for which fielding need to be fetched.
         :return: list containing latest cs fielding.
         """
-        predicate = (ChallengeSetFielding.team == target_team) & (ChallengeSetFielding.cs == target_cs)
+
         query = ChallengeSetFielding.select().join(Round, on=(ChallengeSetFielding.submission_round == Round.id))
+        predicate = (ChallengeSetFielding.team == target_team) & (ChallengeSetFielding.cs == target_cs)
         return query.where(predicate).order_by(Round.num.desc()).limit(1)
 
     @staticmethod
@@ -104,8 +104,9 @@ class PovTestHelper(object):
         :param target_cs: CS for which IDS fielding need to be fetched.
         :return: list containing latest IDS fielding.
         """
-        predicate = (IDSRuleFielding.team == target_team) & (IDSRule.cs == target_cs)
+
         query = IDSRuleFielding.select()\
-            .join(Round, on=(IDSRuleFielding.submission_round == Round.id))\
-            .join(IDSRule, on=(IDSRuleFielding.ids_rule == IDSRule.id))
+                               .join(Round, on=(IDSRuleFielding.submission_round == Round.id))\
+                               .join(IDSRule, on=(IDSRuleFielding.ids_rule == IDSRule.id))
+        predicate = (IDSRuleFielding.team == target_team) & (IDSRule.cs == target_cs)
         return query.where(predicate).order_by(Round.num.desc()).limit(1)
