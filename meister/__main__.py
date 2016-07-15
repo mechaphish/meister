@@ -14,8 +14,6 @@ import meister.settings
 
 from farnsworth.models import Round
 
-import meister.cgc.ticlient
-import meister.cgc.tierror
 from meister.creators.afl import AFLCreator
 from meister.creators.cache import CacheCreator
 from meister.creators.cb_tester import CBTesterCreator
@@ -33,77 +31,45 @@ from meister.creators.povfuzzer2 import PovFuzzer2Creator
 from meister.creators.rop_cache import RopCacheCreator
 from meister.creators.tester import TesterCreator
 from meister.creators.were_rabbit import WereRabbitCreator
-from meister.evaluators import Evaluator
-from meister.notifier import Notifier
 import meister.log
 from meister.schedulers.priority import PriorityScheduler
-from meister.submitters.cb import CBSubmitter
-from meister.submitters.pov import POVSubmitter
 
 LOG = meister.log.LOG.getChild('main')
 
+def wait_for_ambassador():
+    POLL_INTERVAL = 3
+    while Round.current_round() is None:
+        LOG.info("Game not started, waiting %d seconds", POLL_INTERVAL)
+        time.sleep(POLL_INTERVAL)
 
-def main(args=None):
+def main(args=[]):
     """Run the meister."""
-    if args is None:
-        args = []
-    # Initialize APIs
-    cgc = meister.cgc.ticlient.TiClient.from_env()
-
-    previous_round = None
-    notifier = Notifier()
     while True:
-        try:
-            # wait for API to be available
-            while not cgc.ready():
-                notifier.api_is_down()
-                time.sleep(5)
+        wait_for_ambassador()
 
-            notifier.api_is_up()
-            current_round = cgc.getRound()
-            round_, _ = Round.get_or_create(num=current_round)
+        LOG.info("Round #%d", Round.current_round().num)
 
-            # Jobs scheduled continuously
-            scheduler = PriorityScheduler(cgc=cgc, creators=[
-                DrillerCreator(cgc),
-                RexCreator(cgc),
-                PovFuzzer1Creator(cgc),
-                PovFuzzer2Creator(cgc),
-                ColorGuardCreator(cgc),
-                CBTesterCreator(cgc),
-                WereRabbitCreator(cgc),
-                AFLCreator(cgc),
-                CacheCreator(cgc),
-                RopCacheCreator(cgc),
-                PatcherexCreator(cgc),
-                IDSCreator(cgc),
-                FunctionIdentifierCreator(cgc),
-                NetworkPollCreatorCreator(cgc),
-                # VM jobs
-                PollCreatorCreator(cgc),
-                # # VM jobs
-                NetworkPollSanitizerCreator(cgc),
-                TesterCreator(cgc),
-            ])
-            scheduler.run()
-
-            # Get feedbacks
-            Evaluator(cgc, round_).run()
-
-            if current_round == previous_round:
-                LOG.debug("Still round #%d, waiting", current_round)
-                time.sleep(1)
-                continue
-            else:
-                LOG.info("Round #%d", current_round)
-                previous_round = current_round
-
-            # Submit! Order matters!
-            CBSubmitter(cgc).run(current_round, random_submit=True)
-            POVSubmitter(cgc).run()
-
-        except meister.cgc.tierror.TiError:
-            notifier.api_is_down()
+        scheduler = PriorityScheduler(creators=[
+            DrillerCreator(),
+            RexCreator(),
+            PovFuzzer1Creator(),
+            PovFuzzer2Creator(),
+            ColorGuardCreator(),
+            CBTesterCreator(),
+            WereRabbitCreator(),
+            AFLCreator(),
+            CacheCreator(),
+            RopCacheCreator(),
+            PatcherexCreator(),
+            IDSCreator(),
+            FunctionIdentifierCreator(),
+            NetworkPollCreatorCreator(),
+            # VM jobs
+            PollCreatorCreator(),
+            NetworkPollSanitizerCreator(),
+            TesterCreator(),
+        ])
+        scheduler.run()
 
     return 0
 
