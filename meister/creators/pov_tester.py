@@ -51,7 +51,7 @@ class PovTesterCreator(meister.creators.BaseCreator):
                                 target_job = PovTesterJob.get_or_create(cs=curr_cs, payload=job_payload)
                                 # Set priority
                                 target_job.priority = 100
-                                yield target_job
+                                # yield target_job
                             else:
                                 LOG.info("Ignoring Exploit %s for Team %s For CS %s as it is already tested",
                                          curr_exploit.id, curr_team.name, curr_cs.name)
@@ -62,3 +62,5 @@ class PovTesterCreator(meister.creators.BaseCreator):
                 else:
                     LOG.warn("No CS fielding exist for Team %s For CS %s, no PoV Tester Jobs scheduled",
                              curr_team.name, curr_cs.name)
+        return iter(())
+
