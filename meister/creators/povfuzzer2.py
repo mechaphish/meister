@@ -12,14 +12,14 @@ LOG = meister.creators.LOG.getChild('povfuzzer2job')
 class PovFuzzer2Creator(meister.creators.BaseCreator):
     @property
     def jobs(self):
-        for cbn in self.cbns():
-            for crash in cbn.crashes:
+        for cs in self.challenge_sets():
+            for crash in cs.crashes:
 
-                if crash.kind != Vulnerability.ARBITRARY_READ:
+                if not cs.is_multi_cbn and crash.kind != Vulnerability.ARBITRARY_READ:
                     continue
 
-                job, _ = PovFuzzer2Job.get_or_create(cbn=cbn, payload={'crash_id': crash.id},
+                job, _ = PovFuzzer2Job.get_or_create(cs=cs, payload={'crash_id': crash.id},
                                                   limit_cpu=1, limit_memory=10)
 
-                LOG.debug("Yielding PovFuzzer1Job for %s with %s", cbn.id, crash.id)
+                LOG.debug("Yielding PovFuzzer1Job for %s with crash %s", cs.name, crash.id)
                 yield job

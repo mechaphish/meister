@@ -11,13 +11,14 @@ LOG = meister.creators.LOG.getChild('colorguard')
 class ColorGuardCreator(meister.creators.BaseCreator):
     @property
     def jobs(self):
-        for cbn in self.cbns():
+        for cs in self.challenge_sets():
 
-            if cbn.completed_caching or cbn.tracer_cache.exists():
-                LOG.debug("Caching complete for %s, scheduling ColorGuard", cbn.name)
-                for test in cbn.tests:
-                    LOG.debug("ColorGuardJob for %s, test %s being created", cbn.name, test.id)
-                    job, _ = ColorGuardJob.get_or_create(cbn=cbn,
+            if cs.completed_caching or cs.tracer_cache.exists() or cs.is_multi_cbn:
+                LOG.debug("Caching complete for %s, scheduling ColorGuard", cs.name)
+                for test in cs.tests:
+                    LOG.debug("ColorGuardJob for %s, test %s being created", cs.name, test.id)
+                    # TODO: get naive colorguard support working for multicbs
+                    job, _ = ColorGuardJob.get_or_create(cs=cs,
                                                          payload={'test_id': test.id},
                                                          limit_cpu=1,
                                                          limit_memory=6)
@@ -29,8 +30,8 @@ class ColorGuardCreator(meister.creators.BaseCreator):
                     if test.job.worker == "rex":
                         job.priority = 100
 
-                    LOG.debug("Yielding ColorGuardJob for %s with %s", cbn.id, test.id)
+                    LOG.debug("Yielding ColorGuardJob for %s with %s", cs.name, test.id)
                     yield job
 
             else:
-                LOG.debug("Caching incomplete for %s, refusing to schedule ColorGuard", cbn.name)
+                LOG.debug("Caching incomplete for %s, refusing to schedule ColorGuard", cs.name)

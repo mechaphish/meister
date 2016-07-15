@@ -54,15 +54,14 @@ class RexCreator(meister.creators.BaseCreator):
     @staticmethod
     def _normalize_sort(base, ordered_crashes):
 
-        top = max(ordered_crashes)[0]
         for p, c in ordered_crashes:
             yield max(base, 100 - p), c
 
     @property
     def jobs(self):
-        for cbn in self.cbns():
+        for cs in self.single_cb_challenge_sets():
             # does this fetch blobs? can we do the filter with the query?
-            crashes = self._exploitable_crashes(cbn.crashes)
+            crashes = self._exploitable_crashes(cs.crashes)
 
             categories = dict()
             for vulnerability in PRIORITY_MAP.keys():
@@ -76,20 +75,20 @@ class RexCreator(meister.creators.BaseCreator):
                 for priority, crash in self._normalize_sort(BASE_PRIORITY, categories[kind]):
                     # TODO: in rare cases Rex needs more memory, can we try to handle cases where Rex
                     # needs upto 40G?
-                    job, _ = RexJob.get_or_create(cbn=cbn, payload={'crash_id': crash.id},
+                    job, _ = RexJob.get_or_create(cs=cs, payload={'crash_id': crash.id},
                                                   limit_cpu=1, limit_memory=10)
                     job.priority = priority
 
                     # we have type1s? lower the priority of ip_overwrites
-                    if cbn.exploits.where(Exploit.pov_type == 'type1').count() > 0:
+                    if cs.exploits.where(Exploit.pov_type == 'type1').count() > 0:
                         if crash.kind == 'ip_overwrite':
                             job.priority -= (100 - BASE_PRIORITY) / 2
 
-                    if cbn.exploits.where(Exploit.pov_type == 'type2').count() > 0:
+                    if cs.exploits.where(Exploit.pov_type == 'type2').count() > 0:
                         if crash.kind == 'arbitrary_read':
                             job.priority -= (100 - BASE_PRIORITY) / 2
 
                     LOG.debug("Yielding RexJob for %s with crash %s priority %d",
-                              cbn.name, crash.id, job.priority)
+                              cs.name, crash.id, job.priority)
 
                     yield job

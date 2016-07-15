@@ -16,14 +16,14 @@ class FunctionIdentifierCreator(meister.creators.BaseCreator):
     @property
     def jobs(self):
         LOG.debug("Collecting jobs")
-        for cbn in self.cbns():
+        for cs in self.single_cb_challenge_sets():
 
-            job, _ = FunctionIdentifierJob.get_or_create(cbn=cbn,
+            job, _ = FunctionIdentifierJob.get_or_create(cs=cs,
                                                          limit_cpu=1,
                                                          limit_time=60 * 10,
                                                          limit_memory=8)
 
             job.priority = 100 # function identification should always run
 
-            LOG.debug("Yielding FunctionIdentifierJob for %s", cbn.id)
+            LOG.debug("Yielding FunctionIdentifierJob for %s", cs.name)
             yield job
