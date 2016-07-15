@@ -81,11 +81,11 @@ class RexCreator(meister.creators.BaseCreator):
                     # we have type1s? lower the priority of ip_overwrites
                     if cs.exploits.where(Exploit.pov_type == 'type1').count() > 0:
                         if crash.kind == 'ip_overwrite':
-                            job.priority -= (100 - BASE_PRIORITY) / 2
+                            job.priority -= max(BASE_PRIORITY, (100 - BASE_PRIORITY) / 2)
 
                     if cs.exploits.where(Exploit.pov_type == 'type2').count() > 0:
                         if crash.kind == 'arbitrary_read':
-                            job.priority -= (100 - BASE_PRIORITY) / 2
+                            job.priority -= max(BASE_PRIORITY, (100 - BASE_PRIORITY) / 2)
 
                     LOG.debug("Yielding RexJob for %s with crash %s priority %d",
                               cs.name, crash.id, job.priority)
