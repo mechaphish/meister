@@ -12,7 +12,6 @@ class ColorGuardCreator(meister.creators.BaseCreator):
     @property
     def jobs(self):
         for cs in self.challenge_sets():
-
             if cs.completed_caching or cs.tracer_cache.exists() or cs.is_multi_cbn:
                 LOG.debug("Caching complete for %s, scheduling ColorGuard", cs.name)
                 for test in cs.tests:
@@ -22,7 +21,6 @@ class ColorGuardCreator(meister.creators.BaseCreator):
                                                          payload={'test_id': test.id},
                                                          limit_cpu=1,
                                                          limit_memory=6)
-
                     job.priority = 20
 
                     # testcases found by Rex have the potential to be incredibly powerful POVs

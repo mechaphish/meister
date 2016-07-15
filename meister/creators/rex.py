@@ -53,7 +53,6 @@ class RexCreator(meister.creators.BaseCreator):
 
     @staticmethod
     def _normalize_sort(base, ordered_crashes):
-
         for p, c in ordered_crashes:
             yield max(base, 100 - p), c
 

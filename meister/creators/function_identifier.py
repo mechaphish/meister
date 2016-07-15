@@ -8,6 +8,7 @@ from farnsworth.models.job import FunctionIdentifierJob
 import meister.creators
 LOG = meister.creators.LOG.getChild('FunctionIdentifier')
 
+
 class FunctionIdentifierCreator(meister.creators.BaseCreator):
 
     def __init__(self, *args, **kwargs):
@@ -17,7 +18,6 @@ class FunctionIdentifierCreator(meister.creators.BaseCreator):
     def jobs(self):
         LOG.debug("Collecting jobs")
         for cs in self.single_cb_challenge_sets():
-
             job, _ = FunctionIdentifierJob.get_or_create(cs=cs,
                                                          limit_cpu=1,
                                                          limit_time=60 * 10,

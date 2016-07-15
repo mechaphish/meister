@@ -9,12 +9,12 @@ import meister.creators
 from .rex import Vulnerability
 LOG = meister.creators.LOG.getChild('povfuzzer1job')
 
+
 class PovFuzzer1Creator(meister.creators.BaseCreator):
     @property
     def jobs(self):
         for cs in self.challenge_sets():
             for crash in cs.crashes:
-
                 if not cs.is_multi_cbn and crash.kind != Vulnerability.IP_OVERWRITE:
                     continue
 
