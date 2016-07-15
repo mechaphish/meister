@@ -16,13 +16,13 @@ class WereRabbitCreator(meister.creators.BaseCreator):
     @property
     def jobs(self):
         LOG.debug("Collecting jobs")
-        for cbn in self.cbns():
-            if len(cbn.crashes) > 0:
-                job, _ = WereRabbitJob.get_or_create(cbn=cbn,
+        for cs in self.challenge_sets():
+            if len(cs.crashes) > 0:
+                job, _ = WereRabbitJob.get_or_create(cs=cs,
                                                      limit_cpu=4,
                                                      limit_memory=4)
 
                 job.priority = 100 # There should *ALWAYS* be one WereRabbit job running if we have a crash
-                LOG.debug("Yielding WereRabbitJob for %s", cbn.id)
+                LOG.debug("Yielding WereRabbitJob for %s", cs.name)
 
                 yield job

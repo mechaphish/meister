@@ -38,6 +38,15 @@ class BaseCreator(object):
         csids = [cbn.cs.id for cbn in self.cbns(round_)]
         return ChallengeSet.select().where(ChallengeSet.id << csids)
 
+    def single_cb_challenge_sets(self, round_=None):
+        """Return the list of single-cb challenge sets that are active in a round.
+
+        :keyword round_: The round number for which the binaries should be
+                         returned (default: current round).
+        """
+        csids = [cbn.cs.id for cbn in self.cbns(round_) if not cbn.cs.is_multi_cbn]
+        return ChallengeSet.select().where(ChallengeSet.id << csids)
+
     def cbns(self, round_=None):
         """Return the list of binaries that are active in a round.
 
