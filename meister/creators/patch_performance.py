@@ -12,7 +12,8 @@ LOG = meister.creators.LOG.getChild('patch_performance')
 class PatchPerformanceCreator(meister.creators.BaseCreator):
     @property
     def jobs(self):
-        # get only unprocessed traffic files and schedule them.
+        # get all current valid ChallengeSets and schedule them.
+        # passing round id takes care of not generating duplicates in a round for a cs.
         for curr_cs in self.challenge_sets():
             curr_round = Round.current_round()
             job, _ = PatchPerformanceJob.get_or_create(cs=curr_cs,
