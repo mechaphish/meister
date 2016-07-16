@@ -167,6 +167,7 @@ class KubernetesScheduler(object):
 
         # Return cached data
         if (datetime.datetime.now() - self._resources_timestamp) <= self._resources_cache_timeout:
+            LOG.debug("Returning cached data...")
             return self._available_resources
 
         # Reset available resources
