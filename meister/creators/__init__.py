@@ -43,7 +43,10 @@ class BaseCreator(object):
                          returned (default: current round).
         """
         csids = [cbn.cs.id for cbn in self.cbns(round_) if not cbn.cs.is_multi_cbn]
-        return ChallengeSet.select().where(ChallengeSet.id << csids)
+        if csids:
+            return ChallengeSet.select().where(ChallengeSet.id << csids)
+        else:
+            return []
 
     def cbns(self, round_=None):
         """Return the list of binaries that are active in a round.
