@@ -8,6 +8,7 @@ Schedule everything whenver it is available.
 
 from __future__ import unicode_literals, absolute_import
 
+import copy
 import operator
 
 import concurrent.futures
@@ -38,7 +39,7 @@ class PriorityScheduler(meister.schedulers.BaseScheduler):
         jobs_to_run = []
 
         # GJA = Greedy Job Allocator
-        total_capacities = self._kube_total_capacity
+        total_capacities = copy.deepcopy(self._kube_total_capacity)
 
         # TODO: We need to remove overhead, like database and meister, from total capacities.
 
