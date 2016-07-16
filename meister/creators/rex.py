@@ -78,7 +78,6 @@ class RexCreator(meister.creators.BaseCreator):
                     # needs upto 40G?
                     job = RexJob(cs=cs, payload={'crash_id': crash.id},
                                  limit_cpu=1, limit_memory=10240)
-                    priority = priority
 
                     # we have type1s? lower the priority of ip_overwrites
                     if type1_exists and crash.kind == 'ip_overwrite':
