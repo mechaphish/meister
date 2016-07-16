@@ -66,6 +66,7 @@ class PriorityScheduler(meister.schedulers.BaseScheduler):
                 if job.completed_at is not None:
                     LOG.debug("Job has been completed at %s, skipping", job.completed_at)
                     continue
+
                 if created:
                     LOG.debug("Job did not exist yet, created it")
 
