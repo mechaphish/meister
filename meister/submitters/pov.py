@@ -5,8 +5,7 @@ from __future__ import absolute_import, unicode_literals
 
 import random
 
-from farnsworth.models import ChallengeSet, Team
-from meister.cgc.tierror import TiError
+from farnsworth.models import ChallengeSet, ExploitSubmissionCable, Team
 from meister.pov_test_helper import PovTestHelper
 import meister.log
 
@@ -14,9 +13,6 @@ LOG = meister.log.LOG.getChild('povsubmitter')
 
 
 class POVSubmitter(object):
-
-    def __init__(self, cgc):
-        self._cgc = cgc
 
     def run(self):
         for team in Team.opponents():
@@ -53,7 +49,7 @@ class POVSubmitter(object):
                 if to_submit_pov is None:
                     # OK, we do not have any PoVs tested against current CS.
                     # Get any exploit for the current CS and submit it.
-                    available_povs = PovTestHelper.get_povs_for_cs(cs)
+                    available_povs = cs.exploits
                     if len(available_povs) > 0:
                         # OK, we select a random PoV from available PoVs and submit.
                         to_submit_pov = available_povs[random.randint(0,len(available_povs)-1)]
@@ -61,14 +57,9 @@ class POVSubmitter(object):
                                  to_submit_pov.id, team.name, cs.name)
 
                 if to_submit_pov is not None:
-                    try:
-                        result = self._cgc.uploadPOV(str(cs.name),
-                                                     str(team.name),
-                                                     str(throws),
-                                                     str(to_submit_pov.blob))
-                        to_submit_pov.submit_to(teams=team.name, throws=throws)
-                        LOG.debug("Submitted POV! Response: %s", result)
-                    except TiError as e:
-                        LOG.error("PoV Submission error: %s", e.message)
+                    ExploitSubmissionCable.create(team=team,
+                                                  exploit=to_submit_pov,
+                                                  throws=throws)
+                    LOG.debug("POV %s marked for submission", to_submit_pov.id)
                 else:
                     LOG.warn("No PoV to submit for Team %s for CS %s", team.name, cs.name)

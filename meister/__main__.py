@@ -34,6 +34,7 @@ from meister.creators.were_rabbit import WereRabbitCreator
 from meister.creators.pov_tester import PovTesterCreator
 import meister.log
 from meister.schedulers.priority import PriorityScheduler
+from meister.submitters.pov import POVSubmitter
 
 LOG = meister.log.LOG.getChild('main')
 
@@ -74,6 +75,9 @@ def main(args=[]):
             PovTesterCreator()
         ])
         scheduler.run()
+
+        # Submit!
+        POVSubmitter().run()
 
     return 0
 
