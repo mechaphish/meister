@@ -327,7 +327,7 @@ class BaseScheduler(KubernetesScheduler):
         """Run the scheduler."""
         if self._is_kubernetes_unavailable():
             # Run without actually scheduling
-            for job in self.jobs:
+            for job, _ in self.jobs:
                 job.save()
         else:
             # Run internal scheduler method
