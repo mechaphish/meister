@@ -65,9 +65,11 @@ class RexCreator(meister.creators.BaseCreator):
             categories = dict()
             for vulnerability in PRIORITY_MAP.keys():
                 ordered_crashes = crashes.where(Crash.kind == vulnerability).order_by(Crash.created_at.desc())
-                cnt = ordered_crashes.count()
-                if cnt > 0:
-                    categories[vulnerability] = zip(range(cnt), (ordered_crashes))
+                if ordered_crashes:
+                    categories[vulnerability] = enumerate(ordered_crashes)
+
+            type1_exists = cs.exploits.where(Exploit.pov_type == 'type1').exists()
+            type2_exists = cs.exploits.where(Exploit.pov_type == 'type2').exists()
 
             # normalize by ids
             for kind in categories:
@@ -79,12 +81,10 @@ class RexCreator(meister.creators.BaseCreator):
                     job.priority = priority
 
                     # we have type1s? lower the priority of ip_overwrites
-                    if cs.exploits.where(Exploit.pov_type == 'type1').count() > 0:
-                        if crash.kind == 'ip_overwrite':
+                    if type1_exists and crash.kind == 'ip_overwrite':
                             job.priority -= max(BASE_PRIORITY, (100 - BASE_PRIORITY) / 2)
 
-                    if cs.exploits.where(Exploit.pov_type == 'type2').count() > 0:
-                        if crash.kind == 'arbitrary_read':
+                    if type2_exists and crash.kind == 'arbitrary_read':
                             job.priority -= max(BASE_PRIORITY, (100 - BASE_PRIORITY) / 2)
 
                     LOG.debug("Yielding RexJob for %s with crash %s priority %d",
