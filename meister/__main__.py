@@ -68,12 +68,12 @@ def main(args=[]):
             # IDSCreator(),
             FunctionIdentifierCreator(),
             NetworkPollCreatorCreator(),
-            PatchPerformanceCreator(),
+            # PatchPerformanceCreator(),
             # VM jobs
-            PollCreatorCreator(),
-            NetworkPollSanitizerCreator(),
-            CBTesterCreator(),
-            PovTesterCreator()
+            # PollCreatorCreator(),
+            # NetworkPollSanitizerCreator(),
+            # CBTesterCreator(),
+            # PovTesterCreator()
         ])
         scheduler.run()
 
