@@ -5,12 +5,14 @@
 
 from __future__ import absolute_import, division, unicode_literals
 
+import copy
 import datetime
 import itertools
 import operator
 import os
 import time
 
+import concurrent.futures
 import pykube.exceptions
 import pykube.http
 import pykube.objects
@@ -61,13 +63,8 @@ class KubernetesScheduler(object):
     def schedule(self, job):
         """Schedule the job with the specific resources."""
         LOG.debug("Scheduling job for job id %s", job.id)
-        job.save()
         self.terminate(self._worker_name(job.id))
-        if self._resources_available(job):
-            self._schedule_kube_pod(job)
-            self._resources_update(job)
-            return True
-        return False
+        self._schedule_kube_pod(job)
 
     @property
     def api(self):
@@ -128,7 +125,7 @@ class KubernetesScheduler(object):
                         'resources': {
                             'limits': {
                                 'cpu': str(cpu),
-                                'memory': "{}Gi".format(memory)
+                                'memory': "{}Mi".format(memory)
                             }
                         },
                         'env': filter(None, [
@@ -150,21 +147,6 @@ class KubernetesScheduler(object):
         }
         return config
 
-    def _resources_available(self, job):
-        """Internal method to check whether the resources for a Job are available."""
-        assert job is not None
-        cpu_available = self._kube_resources['cpu'] >= job.limit_cpu
-        memory_available = self._kube_resources['memory'] >= (job.limit_memory * 1024 ** 3)
-        pod_available = self._kube_resources['pods'] >= 1
-        return cpu_available and memory_available and pod_available
-
-    def _resources_update(self, job):
-        """Internal method to check whether the resources for a Job are available."""
-        assert job is not None
-        self._kube_resources['cpu'] -= job.limit_cpu
-        self._kube_resources['memory'] -= (job.limit_memory * 1024 ** 3)
-        self._kube_resources['pods'] -= 1
-
     # Currently, we are using aggregate resources instead of per node resources for ease of
     # scheduling. This is suboptimal because we might run into situation where we think we can
     # schedule a job but actually cannot. The example below is a generalization of this in case node
@@ -185,10 +167,11 @@ class KubernetesScheduler(object):
 
         # Return cached data
         if (datetime.datetime.now() - self._resources_timestamp) <= self._resources_cache_timeout:
+            LOG.debug("Returning cached data...")
             return self._available_resources
 
         # Reset available resources
-        self._available_resources = self._kube_total_capacity
+        self._available_resources = copy.copy(self._kube_total_capacity)
 
         # Collect fresh information from the Kubernetes API about all running pods
         # FIXME: Shitty loop to fix https://github.com/kelproject/pykube/issues/10
@@ -333,7 +316,12 @@ class BaseScheduler(KubernetesScheduler):
     @property
     def jobs(self):
         """Return all jobs that all creators want to run."""
-        return itertools.chain.from_iterable(c.jobs for c in self.creators)
+        with concurrent.futures.ThreadPoolExecutor(max_workers=20) as executor:
+            # Return 25 jobs at a time to speed up generator
+            jobs_unordered_iter = executor.map(operator.attrgetter('jobs'),
+                                               self.creators, chunksize=25)
+            for job in itertools.chain.from_iterable(jobs_unordered_iter):
+                yield job
 
     def run(self):
         """Run the scheduler."""

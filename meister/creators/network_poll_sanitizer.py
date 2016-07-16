@@ -15,8 +15,8 @@ class NetworkPollSanitizerCreator(meister.creators.BaseCreator):
     def jobs(self):
         # get only un sanitized raw polls to sanitize
         for curr_unsan_poll in RawRoundPoll.select().where(RawRoundPoll.sanitized == False):
-            job, _ = NetworkPollSanitizerJob.get_or_create(cs=curr_unsan_poll.cs,
-                                                           payload={'rrp_id': curr_unsan_poll.id})
+            job = NetworkPollSanitizerJob(cs=curr_unsan_poll.cs,
+                                          payload={'rrp_id': curr_unsan_poll.id})
             LOG.debug("Creating PollSanitizerJob for %s ", curr_unsan_poll.id)
             # yield job
         return iter(())

@@ -14,12 +14,13 @@ class PovFuzzer1Creator(meister.creators.BaseCreator):
     @property
     def jobs(self):
         for cs in self.challenge_sets():
+            multi_cbn = cs.is_multi_cbn
             for crash in cs.crashes:
-                if not cs.is_multi_cbn and crash.kind != Vulnerability.IP_OVERWRITE:
+                if not multi_cbn and crash.kind != Vulnerability.IP_OVERWRITE:
                     continue
 
-                job, _ = PovFuzzer1Job.get_or_create(cs=cs, payload={'crash_id': crash.id},
-                                                     limit_cpu=1, limit_memory=10)
+                job = PovFuzzer1Job(cs=cs, payload={'crash_id': crash.id},
+                                    limit_cpu=1, limit_memory=10240)
 
                 LOG.debug("Yielding PovFuzzer1Job for %s with crash %s", cs.name, crash.id)
-                yield job
+                yield (job, 0)

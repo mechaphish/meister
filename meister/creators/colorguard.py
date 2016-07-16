@@ -17,19 +17,17 @@ class ColorGuardCreator(meister.creators.BaseCreator):
                 for test in cs.tests:
                     LOG.debug("ColorGuardJob for %s, test %s being created", cs.name, test.id)
                     # TODO: get naive colorguard support working for multicbs
-                    job, _ = ColorGuardJob.get_or_create(cs=cs,
-                                                         payload={'test_id': test.id},
-                                                         limit_cpu=1,
-                                                         limit_memory=6)
-                    job.priority = 20
+                    job = ColorGuardJob(cs=cs, payload={'test_id': test.id},
+                                        limit_cpu=1, limit_memory=6144)
+                    priority = 20
 
                     # testcases found by Rex have the potential to be incredibly powerful POVs
                     # the priority should be the max
                     if test.job.worker == "rex":
-                        job.priority = 100
+                        priority = 100
 
                     LOG.debug("Yielding ColorGuardJob for %s with %s", cs.name, test.id)
-                    yield job
+                    yield (job, priority)
 
             else:
                 LOG.debug("Caching incomplete for %s, refusing to schedule ColorGuard", cs.name)

@@ -13,10 +13,8 @@ class TesterCreator(meister.creators.BaseCreator):
     def jobs(self):
         for cbn in ChallengeBinaryNode.all_descendants():
             for test in cbn.all_tests_for_this_cb:
-                job, _ = TesterJob.get_or_create(cbn=cbn,
-                                                 payload={'test_id': test.id},
-                                                 limit_cpu=8,
-                                                 limit_memory=1)
+                job = TesterJob(cbn=cbn, payload={'test_id': test.id},
+                                limit_cpu=8, limit_memory=1024)
                 LOG.debug("Creating TesterJob for %s with %s", cbn.id, test.id)
                 # yield job
         return iter(())

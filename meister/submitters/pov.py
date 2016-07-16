@@ -6,8 +6,9 @@ from __future__ import absolute_import, unicode_literals
 import random
 
 from farnsworth.models import ChallengeSet, ExploitSubmissionCable, Team
-from meister.pov_test_helper import PovTestHelper
+
 import meister.log
+from meister.helpers.pov_test import PovTestHelper
 
 LOG = meister.log.LOG.getChild('povsubmitter')
 

@@ -17,7 +17,7 @@ class RopCacheCreator(meister.creators.BaseCreator):
     def jobs(self):
         LOG.debug("Collecting jobs...")
         for cs in self.single_cb_challenge_sets():
-            job, _ = RopCacheJob.get_or_create(cs=cs, limit_cpu=1, limit_memory=8)
-            job.priority = 90  # A rop cache should probably always be created
+            job = RopCacheJob(cs=cs, limit_cpu=1, limit_memory=8192)
+            priority = 90  # A rop cache should probably always be created
             LOG.debug("Yielding RopCacheJob for %s", cs.name)
-            yield job
+            yield (job, priority)

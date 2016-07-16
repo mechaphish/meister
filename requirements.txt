@@ -1,3 +1,4 @@
+futures
 requests
 python-dotenv
 git+ssh://git@git.seclab.cs.ucsb.edu/cgc/farnsworth#egg=farnsworth

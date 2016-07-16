@@ -18,15 +18,15 @@ class CBTesterCreator(meister.creators.BaseCreator):
             target_cs = poll.cs
             # Create job for unpatched binary
             LOG.debug("Yielding CBTesterJob for poll %s (unpatched)", poll.id)
-            yield CBTesterJob.get_or_create(payload={'poll_id': poll.id,
-                                                     'cs_id': target_cs.id})
+            yield (CBTesterJob(payload={'poll_id': poll.id,
+                                        'cs_id': target_cs.id}), 0)
 
             # For each of patch types create Tester Jobs
             for patch_type in target_cs.cbns_by_patch_type():
                 LOG.debug("Yielding CBTesterJob for poll %s (patched %s)", poll.id, patch_type)
-                yield CBTesterJob.get_or_create(payload={'poll_id': poll.id,
-                                                         'cs_id': target_cs.id,
-                                                         'patch_type': patch_type})
+                yield (CBTesterJob(payload={'poll_id': poll.id,
+                                            'cs_id': target_cs.id,
+                                            'patch_type': patch_type}), 0)
             # Set scores computed flag and save
             poll.has_scores_computed = True
             poll.save()
