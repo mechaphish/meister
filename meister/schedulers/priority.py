@@ -52,11 +52,10 @@ class PriorityScheduler(meister.schedulers.BaseScheduler):
             total_capacities['memory'] -= (job.limit_memory * 1024 ** 2)
             total_capacities['pods'] -= 1
 
+        jobs = sorted(self.jobs, key=operator.itemgetter(1), reverse=True)
+
         jobs_to_run = []
         with farnsworth.config.master_db.atomic():
-            # jobs_to_schedule = sorted((j for j in self.jobs if j.completed_at is None),
-            #                        key=operator.attrgetter('priority'), reverse=True)
-            jobs = sorted(self.jobs, key=operator.itemgetter(1), reverse=True)
             for j, p in jobs:
                 if not _can_schedule(j):
                     LOG.debug("Resources exhausted, stopping scheduling")
