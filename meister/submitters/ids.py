@@ -6,6 +6,7 @@ import meister.log
 
 LOG = meister.log.LOG.getChild('idssubmitter')
 
+# FIXME: remove
 class IDSSubmitter(object):
 
     def __init__(self, cgc):

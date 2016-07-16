@@ -33,6 +33,7 @@ from meister.creators.were_rabbit import WereRabbitCreator
 from meister.creators.pov_tester import PovTesterCreator
 import meister.log
 from meister.schedulers.priority import PriorityScheduler
+from meister.submitters.cb import CBSubmitter
 from meister.submitters.pov import POVSubmitter
 
 LOG = meister.log.LOG.getChild('main')
@@ -47,6 +48,7 @@ def wait_for_ambassador():
 
 def main(args=[]):
     """Run the meister."""
+    cbsubmitter = CBSubmitter()
     while True:
         wait_for_ambassador()
 
@@ -63,7 +65,7 @@ def main(args=[]):
             CacheCreator(),
             RopCacheCreator(),
             PatcherexCreator(),
-            IDSCreator(),
+            # IDSCreator(),
             FunctionIdentifierCreator(),
             NetworkPollCreatorCreator(),
             PatchPerformanceCreator(),
@@ -76,6 +78,7 @@ def main(args=[]):
         scheduler.run()
 
         # Submit!
+        cbsubmitter.run(Round.current_round().num)
         POVSubmitter().run()
 
     return 0
