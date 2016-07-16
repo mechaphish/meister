@@ -7,7 +7,7 @@ from farnsworth.models import NetworkPollCreatorJob
 from farnsworth.models import RawRoundTraffic
 
 import meister.creators
-LOG = meister.creators.LOG.getChild('networkpoll')
+LOG = meister.creators.LOG.getChild('network_poll_creator')
 
 
 class NetworkPollCreatorCreator(meister.creators.BaseCreator):
