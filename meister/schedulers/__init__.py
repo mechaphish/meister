@@ -5,6 +5,7 @@
 
 from __future__ import absolute_import, division, unicode_literals
 
+import copy
 import datetime
 import itertools
 import operator
@@ -169,7 +170,7 @@ class KubernetesScheduler(object):
             return self._available_resources
 
         # Reset available resources
-        self._available_resources = self._kube_total_capacity
+        self._available_resources = copy.copy(self._kube_total_capacity)
 
         # Collect fresh information from the Kubernetes API about all running pods
         # FIXME: Shitty loop to fix https://github.com/kelproject/pykube/issues/10
