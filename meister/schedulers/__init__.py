@@ -62,13 +62,8 @@ class KubernetesScheduler(object):
     def schedule(self, job):
         """Schedule the job with the specific resources."""
         LOG.debug("Scheduling job for job id %s", job.id)
-        job.save()
         self.terminate(self._worker_name(job.id))
-        if self._resources_available(job):
-            self._schedule_kube_pod(job)
-            self._resources_update(job)
-            return True
-        return False
+        self._schedule_kube_pod(job)
 
     @property
     def api(self):
@@ -150,21 +145,6 @@ class KubernetesScheduler(object):
             }
         }
         return config
-
-    def _resources_available(self, job):
-        """Internal method to check whether the resources for a Job are available."""
-        assert job is not None
-        cpu_available = self._kube_resources['cpu'] >= job.limit_cpu
-        memory_available = self._kube_resources['memory'] >= (job.limit_memory * 1024 ** 3)
-        pod_available = self._kube_resources['pods'] >= 1
-        return cpu_available and memory_available and pod_available
-
-    def _resources_update(self, job):
-        """Internal method to check whether the resources for a Job are available."""
-        assert job is not None
-        self._kube_resources['cpu'] -= job.limit_cpu
-        self._kube_resources['memory'] -= (job.limit_memory * 1024 ** 3)
-        self._kube_resources['pods'] -= 1
 
     # Currently, we are using aggregate resources instead of per node resources for ease of
     # scheduling. This is suboptimal because we might run into situation where we think we can
