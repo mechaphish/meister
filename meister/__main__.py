@@ -63,7 +63,7 @@ def main(args=[]):
             CacheCreator(),
             RopCacheCreator(),
             PatcherexCreator(),
-            IDSCreator(),
+            # IDSCreator(),
             FunctionIdentifierCreator(),
             NetworkPollCreatorCreator(),
             PatchPerformanceCreator(),
