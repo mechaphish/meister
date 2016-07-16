@@ -3,7 +3,7 @@
 
 from __future__ import absolute_import, unicode_literals
 
-from farnsworth.models import ChallengeSetFielding, IDSRuleFielding, PovTestResult, Round, IDSRule, Exploit, ChallengeBinaryNode
+from farnsworth.models import ChallengeSetFielding, IDSRuleFielding, PovTestResult, Round, IDSRule, Exploit
 
 
 class PovTestHelper(object):
@@ -51,17 +51,6 @@ class PovTestHelper(object):
         query = PovTestResult.select(PovTestResult).join(ChallengeSetFielding)
         predicate = ChallengeSetFielding.cs == target_cs
         return query.where(predicate).order_by(PovTestResult.num_success.desc()).limit(1)
-
-    @staticmethod
-    def get_povs_for_cs(target_cs):
-        """
-            Get Latest exploits against specific CS.
-        :param target_cs: CS for which PoVs need to be fetched.
-        :return: List containing PoVs for the provided CS
-        """
-        query = Exploit.select(Exploit).join(ChallengeBinaryNode)
-        predicate = ChallengeBinaryNode.cs == target_cs
-        return query.where(predicate)
 
     @staticmethod
     def get_exploit_test_results(target_exploit, cs_fielding, ids_fielding):
