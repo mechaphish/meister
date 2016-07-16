@@ -34,9 +34,6 @@ class PriorityScheduler(meister.schedulers.BaseScheduler):
     def _run(self):
         """Run jobs based on priority."""
         # Sorting is not necessarily stable, and only by priority, we have other requirements too.
-        jobs_to_schedule = sorted((j for j in self.jobs if j.completed_at is None),
-                                  key=operator.attrgetter('priority'), reverse=True)
-        jobs_to_run = []
 
         # GJA = Greedy Job Allocator
         total_capacities = copy.deepcopy(self._kube_total_capacity)
@@ -45,29 +42,40 @@ class PriorityScheduler(meister.schedulers.BaseScheduler):
 
         def _can_schedule(job):
             cpu_available = total_capacities['cpu'] >= job.limit_cpu
-            memory_available = total_capacities['memory'] >= (job.limit_memory * 1024 ** 3)
+            memory_available = total_capacities['memory'] >= (job.limit_memory * 1024 ** 2)
             pod_available = total_capacities['pods'] >= 1
             return cpu_available and memory_available and pod_available
 
         def _account_for_resources(job):
             LOG.debug("Scheduling new %s job with priority %d", job.worker, job.priority)
             total_capacities['cpu'] -= job.limit_cpu
-            total_capacities['memory'] -= (job.limit_memory * 1024 ** 3)
+            total_capacities['memory'] -= (job.limit_memory * 1024 ** 2)
             total_capacities['pods'] -= 1
 
-            # We need to get the original JOB_ID in case the job is updated, hence saving it.
-            job.save()
-            jobs_to_run.append(job)
-
-        if jobs_to_schedule:
-            LOG.debug("Can I schedule the highest priority job? %s",
-                    _can_schedule(jobs_to_schedule[0]))
-        else:
-            LOG.debug("No jobs to schedule, tabula rasa!")
-
+        jobs_to_run = []
         with farnsworth.config.master_db.atomic():
-            while jobs_to_schedule and _can_schedule(jobs_to_schedule[0]):
-                _account_for_resources(jobs_to_schedule.pop(0))
+            # jobs_to_schedule = sorted((j for j in self.jobs if j.completed_at is None),
+            #                        key=operator.attrgetter('priority'), reverse=True)
+            jobs = sorted(self.jobs, key=operator.itemgetter(1), reverse=True)
+            for j, p in jobs:
+                if not _can_schedule(j):
+                    LOG.debug("Resources exhausted, stopping scheduling")
+                    break
+
+                kwargs = {df.name: getattr(j, df.name) for df in j.dirty_fields}
+                job, created = type(j).get_or_create(**kwargs)
+                if job.completed_at is not None:
+                    LOG.debug("Job has been completed at %s, skipping", job.completed_at)
+                    continue
+                if created:
+                    LOG.debug("Job did not exist yet, created it")
+
+                LOG.debug("Scheduling job id=%d type=%s", job.id, job.worker)
+
+                _account_for_resources(job)
+                job.priority = p
+                job.save()
+                jobs_to_run.append(job)
 
         # TODO: We might still have some jobs that have the same priority but different requirements
         # and which are sorted differently, we need to solve the resource requirement equations for
@@ -107,7 +115,6 @@ class PriorityScheduler(meister.schedulers.BaseScheduler):
         if job_ids_to_ignore:
             assert isinstance(job_ids_to_ignore[0], (int, long))
 
-        LOG.debug("Jobs not running: %s", set(job.id for job in jobs_to_schedule))
         LOG.debug("Terminating workers: %s", job_ids_to_kill)
         LOG.debug("Workers running already: %s", job_ids_to_ignore)
 

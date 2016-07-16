@@ -21,15 +21,13 @@ class DrillerCreator(meister.creators.BaseCreator):
                 LOG.debug("Found {} undrilled tests".format(len(cs.undrilled_tests)))
                 found_crash = cs.found_crash
                 for test in cs.tests:
-                    job, _ = DrillerJob.get_or_create(cs=cs,
-                                                      limit_cpu=1,
-                                                      limit_memory=10,
-                                                      limit_time=15 * 60,
-                                                      payload={'test_id': test.id})
+                    job = DrillerJob(cs=cs, limit_cpu=1, limit_memory=10240,
+                                     limit_time=15 * 60,
+                                     payload={'test_id': test.id})
                     LOG.debug("Yielding DrillerJob for %s with %s", cs.name, test.id)
 
-                    job.priority = 20
+                    priority = 20
                     if not found_crash:
-                        job.priority = 100
+                        priority = 100
 
-                    yield job
+                    yield (job, priority)

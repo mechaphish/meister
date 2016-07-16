@@ -48,10 +48,11 @@ class PovTesterCreator(meister.creators.BaseCreator):
                                 job_payload = {'exploit_id': curr_exploit.id, 'cs_fld_hash' : target_cs_fld.sha256}
                                 if target_ids_fld is not None:
                                     job_payload['ids_fld_hash'] = target_ids_fld.sha256
-                                target_job = PovTesterJob.get_or_create(cs=curr_cs, payload=job_payload)
+
+                                job = PovTesterJob(cs=curr_cs, payload=job_payload)
                                 # Set priority
-                                target_job.priority = 100
-                                # yield target_job
+                                priority = 100
+                                # yield (job, priority)
                             else:
                                 LOG.info("Ignoring Exploit %s for Team %s For CS %s as it is already tested",
                                          curr_exploit.id, curr_team.name, curr_cs.name)

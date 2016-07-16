@@ -76,18 +76,18 @@ class RexCreator(meister.creators.BaseCreator):
                 for priority, crash in self._normalize_sort(BASE_PRIORITY, categories[kind]):
                     # TODO: in rare cases Rex needs more memory, can we try to handle cases where Rex
                     # needs upto 40G?
-                    job, _ = RexJob.get_or_create(cs=cs, payload={'crash_id': crash.id},
-                                                  limit_cpu=1, limit_memory=10)
-                    job.priority = priority
+                    job = RexJob(cs=cs, payload={'crash_id': crash.id},
+                                 limit_cpu=1, limit_memory=10240)
+                    priority = priority
 
                     # we have type1s? lower the priority of ip_overwrites
                     if type1_exists and crash.kind == 'ip_overwrite':
-                            job.priority -= max(BASE_PRIORITY, (100 - BASE_PRIORITY) / 2)
+                        priority -= max(BASE_PRIORITY, (100 - BASE_PRIORITY) / 2)
 
                     if type2_exists and crash.kind == 'arbitrary_read':
-                            job.priority -= max(BASE_PRIORITY, (100 - BASE_PRIORITY) / 2)
+                        priority -= max(BASE_PRIORITY, (100 - BASE_PRIORITY) / 2)
 
                     LOG.debug("Yielding RexJob for %s with crash %s priority %d",
-                              cs.name, crash.id, job.priority)
+                              cs.name, crash.id, priority)
 
-                    yield job
+                    yield (job, priority)

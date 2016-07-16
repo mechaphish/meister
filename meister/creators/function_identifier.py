@@ -18,12 +18,7 @@ class FunctionIdentifierCreator(meister.creators.BaseCreator):
     def jobs(self):
         LOG.debug("Collecting jobs")
         for cs in self.single_cb_challenge_sets():
-            job, _ = FunctionIdentifierJob.get_or_create(cs=cs,
-                                                         limit_cpu=1,
-                                                         limit_time=60 * 10,
-                                                         limit_memory=8)
-
-            job.priority = 100 # function identification should always run
-
+            job = FunctionIdentifierJob(cs=cs, limit_cpu=1, limit_time=60 * 10, limit_memory=8192)
+            priority = 100 # function identification should always run
             LOG.debug("Yielding FunctionIdentifierJob for %s", cs.name)
-            yield job
+            yield (job, priority)

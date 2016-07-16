@@ -129,7 +129,7 @@ class KubernetesScheduler(object):
                         'resources': {
                             'limits': {
                                 'cpu': str(cpu),
-                                'memory': "{}Gi".format(memory)
+                                'memory': "{}Mi".format(memory)
                             }
                         },
                         'env': filter(None, [
