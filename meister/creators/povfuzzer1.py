@@ -14,8 +14,9 @@ class PovFuzzer1Creator(meister.creators.BaseCreator):
     @property
     def jobs(self):
         for cs in self.challenge_sets():
+            multi_cbn = cs.is_multi_cbn
             for crash in cs.crashes:
-                if not cs.is_multi_cbn and crash.kind != Vulnerability.IP_OVERWRITE:
+                if not multi_cbn and crash.kind != Vulnerability.IP_OVERWRITE:
                     continue
 
                 job, _ = PovFuzzer1Job.get_or_create(cs=cs, payload={'crash_id': crash.id},
