@@ -7,11 +7,11 @@ from __future__ import absolute_import, division, unicode_literals
 
 import datetime
 import itertools
-import multiprocessing
 import operator
 import os
 import time
 
+import concurrent.futures
 import pykube.exceptions
 import pykube.http
 import pykube.objects
@@ -41,16 +41,6 @@ def _memory2int(memory):
     elif memory.endswith("Gi"):
         multiplier = 1024 ** 3
     return int(memory[:-2]) * multiplier
-
-
-def _jobs(creator):
-    """Internal helper function to return jobs from a creator.
-
-    The _jobs function has to be on at the module level because it is
-    locally-bound otherwise, which cannot be pickled, which would make
-    multiprocessing fail.
-    """
-    return creator.jobs
 
 
 class KubernetesScheduler(object):
@@ -344,13 +334,12 @@ class BaseScheduler(KubernetesScheduler):
     @property
     def jobs(self):
         """Return all jobs that all creators want to run."""
-        pool = multiprocessing.Pool()
-        # Return 25 jobs at a time to speed up generator
-        jobs_unordered_iter = pool.imap_unordered(_jobs, self.creators, chunksize=25)
-        for job in itertools.chain.from_iterable(jobs_unordered_iter):
-            yield job
-        pool.terminate()
-        pool.join()
+        with concurrent.futures.ThreadPoolExecutor(max_workers=20) as executor:
+            # Return 25 jobs at a time to speed up generator
+            jobs_unordered_iter = executor.map(operator.attrgetter('jobs'),
+                                               self.creators, chunksize=25)
+            for job in itertools.chain.from_iterable(jobs_unordered_iter):
+                yield job
 
     def run(self):
         """Run the scheduler."""
