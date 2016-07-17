@@ -328,7 +328,8 @@ class BaseScheduler(KubernetesScheduler):
         if self._is_kubernetes_unavailable():
             # Run without actually scheduling
             for job, _ in self.jobs:
-                job.save()
+                kwargs = {df.name: getattr(job, df.name) for df in job.dirty_fields}
+                job, created = type(job).get_or_create(**kwargs)
         else:
             # Run internal scheduler method
             self._run()
