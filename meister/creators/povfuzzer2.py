@@ -23,4 +23,4 @@ class PovFuzzer2Creator(meister.creators.BaseCreator):
                                     limit_cpu=1, limit_memory=10240)
 
                 LOG.debug("Yielding PovFuzzer1Job for %s with crash %s", cs.name, crash.id)
-                yield (job, 0)
+                yield (job, 50)
