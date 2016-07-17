@@ -13,6 +13,7 @@ import os
 import time
 
 import concurrent.futures
+import farnsworth.config
 import pykube.exceptions
 import pykube.http
 import pykube.objects
@@ -327,9 +328,12 @@ class BaseScheduler(KubernetesScheduler):
         """Run the scheduler."""
         if self._is_kubernetes_unavailable():
             # Run without actually scheduling
-            for job, _ in self.jobs:
-                kwargs = {df.name: getattr(job, df.name) for df in job.dirty_fields}
-                job, created = type(job).get_or_create(**kwargs)
+            with farnsworth.config.master_db.atomic():
+                for job, priority in self.jobs:
+                    kwargs = {df.name: getattr(job, df.name) for df in job.dirty_fields}
+                    job, _ = type(job).get_or_create(**kwargs)
+                    job.priority = priority
+                    job.save()
         else:
             # Run internal scheduler method
             self._run()
