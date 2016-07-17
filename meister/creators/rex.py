@@ -21,10 +21,14 @@ class Vulnerability(object):
     UNCONTROLLED_WRITE = "uncontrolled_write"
     ARBITRARY_READ = "arbitrary_read"
     NULL_DEREFERENCE = "null_dereference"
+    ARBITRARY_TRANSMIT = "arbitrary_transmit"
+    ARBITRARY_RECEIVE = "arbitrary_receive"
     UNKNOWN = "unknown"
 
 PRIORITY_MAP = {Vulnerability.IP_OVERWRITE: 100,
+                Vulnerability.ARBITRARY_TRANSMIT: 100,
                 Vulnerability.PARTIAL_IP_OVERWRITE: 80,
+                Vulnerability.ARBITRARY_RECEIVE: 80,
                 Vulnerability.ARBITRARY_READ: 75,
                 Vulnerability.WRITE_WHAT_WHERE: 50,
                 Vulnerability.WRITE_X_WHERE: 25,
