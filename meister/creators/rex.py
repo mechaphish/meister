@@ -101,6 +101,9 @@ class RexCreator(meister.creators.BaseCreator):
                     job = RexJob(cs=cs, payload={'crash_id': crash.id},
                                  limit_cpu=1, limit_memory=10240)
 
+                    type1_exists = cs.has_type1
+                    type2_exists = cs.has_type2
+
                     if type1_exists and type2_exists:
                         priority = BASE_PRIORITY
 
