@@ -3,6 +3,8 @@
 
 from __future__ import absolute_import, unicode_literals
 
+import itertools
+
 from peewee import fn
 from farnsworth.models import RexJob, Exploit, Crash
 
@@ -46,7 +48,7 @@ BASE_PRIORITY = 10
 class RexCreator(meister.creators.BaseCreator):
 
     @staticmethod
-    def _exploitable_crashes(crashes):
+    def _filter_non_exploitable(crashes):
         # ignore crashes of kind null_dereference, uncontrolled_ip_overwrite,
         # uncontrolled_write and unknown
         non_exploitable = [Vulnerability.NULL_DEREFERENCE,
@@ -54,15 +56,12 @@ class RexCreator(meister.creators.BaseCreator):
                           Vulnerability.UNCONTROLLED_WRITE,
                           Vulnerability.UNKNOWN]
 
-        ignore = crashes.select(fn.Distinct(Crash.crash_pc)).where(
-                (Crash.explored) | (Crash.exploited)
-                )
-
         # ignore any crashes which are the same crashing pc of an explored, exploited, or leaked input
         # TODO we may just want to lower the priority of these crashes
-        return crashes.where(~(Crash.crash_pc << ignore) &\
+        return crashes.where(
                 ~(Crash.kind << non_exploitable) &\
-                (Crash.triaged != True))
+                (Crash.triaged != True)
+                )
 
     @staticmethod
     def _normalize_sort(base, ordered_crashes):
@@ -73,18 +72,28 @@ class RexCreator(meister.creators.BaseCreator):
     def jobs(self):
         for cs in self.single_cb_challenge_sets():
             # does this fetch blobs? can we do the filter with the query?
-            crashes = self._exploitable_crashes(cs.crashes)
+            crashes = self._filter_non_exploitable(cs.crashes)
+
+
+            encountered_subquery = crashes.select(fn.Distinct(Crash.crash_pc)).where(
+                    (Crash.explored) | (Crash.exploited)
+                    )
 
             categories = dict()
             for vulnerability in PRIORITY_MAP.keys():
-                ordered_crashes = crashes.where(Crash.kind == vulnerability).order_by(Crash.bb_count.asc())
-                if ordered_crashes:
-                    categories[vulnerability] = enumerate(ordered_crashes)
+                high_priority = crashes.where((Crash.kind == vulnerability) &\
+                        ~(Crash.crash_pc << encountered_subquery)).order_by(Crash.bb_count.asc())
+                low_priority = crashes.where((Crash.kind == vulnerability) &\
+                        (Crash.crash_pc << encountered_subquery)).order_by(Crash.bb_count.asc())
 
-            type1_exists = cs.exploits.where(Exploit.pov_type == 'type1').exists(Exploit.reliability > 0)
-            type2_exists = cs.exploits.where(Exploit.pov_type == 'type2').exists(Exploit.reliability > 0)
+                if high_priority or low_priority:
+                    categories[vulnerability] = enumerate(itertools.chain(high_priority, low_priority))
 
-            # if we've already made a flag pointing input
+            type1_exists = cs.exploits.where((Exploit.pov_type == 'type1')\
+                    & (Exploit.reliability > 0)).exists()
+
+            type2_exists = cs.exploits.where((Exploit.pov_type == 'type2')\
+                    & (Exploit.reliability > 0)).exists()
 
             # normalize by ids
             for kind in categories:
