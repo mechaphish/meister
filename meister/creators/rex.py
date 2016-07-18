@@ -3,6 +3,7 @@
 
 from __future__ import absolute_import, unicode_literals
 
+from peewee import fn
 from farnsworth.models import RexJob, Exploit, Crash
 
 import meister.creators
@@ -39,7 +40,7 @@ PRIORITY_MAP = {Vulnerability.IP_OVERWRITE: 100,
                 Vulnerability.NULL_DEREFERENCE: 0}
 
 # the base Rex priority
-BASE_PRIORITY = 20
+BASE_PRIORITY = 10
 
 
 class RexCreator(meister.creators.BaseCreator):
@@ -53,7 +54,15 @@ class RexCreator(meister.creators.BaseCreator):
                           Vulnerability.UNCONTROLLED_WRITE,
                           Vulnerability.UNKNOWN]
 
-        return crashes.where(~(Crash.kind << non_exploitable) & (Crash.triaged != True))
+        ignore = crashes.select(fn.Distinct(Crash.crash_pc)).where(
+                (Crash.explored) | (Crash.exploited)
+                )
+
+        # ignore any crashes which are the same crashing pc of an explored, exploited, or leaked input
+        # TODO we may just want to lower the priority of these crashes
+        return crashes.where(~(Crash.crash_pc << ignore) &\
+                ~(Crash.kind << non_exploitable) &\
+                (Crash.triaged != True))
 
     @staticmethod
     def _normalize_sort(base, ordered_crashes):
@@ -68,27 +77,31 @@ class RexCreator(meister.creators.BaseCreator):
 
             categories = dict()
             for vulnerability in PRIORITY_MAP.keys():
-                ordered_crashes = crashes.where(Crash.kind == vulnerability).order_by(Crash.created_at.desc())
+                ordered_crashes = crashes.where(Crash.kind == vulnerability).order_by(Crash.bb_count.asc())
                 if ordered_crashes:
                     categories[vulnerability] = enumerate(ordered_crashes)
 
-            type1_exists = cs.exploits.where(Exploit.pov_type == 'type1').exists()
-            type2_exists = cs.exploits.where(Exploit.pov_type == 'type2').exists()
+            type1_exists = cs.exploits.where(Exploit.pov_type == 'type1').exists(Exploit.reliability > 0)
+            type2_exists = cs.exploits.where(Exploit.pov_type == 'type2').exists(Exploit.reliability > 0)
+
+            # if we've already made a flag pointing input
 
             # normalize by ids
             for kind in categories:
                 for priority, crash in self._normalize_sort(BASE_PRIORITY, categories[kind]):
-                    # TODO: in rare cases Rex needs more memory, can we try to handle cases where Rex
-                    # needs upto 40G?
                     job = RexJob(cs=cs, payload={'crash_id': crash.id},
                                  limit_cpu=1, limit_memory=10240)
 
+                    if type1_exists and type2_exists:
+                        priority = BASE_PRIORITY
+
                     # we have type1s? lower the priority of ip_overwrites
                     if type1_exists and crash.kind == 'ip_overwrite':
-                        priority -= max(BASE_PRIORITY, (100 - BASE_PRIORITY) / 2)
+                        priority = BASE_PRIORITY
 
+                    # we have types2? lower the priority
                     if type2_exists and crash.kind == 'arbitrary_read':
-                        priority -= max(BASE_PRIORITY, (100 - BASE_PRIORITY) / 2)
+                        priority = BASE_PRIORITY
 
                     LOG.debug("Yielding RexJob for %s with crash %s priority %d",
                               cs.name, crash.id, priority)
