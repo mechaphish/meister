@@ -3,7 +3,7 @@
 import random
 from farnsworth.models import (ChallengeBinaryNode,
                                ChallengeSet,
-                               ChallengeSetSubmissionCable,
+                               CSSubmissionCable,
                                IDSRule)
 import meister.log
 
@@ -17,55 +17,51 @@ class CBSubmitter(object):
         self.available_patch_types = set()
 
     def run(self, current_round=None, random_submit=False):
-        if (current_round % 2) == 0:
-            # to_submit_patch_type = None
-            # to_submit_patch_types = None
-            # submit_pt_index = None
-            #if self.patch_submission_order is not None:
-            #    if self.submission_index >= (len(self.patch_submission_order) - 2):
-            #            self.submission_index = 0
-            #    to_submit_patch_types = self.patch_submission_order[self.submission_index:]
-            #    self.submission_index += 1
-            #submit_pt_index = 0
+        small_list = None
+        if self.patch_submission_order is not None:
+            if self.submission_index >= len(self.patch_submission_order):
+                self.submission_index = 0
+            small_list = self.patch_submission_order[self.submission_index:]
+        small_index = 0
+        for cs in ChallengeSet.fielded_in_round():
+            curr_patch_types = set(cs.cbns_by_patch_type().keys())
+            to_submit_patch_type = None
+            if self.patch_submission_order is None or \
+                    not (curr_patch_types <= self.available_patch_types):
+                self.available_patch_types = curr_patch_types
+                all_patch_types = map(lambda x: str(x), list(cs.cbns_by_patch_type().keys()))
+                self.patch_submission_order = all_patch_types * 1000
+                self.submission_index = 0
+                small_list = self.patch_submission_order[self.submission_index:]
 
-            for cs in ChallengeSet.fielded_in_round():
-                curr_patch_types = set(cs.cbns_by_patch_type().keys())
-                to_submit_patch_type = None
-                if self.patch_submission_order is None or \
-                        not (curr_patch_types <= self.available_patch_types):
-                    self.available_patch_types = curr_patch_types
-                    all_patch_types = map(lambda x: str(x), list(cs.cbns_by_patch_type().keys()))
-                    self.patch_submission_order = all_patch_types * 1000
-                    self.submission_index = 0
-                    # to_submit_patch_types = self.patch_submission_order[self.submission_index:]
-                    # self.submission_index += 1
 
-                # if submit_pt_index >= len(to_submit_patch_types):
-                #    submit_pt_index = 0
+            if small_index >= len(small_list):
+                small_index = 0
+            if small_index < len(small_list):
+                to_submit_patch_type = small_list[small_index]
+            small_index += 1
+            print cs.name, to_submit_patch_type
 
-                # if submit_pt_index < len(to_submit_patch_types):
-                #    to_submit_patch_type = to_submit_patch_types[submit_pt_index]
+            patches_to_submit = []
+            for cbn in cs.cbns_original:
+                for patch in cbn.unsubmitted_patches:
+                    original_cbid = cbn.name
+                    if patch.patch_type is not None and (to_submit_patch_type is None or
+                                                         to_submit_patch_type == str(patch.patch_type)):
+                        LOG.debug("Submitting patch %s for %s", patch.name, original_cbid)
+                        patches_to_submit.append(patch)
+                        # we submit only one patch type at once
+                        break
 
-                # submit_pt_index += 1
-                if self.submission_index >= len(self.patch_submission_order):
-                    self.submission_index = 0
-                if self.submission_index < len(self.patch_submission_order):
-                    to_submit_patch_type = self.patch_submission_order[self.submission_index]
-                self.submission_index += 1
-                print cs.name, to_submit_patch_type
-                # import ipdb; ipdb.set_trace()
+                    else:
+                        LOG.debug("Ignoring patch %s for %s as to submit patch type is %s",
+                                 str(patch.name), str(original_cbid), str(to_submit_patch_type))
 
-                for cbn in cs.cbns_original:
-                    for patch in cbn.unsubmitted_patches:
-                        original_cbid = cbn.name
-                        if patch.patch_type is not None and (to_submit_patch_type is None or
-                                                             to_submit_patch_type == str(patch.patch_type)):
-                            LOG.info("Submitting patch %s for %s", patch.name, original_cbid)
-                            CSSB = ChallengeSetSubmissionCable
-                            CSSB.get_or_create(cs=cs, cbns=patch, ids=patch.ids_rule)
-                            # FIXME: we submit only one patch type at onceon ro
-                            break
+            if patches_to_submit:
+                CSSubmissionCable.get_or_create(cs=cs, ids=patch.ids_rule, cbns=patches_to_submit)
+            else:
+                LOG.debug("No patches to submit for cs %s, patch type %s",
+                         cs.name, str(to_submit_patch_type))
 
-                        else:
-                            LOG.info("Ignoring patch %s for %s as to submit patch type is %s",
-                                     str(patch.name), str(original_cbid), str(to_submit_patch_type))
+
+        self.submission_index += 1
