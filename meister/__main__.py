@@ -29,7 +29,6 @@ from meister.creators.povfuzzer1 import PovFuzzer1Creator
 from meister.creators.povfuzzer2 import PovFuzzer2Creator
 from meister.creators.rex import RexCreator
 from meister.creators.rop_cache import RopCacheCreator
-from meister.creators.were_rabbit import WereRabbitCreator
 from meister.creators.pov_tester import PovTesterCreator
 import meister.log
 from meister.schedulers.priority import PriorityScheduler
@@ -60,7 +59,6 @@ def main(args=[]):
             PovFuzzer1Creator(),
             PovFuzzer2Creator(),
             ColorGuardCreator(),
-            WereRabbitCreator(),
             AFLCreator(),
             CacheCreator(),
             RopCacheCreator(),
