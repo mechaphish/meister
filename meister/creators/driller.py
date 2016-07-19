@@ -19,7 +19,9 @@ class DrillerCreator(meister.creators.BaseCreator):
             if not cs.fuzzer_stat.pending_favs > 0:
                 LOG.info("AFL has no pending favs, scheduling Driller")
                 LOG.debug("Found {} undrilled tests".format(len(cs.undrilled_tests)))
-                found_crash = cs.found_crash
+
+                have_exploit = cs.has_type1 or cs.has_type2
+
                 for test in cs.tests:
                     job = DrillerJob(cs=cs, limit_cpu=1, limit_memory=10240,
                                      limit_time=15 * 60,
@@ -27,7 +29,7 @@ class DrillerCreator(meister.creators.BaseCreator):
                     LOG.debug("Yielding DrillerJob for %s with %s", cs.name, test.id)
 
                     priority = 20
-                    if not found_crash:
-                        priority = 100
+                    if not have_exploit:
+                        priority = 95
 
                     yield (job, priority)
