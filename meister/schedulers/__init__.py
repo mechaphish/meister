@@ -293,7 +293,7 @@ class BaseScheduler(KubernetesScheduler):
     All other scheduling strategies should inherit from this Strategy.
     """
 
-    def __init__(self, **kwargs):
+    def __init__(self, brain, **kwargs):
         """Construct a base strategy object.
 
         The Base Strategy assumes that the Farnsworth API is setup already,
@@ -302,6 +302,7 @@ class BaseScheduler(KubernetesScheduler):
         :keyword sleepytime: the amount to sleep between strategy runs.
         :keyword creators: list of creators yielding jobs.
         """
+        self.brain = brain
         self.sleepytime = kwargs.pop('sleepytime', 3)
         self.creators = kwargs.pop('creators', [])
         super(BaseScheduler, self).__init__(**kwargs)
