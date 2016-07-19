@@ -13,4 +13,4 @@ class ToadBrain(object):
 
     def sort(self, jobs):
         LOG.debug("Sorting jobs...")
-        return sorted(self.jobs, key=operator.itemgetter(1), reverse=True)
+        return sorted(jobs, key=operator.itemgetter(1), reverse=True)
