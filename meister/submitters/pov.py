@@ -1,16 +1,16 @@
-#!/usr/bin/env/python
+#!/usr/bin/env python2
 # -*- coding: utf-8 -*-
 
-from __future__ import absolute_import, unicode_literals
+from __future__ import absolute_import, unicode_literal
 
 import random
 
 from farnsworth.models import ChallengeSet, ExploitSubmissionCable, Team
 
-import meister.log
-from meister.helpers.pov_test import PovTestHelper
+from ..helpers.pov_test import PovTestHelper
+import meister.submitters
 
-LOG = meister.log.LOG.getChild('povsubmitter')
+LOG = meister.submitters.LOG.getChild('pov')
 
 
 class POVSubmitter(object):
