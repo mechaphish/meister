@@ -3,7 +3,10 @@
 
 from __future__ import absolute_import, unicode_literals
 
+import itertools
+
 from farnsworth.models import RexJob, Exploit, Crash
+from peewee import fn
 
 import meister.creators
 LOG = meister.creators.LOG.getChild('rex')
@@ -39,13 +42,13 @@ PRIORITY_MAP = {Vulnerability.IP_OVERWRITE: 100,
                 Vulnerability.NULL_DEREFERENCE: 0}
 
 # the base Rex priority
-BASE_PRIORITY = 20
+BASE_PRIORITY = 10
 
 
 class RexCreator(meister.creators.BaseCreator):
 
     @staticmethod
-    def _exploitable_crashes(crashes):
+    def _filter_non_exploitable(crashes):
         # ignore crashes of kind null_dereference, uncontrolled_ip_overwrite,
         # uncontrolled_write and unknown
         non_exploitable = [Vulnerability.NULL_DEREFERENCE,
@@ -53,7 +56,10 @@ class RexCreator(meister.creators.BaseCreator):
                           Vulnerability.UNCONTROLLED_WRITE,
                           Vulnerability.UNKNOWN]
 
-        return crashes.where(~(Crash.kind << non_exploitable) & (Crash.triaged != True))
+        # ignore any crashes which are the same crashing pc of an explored, exploited, or leaked input
+        # TODO we may just want to lower the priority of these crashes
+        return crashes.where(~(Crash.kind << non_exploitable) \
+                             & (Crash.triaged != True))
 
     @staticmethod
     def _normalize_sort(base, ordered_crashes):
@@ -64,31 +70,47 @@ class RexCreator(meister.creators.BaseCreator):
     def jobs(self):
         for cs in self.single_cb_challenge_sets():
             # does this fetch blobs? can we do the filter with the query?
-            crashes = self._exploitable_crashes(cs.crashes)
+            crashes = self._filter_non_exploitable(cs.crashes)
+
+
+            encountered_subquery = crashes.select(fn.Distinct(Crash.crash_pc)) \
+                                          .where((Crash.explored) | (Crash.exploited))
 
             categories = dict()
             for vulnerability in PRIORITY_MAP.keys():
-                ordered_crashes = crashes.where(Crash.kind == vulnerability).order_by(Crash.created_at.desc())
-                if ordered_crashes:
-                    categories[vulnerability] = enumerate(ordered_crashes)
+                high_priority = crashes.where((Crash.kind == vulnerability) \
+                    & ~(Crash.crash_pc << encountered_subquery)).order_by(Crash.bb_count.asc())
+                low_priority = crashes.where((Crash.kind == vulnerability) \
+                    & (Crash.crash_pc << encountered_subquery)).order_by(Crash.bb_count.asc())
 
-            type1_exists = cs.exploits.where(Exploit.pov_type == 'type1').exists()
-            type2_exists = cs.exploits.where(Exploit.pov_type == 'type2').exists()
+                if high_priority or low_priority:
+                    categories[vulnerability] = enumerate(itertools.chain(high_priority, low_priority))
+
+            type1_exists = cs.exploits.where((Exploit.pov_type == 'type1') \
+                                             & (Exploit.reliability > 0)).exists()
+
+            type2_exists = cs.exploits.where((Exploit.pov_type == 'type2') \
+                                             & (Exploit.reliability > 0)).exists()
 
             # normalize by ids
             for kind in categories:
                 for priority, crash in self._normalize_sort(BASE_PRIORITY, categories[kind]):
-                    # TODO: in rare cases Rex needs more memory, can we try to handle cases where Rex
-                    # needs upto 40G?
                     job = RexJob(cs=cs, payload={'crash_id': crash.id},
                                  limit_cpu=1, limit_memory=10240)
 
+                    type1_exists = cs.has_type1
+                    type2_exists = cs.has_type2
+
+                    if type1_exists and type2_exists:
+                        priority = BASE_PRIORITY
+
                     # we have type1s? lower the priority of ip_overwrites
                     if type1_exists and crash.kind == 'ip_overwrite':
-                        priority -= max(BASE_PRIORITY, (100 - BASE_PRIORITY) / 2)
+                        priority = BASE_PRIORITY
 
+                    # we have types2? lower the priority
                     if type2_exists and crash.kind == 'arbitrary_read':
-                        priority -= max(BASE_PRIORITY, (100 - BASE_PRIORITY) / 2)
+                        priority = BASE_PRIORITY
 
                     LOG.debug("Yielding RexJob for %s with crash %s priority %d",
                               cs.name, crash.id, priority)
