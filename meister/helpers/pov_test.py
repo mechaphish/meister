@@ -81,7 +81,7 @@ class PovTestHelper(object):
         :return: list containing latest cs fielding.
         """
 
-        query = ChallengeSetFielding.select().join(Round, on=(ChallengeSetFielding.submission_round == Round.id))
+        query = ChallengeSetFielding.select().join(Round, on=(ChallengeSetFielding.available_round == Round.id))
         predicate = (ChallengeSetFielding.team == target_team) & (ChallengeSetFielding.cs == target_cs)
         return query.where(predicate).order_by(Round.num.desc()).limit(1)
 
@@ -95,7 +95,7 @@ class PovTestHelper(object):
         """
 
         query = IDSRuleFielding.select()\
-                               .join(Round, on=(IDSRuleFielding.submission_round == Round.id))\
+                               .join(Round, on=(IDSRuleFielding.available_round == Round.id))\
                                .join(IDSRule, on=(IDSRuleFielding.ids_rule == IDSRule.id))
         predicate = (IDSRuleFielding.team == target_team) & (IDSRule.cs == target_cs)
         return query.where(predicate).order_by(Round.num.desc()).limit(1)
