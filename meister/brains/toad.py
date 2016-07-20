@@ -6,11 +6,8 @@ import meister.brains
 LOG = meister.brains.LOG.getChild('toad')
 
 
-class ToadBrain(object):
+class ToadBrain(meister.brains.Brain):
 
-    def __init__(self):
-        pass
-
-    def sort(self, jobs):
+    def _sort(self, jobs):
         LOG.debug("Sorting jobs...")
         return sorted(jobs, key=operator.itemgetter(1), reverse=True)
