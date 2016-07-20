@@ -45,23 +45,32 @@ class Brain(object):
         limit_memory = Job.limit_memory.default
         limit_time = Job.limit_time.default
         priority = 0
-        for cs, job_type__jobs in jobs_to_merge.items():
-            # We are doing this manually instead of through max(key=)
-            # because it would iterate 3 times over it instead.
-            for job_type, jobs in job_type__jobs.items():
-                for job, job_priority in jobs:
-                    if limit_cpu is not None:
-                        limit_cpu = max(limit_cpu, job.limit_cpu)
 
-                    if limit_memory is not None:
-                        limit_memory = max(limit_memory, job.limit_memory)
+        # We want this as an atomic transaction because we are doing a
+        # lot of get_or_create()
+        with farnsworth.master_db.atomic():
+            for cs, job_type__jobs in jobs_to_merge.items():
+                # We are doing this manually instead of through
+                # max(key=) because it would iterate 3x over it instead.
+                for job_type, jobs in job_type__jobs.items():
+                    for job, job_priority in jobs:
+                        if limit_cpu is not None:
+                            limit_cpu = max(limit_cpu, job.limit_cpu)
 
-                    if limit_time is not None:
-                        limit_time = max(limit_time, job.limit_time)
+                        if limit_memory is not None:
+                            limit_memory = max(limit_memory, job.limit_memory)
 
-                    priority = max(priority, job_priority)
+                        if limit_time is not None:
+                            limit_time = max(limit_time, job.limit_time)
 
-                job = job_type(cs=cs, limit_cpu=limit_cpu, limit_memory=limit_memory)
-                jobs_new.append((job, priority))
+                        priority = max(priority, job_priority)
+
+                        # Save object to DB so the worker can access it
+                        job.get_or_create()
+
+                    # Add meta job with proper payload to queue
+                    job = TesterJob(cs=cs, limit_cpu=limit_cpu, limit_memory=limit_memory,
+                                    payload={'type': job_type.worker})
+                    jobs_new.append((job, priority))
 
         return self._sort(jobs_new)
