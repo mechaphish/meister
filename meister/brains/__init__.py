@@ -1,13 +1,16 @@
 #!/usr/bin/env python2
 # -*- coding: utf-8 -*-
 
-from __future__ import absolute_import, unicode_literal
+from __future__ import absolute_import, unicode_literals
 
-import farnworth.config
+from collections import defaultdict
+
+import farnsworth.config
 from farnsworth.models.job import (CBTesterJob,
                                    NetworkPollCreatorJob,
                                    NetworkPollSanitizerJob,
-                                   PovTesterJob)
+                                   PovTesterJob,
+                                   TesterJob)
 
 import meister.log
 
@@ -26,12 +29,12 @@ class Brain(object):
         # Merge jobs
         job_types_to_merge = [CBTesterJob,
                               NetworkPollCreatorJob,
-                              NetworkPollSanitizerJob
+                              NetworkPollSanitizerJob,
                               PovTesterJob]
 
         # Filter jobs that need to be merged and those that are passed
         # through. TesterJobs are per ChallengeSet.
-        jobs_to_merge, jobs_new = defaultdict(defaultdict(list)), []
+        jobs_to_merge, jobs_new = defaultdict(lambda: defaultdict(list)), []
         for job, priority in jobs:
             for job_type in job_types_to_merge:
                 if isinstance(job, job_type):
@@ -42,11 +45,6 @@ class Brain(object):
 
         # Merge jobs, to have enough resources, we assign the maximum
         # requested resources to the overall TesterJob.
-        limit_cpu = Job.limit_cpu.default,
-        limit_memory = Job.limit_memory.default
-        limit_time = Job.limit_time.default
-        priority = 0
-
         # We want this as an atomic transaction because we are doing a
         # lot of get_or_create()
         with farnsworth.config.master_db.atomic():
@@ -54,6 +52,11 @@ class Brain(object):
                 # We are doing this manually instead of through
                 # max(key=) because it would iterate 3x over it instead.
                 for job_type, jobs in job_type__jobs.items():
+                    limit_cpu = job_type.limit_cpu.default,
+                    limit_memory = job_type.limit_memory.default
+                    limit_time = job_type.limit_time.default
+                    priority = 0
+
                     for job, job_priority in jobs:
                         if limit_cpu is not None:
                             limit_cpu = max(limit_cpu, job.limit_cpu)

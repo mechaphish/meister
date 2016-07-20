@@ -19,6 +19,7 @@ import pykube.http
 import pykube.objects
 import requests.exceptions
 
+from ..brains.toad import ToadBrain
 import meister.log
 import meister.kubernetes as kubernetes
 
@@ -293,7 +294,7 @@ class BaseScheduler(KubernetesScheduler):
     All other scheduling strategies should inherit from this Strategy.
     """
 
-    def __init__(self, brain, **kwargs):
+    def __init__(self, brain=None, creators=None, sleepytime=3):
         """Construct a base strategy object.
 
         The Base Strategy assumes that the Farnsworth API is setup already,
@@ -302,10 +303,10 @@ class BaseScheduler(KubernetesScheduler):
         :keyword sleepytime: the amount to sleep between strategy runs.
         :keyword creators: list of creators yielding jobs.
         """
-        self.brain = brain
-        self.sleepytime = kwargs.pop('sleepytime', 3)
-        self.creators = kwargs.pop('creators', [])
-        super(BaseScheduler, self).__init__(**kwargs)
+        self.brain = brain if brain is not None else ToadBrain()
+        self.creators = creators if creators is not None else []
+        self.sleepytime = sleepytime
+        super(BaseScheduler, self).__init__()
 
         LOG.debug("Scheduler sleepytime: %d", self.sleepytime)
         LOG.debug("Job creators: %s", ", ".join(c.__class__.__name__

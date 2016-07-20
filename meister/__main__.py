@@ -13,7 +13,7 @@ import meister.settings
 
 from farnsworth.models import Round
 
-from meister.brains.toad import ToadBrain
+from meister.brains.elephant import ElephantBrain
 from meister.creators.afl import AFLCreator
 from meister.creators.cache import CacheCreator
 from meister.creators.cb_tester import CBTesterCreator
@@ -49,7 +49,7 @@ def wait_for_ambassador():
 
 def main(args=[]):
     """Run the meister."""
-    brain = ToadBrain()
+    brain = ElephantBrain()
     submitters = [POVSubmitter(), CBSubmitter()]
     creators = [DrillerCreator(),
                 RexCreator(),

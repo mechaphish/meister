@@ -54,7 +54,7 @@ class PriorityScheduler(meister.schedulers.BaseScheduler):
 
         jobs_to_run = []
         with farnsworth.config.master_db.atomic():
-            for j, p in self.brain.sort(jobs):
+            for j, p in self.brain.sort(self.jobs):
                 if not _can_schedule(j):
                     LOG.debug("Resources exhausted, stopping scheduling")
                     break
