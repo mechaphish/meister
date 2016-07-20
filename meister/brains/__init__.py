@@ -3,6 +3,7 @@
 
 from __future__ import absolute_import, unicode_literal
 
+import farnworth.config
 from farnsworth.models.job import (CBTesterJob,
                                    NetworkPollCreatorJob,
                                    NetworkPollSanitizerJob,
@@ -48,7 +49,7 @@ class Brain(object):
 
         # We want this as an atomic transaction because we are doing a
         # lot of get_or_create()
-        with farnsworth.master_db.atomic():
+        with farnsworth.config.master_db.atomic():
             for cs, job_type__jobs in jobs_to_merge.items():
                 # We are doing this manually instead of through
                 # max(key=) because it would iterate 3x over it instead.
