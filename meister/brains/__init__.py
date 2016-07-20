@@ -67,7 +67,8 @@ class Brain(object):
                         priority = max(priority, job_priority)
 
                         # Save object to DB so the worker can access it
-                        job.get_or_create()
+                        kwargs = {df.name: getattr(job, df.name) for df in job.dirty_fields}
+                        job_type.get_or_create(**kwargs)
 
                     # Add meta job with proper payload to queue
                     job = TesterJob(cs=cs, limit_cpu=limit_cpu, limit_memory=limit_memory,
