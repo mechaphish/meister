@@ -39,7 +39,7 @@ class PovTesterCreator(meister.creators.BaseCreator):
                     if len(pov_test_results) == 0 or pov_test_results[0].num_success >= PovTesterCreator.SUCCESS_THRESHOLD:
                         # OK, we do not have any successful PoVs for the current fielded CS.
                         # schedule jobs for all PoVs, if they are not tested before.
-                        for curr_exploit in Exploit.select().where(Exploit.cbn.cs == target_cs_fld.cs):
+                        for curr_exploit in Exploit.select().where(Exploit.cs == target_cs_fld.cs):
                             # if this exploit is not tested, then schedule the PovTesterJob
                             available_test_results = PovTestHelper.\
                                 get_exploit_test_results(curr_exploit, target_cs_fld, target_ids_fld)
