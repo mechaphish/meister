@@ -27,9 +27,10 @@ from meister.creators.network_poll_sanitizer import NetworkPollSanitizerCreator
 from meister.creators.patch_performance import PatchPerformanceCreator
 from meister.creators.povfuzzer1 import PovFuzzer1Creator
 from meister.creators.povfuzzer2 import PovFuzzer2Creator
+from meister.creators.pov_tester import PovTesterCreator
 from meister.creators.rex import RexCreator
 from meister.creators.rop_cache import RopCacheCreator
-from meister.creators.pov_tester import PovTesterCreator
+from meister.creators.showmap_sync import ShowmapSyncCreator
 import meister.log
 from meister.schedulers.priority import PriorityScheduler
 from meister.submitters.cb import CBSubmitter
@@ -66,6 +67,7 @@ def main(args=[]):
             # IDSCreator(),
             FunctionIdentifierCreator(),
             NetworkPollCreatorCreator(),
+            ShowmapSyncCreator(),
             # PatchPerformanceCreator(),
             # VM jobs
             # PollCreatorCreator(),
