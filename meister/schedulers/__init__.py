@@ -109,6 +109,7 @@ class KubernetesScheduler(object):
             postgres_use_slaves = {'name': "POSTGRES_USE_SLAVES", 'value': "true"}
         else:
             postgres_use_slaves = None
+
         config = {
             'metadata': {
                 'labels': {
