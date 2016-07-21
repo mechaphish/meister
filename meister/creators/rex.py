@@ -72,7 +72,6 @@ class RexCreator(meister.creators.BaseCreator):
             # does this fetch blobs? can we do the filter with the query?
             crashes = self._filter_non_exploitable(cs.crashes)
 
-
             encountered_subquery = crashes.select(fn.Distinct(Crash.crash_pc)) \
                                           .where((Crash.explored) | (Crash.exploited))
 
@@ -86,20 +85,14 @@ class RexCreator(meister.creators.BaseCreator):
                 if high_priority or low_priority:
                     categories[vulnerability] = enumerate(itertools.chain(high_priority, low_priority))
 
-            type1_exists = cs.exploits.where((Exploit.pov_type == 'type1') \
-                                             & (Exploit.reliability > 0)).exists()
-
-            type2_exists = cs.exploits.where((Exploit.pov_type == 'type2') \
-                                             & (Exploit.reliability > 0)).exists()
+            type1_exists = cs.has_type1
+            type2_exists = cs.has_type2
 
             # normalize by ids
             for kind in categories:
                 for priority, crash in self._normalize_sort(BASE_PRIORITY, categories[kind]):
                     job = RexJob(cs=cs, payload={'crash_id': crash.id},
                                  limit_cpu=1, limit_memory=10240)
-
-                    type1_exists = cs.has_type1
-                    type2_exists = cs.has_type2
 
                     if type1_exists and type2_exists:
                         priority = BASE_PRIORITY
