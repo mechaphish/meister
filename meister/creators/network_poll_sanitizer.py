@@ -23,7 +23,7 @@ class NetworkPollSanitizerCreator(meister.creators.BaseCreator):
 
             # Set high priority only, if there are less polls
             num_poll_available = ValidPoll.select() \
-                                          .where(ValidPoll.cs == curr_unsan_poll.cs)
+                                          .where(ValidPoll.cs == curr_unsan_poll.cs) \
                                           .count()
             if num_poll_available < PollCreatorCreator.SAFE_NUM_POLLS:
                 priority = 100
