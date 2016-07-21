@@ -333,7 +333,7 @@ class BaseScheduler(KubernetesScheduler):
         if self._is_kubernetes_unavailable():
             # Run without actually scheduling
             with farnsworth.config.master_db.atomic():
-                for job, priority in self.jobs:
+                for job, priority in self.brain.sort(self.jobs):
                     kwargs = {df.name: getattr(job, df.name) for df in job.dirty_fields}
                     job, _ = type(job).get_or_create(**kwargs)
                     job.priority = priority
