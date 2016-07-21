@@ -42,8 +42,8 @@ LOG = meister.log.LOG.getChild('main')
 
 def wait_for_ambassador():
     POLL_INTERVAL = 3
-    while Round.current_round() is None:
-        LOG.info("Game not started, waiting %d seconds", POLL_INTERVAL)
+    while not (Round.current_round() and Round.current_round().is_ready()):
+        LOG.info("Round data not available, waiting %d seconds", POLL_INTERVAL)
         time.sleep(POLL_INTERVAL)
 
 
