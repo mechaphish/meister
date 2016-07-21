@@ -28,5 +28,5 @@ class ElephantBrain(meister.brains.Brain):
         return 1.
 
     def _sort(self, jobs):
-        jobs = ((j, int(self._global(j) * self._local(j) * p) for j, p in jobs)
+        jobs = ((j, int(self._global(j) * self._local(j) * p)) for j, p in jobs)
         return sorted(jobs, key=operator.itemgetter(1), reverse=True)
