@@ -3,7 +3,7 @@
 
 from __future__ import absolute_import
 
-from farnsworth.models.job import ShowmapSyncJob
+from farnsworth.models import Round, ShowmapSyncJob
 
 import meister.creators
 LOG = meister.creators.LOG.getChild('ShowmapSync')
@@ -23,7 +23,11 @@ class ShowmapSyncCreator(meister.creators.BaseCreator):
                 LOG.warning("ShowmapSync does not support MultiCBs yet")
 
             else:
-                job = ShowmapSyncJob(cs=cs, limit_cpu=1, limit_time=60 * 10, limit_memory=1024 * 6)
-                priority = 100 # we should always try to sync new testcases
-                LOG.debug("Yielding FunctionIdentifierJob for %s", cs.name)
-                yield (job, priority)
+                prev_round = Round.prev_round()
+                if prev_round:
+                    job = ShowmapSyncJob(cs=cs, payload={"round_id": prev_round.id},
+                        limit_cpu=1, limit_time=60 * 10, limit_memory=1024 * 6)
+
+                    priority = 100 # we should always try to sync new testcases
+                    LOG.debug("Yielding ShowmapSyncJob for %s, round #%d", cs.name, prev_round.num)
+                    yield (job, priority)
