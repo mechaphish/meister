@@ -10,6 +10,7 @@ from farnsworth.models.job import (CBTesterJob,
                                    NetworkPollCreatorJob,
                                    NetworkPollSanitizerJob,
                                    PovTesterJob,
+                                   PollCreatorJob,
                                    TesterJob)
 
 import meister.log
@@ -30,7 +31,8 @@ class Brain(object):
         job_types_to_merge = [CBTesterJob,
                               NetworkPollCreatorJob,
                               NetworkPollSanitizerJob,
-                              PovTesterJob]
+                              PovTesterJob,
+                              PollCreatorJob]
 
         # Filter jobs that need to be merged and those that are passed
         # through. TesterJobs are per ChallengeSet.
