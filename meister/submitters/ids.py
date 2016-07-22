@@ -1,10 +1,14 @@
-#!/usr/bin/env python
+#!/usr/bin/env python2
+# -*- coding: utf-8 -*-
+
+from __future__ import absolute_import, unicode_literals
 
 from farnsworth.models import ChallengeSet, IDSRule
-from meister.cgc.tierror import TiError
-import meister.log
 
-LOG = meister.log.LOG.getChild('idssubmitter')
+import meister.submitters
+
+LOG = meister.submitters.LOG.getChild('ids')
+
 
 # FIXME: remove
 class IDSSubmitter(object):

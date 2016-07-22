@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python2
 # -*- coding: utf-8 -*-
 
 """Run the meister."""
@@ -13,6 +13,7 @@ import meister.settings
 
 from farnsworth.models import Round
 
+from meister.brains.elephant import ElephantBrain
 from meister.creators.afl import AFLCreator
 from meister.creators.cache import CacheCreator
 from meister.creators.cb_tester import CBTesterCreator
@@ -48,38 +49,39 @@ def wait_for_ambassador():
 
 def main(args=[]):
     """Run the meister."""
-    cbsubmitter = CBSubmitter()
+    brain = ElephantBrain()
+    submitters = [POVSubmitter(), CBSubmitter()]
+    creators = [DrillerCreator(),
+                RexCreator(),
+                PovFuzzer1Creator(),
+                PovFuzzer2Creator(),
+                ColorGuardCreator(),
+                AFLCreator(),
+                CacheCreator(),
+                RopCacheCreator(),
+                PatcherexCreator(),
+                # IDSCreator(),
+                FunctionIdentifierCreator(),
+                NetworkPollCreatorCreator(),
+                ShowmapSyncCreator()]
+                # PatchPerformanceCreator(),
+                # VM jobs
+                # PollCreatorCreator(),
+                # NetworkPollSanitizerCreator(),
+                # CBTesterCreator(),
+                # PovTesterCreator()
+
+    scheduler = PriorityScheduler(brain, creators)
+
     while True:
         wait_for_ambassador()
 
         LOG.info("Round #%d", Round.current_round().num)
 
-        scheduler = PriorityScheduler(creators=[
-            DrillerCreator(),
-            RexCreator(),
-            PovFuzzer1Creator(),
-            PovFuzzer2Creator(),
-            ColorGuardCreator(),
-            AFLCreator(),
-            CacheCreator(),
-            RopCacheCreator(),
-            PatcherexCreator(),
-            # IDSCreator(),
-            FunctionIdentifierCreator(),
-            NetworkPollCreatorCreator(),
-            ShowmapSyncCreator(),
-            # PatchPerformanceCreator(),
-            # VM jobs
-            # PollCreatorCreator(),
-            # NetworkPollSanitizerCreator(),
-            # CBTesterCreator(),
-            # PovTesterCreator()
-        ])
         scheduler.run()
 
-        # Submit!
-        cbsubmitter.run(Round.current_round().num)
-        POVSubmitter().run()
+        for submitter in submitters:
+            submitter.run(Round.current_round().num)
 
     return 0
 

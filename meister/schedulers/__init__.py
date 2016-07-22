@@ -19,6 +19,7 @@ import pykube.http
 import pykube.objects
 import requests.exceptions
 
+from ..brains.toad import ToadBrain
 import meister.log
 import meister.kubernetes as kubernetes
 
@@ -108,6 +109,7 @@ class KubernetesScheduler(object):
             postgres_use_slaves = {'name': "POSTGRES_USE_SLAVES", 'value': "true"}
         else:
             postgres_use_slaves = None
+
         config = {
             'metadata': {
                 'labels': {
@@ -293,7 +295,7 @@ class BaseScheduler(KubernetesScheduler):
     All other scheduling strategies should inherit from this Strategy.
     """
 
-    def __init__(self, **kwargs):
+    def __init__(self, brain=None, creators=None, sleepytime=3):
         """Construct a base strategy object.
 
         The Base Strategy assumes that the Farnsworth API is setup already,
@@ -302,9 +304,10 @@ class BaseScheduler(KubernetesScheduler):
         :keyword sleepytime: the amount to sleep between strategy runs.
         :keyword creators: list of creators yielding jobs.
         """
-        self.sleepytime = kwargs.pop('sleepytime', 3)
-        self.creators = kwargs.pop('creators', [])
-        super(BaseScheduler, self).__init__(**kwargs)
+        self.brain = brain if brain is not None else ToadBrain()
+        self.creators = creators if creators is not None else []
+        self.sleepytime = sleepytime
+        super(BaseScheduler, self).__init__()
 
         LOG.debug("Scheduler sleepytime: %d", self.sleepytime)
         LOG.debug("Job creators: %s", ", ".join(c.__class__.__name__
@@ -330,7 +333,7 @@ class BaseScheduler(KubernetesScheduler):
         if self._is_kubernetes_unavailable():
             # Run without actually scheduling
             with farnsworth.config.master_db.atomic():
-                for job, priority in self.jobs:
+                for job, priority in self.brain.sort(self.jobs):
                     kwargs = {df.name: getattr(job, df.name) for df in job.dirty_fields}
                     job, _ = type(job).get_or_create(**kwargs)
                     job.priority = priority

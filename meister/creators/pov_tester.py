@@ -45,14 +45,14 @@ class PovTesterCreator(meister.creators.BaseCreator):
                                 get_exploit_test_results(curr_exploit, target_cs_fld, target_ids_fld)
                             if len(available_test_results) == 0:
                                 # Schedule a Pov Tester Job for this
-                                job_payload = {'exploit_id': curr_exploit.id, 'cs_fld_hash' : target_cs_fld.sha256}
+                                job_payload = {'exploit_id': curr_exploit.id, 'cs_fld_hash': target_cs_fld.sha256}
                                 if target_ids_fld is not None:
                                     job_payload['ids_fld_hash'] = target_ids_fld.sha256
 
-                                job = PovTesterJob(cs=curr_cs, payload=job_payload)
+                                job = PovTesterJob(cs=curr_cs, payload=job_payload, limit_cpu=20, limit_memory=4096)
                                 # Set priority
                                 priority = 100
-                                # yield (job, priority)
+                                yield (job, priority)
                             else:
                                 LOG.info("Ignoring Exploit %s for Team %s For CS %s as it is already tested",
                                          curr_exploit.id, curr_team.name, curr_cs.name)
@@ -63,5 +63,4 @@ class PovTesterCreator(meister.creators.BaseCreator):
                 else:
                     LOG.warn("No CS fielding exist for Team %s For CS %s, no PoV Tester Jobs scheduled",
                              curr_team.name, curr_cs.name)
-        return iter(())
 
