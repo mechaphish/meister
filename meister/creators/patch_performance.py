@@ -18,6 +18,7 @@ class PatchPerformanceCreator(meister.creators.BaseCreator):
             curr_round = Round.current_round()
             job = PatchPerformanceJob(cs=curr_cs, limit_cpu=1, limit_memory=2048,
                                       payload={'round_id': curr_round.id})
-            priority = 50
+            # we want the patch performance to be computed soon for every round.
+            priority = 100
             LOG.debug("Creating PatchPerformanceCreator for CS %s and Round %s ", curr_cs.name, curr_round.num)
             yield (job, priority)

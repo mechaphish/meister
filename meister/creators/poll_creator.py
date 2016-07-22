@@ -17,7 +17,7 @@ class PollCreatorCreator(meister.creators.BaseCreator):
     def jobs(self):
         for curr_test in Test.select().where(Test.poll_created == False):
             job = PollCreatorJob(cs=curr_test.cs, payload={'test_id': curr_test.id}, limit_cpu=20,
-                                 limit_memory=4096)
+                                 limit_memory=4096*2)
             priority = 20
 
             # Set high priority only, if there are less polls
