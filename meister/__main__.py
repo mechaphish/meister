@@ -63,13 +63,13 @@ def main(args=[]):
                 # IDSCreator(),
                 FunctionIdentifierCreator(),
                 NetworkPollCreatorCreator(),
-                ShowmapSyncCreator()]
-                # PatchPerformanceCreator(),
+                ShowmapSyncCreator(),
+                PatchPerformanceCreator(),
                 # VM jobs
-                # PollCreatorCreator(),
-                # NetworkPollSanitizerCreator(),
-                # CBTesterCreator(),
-                # PovTesterCreator()
+                PollCreatorCreator(),
+                NetworkPollSanitizerCreator(),
+                CBTesterCreator(),
+                PovTesterCreator()]
 
     scheduler = PriorityScheduler(brain, creators)
 
