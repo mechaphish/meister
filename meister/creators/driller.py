@@ -3,6 +3,7 @@
 
 from __future__ import absolute_import
 
+from datetime import datetime, timedelta
 from farnsworth.models.job import DrillerJob
 
 import meister.creators
@@ -15,8 +16,23 @@ class DrillerCreator(meister.creators.BaseCreator):
             if cs.fuzzer_stat is None or cs.fuzzer_stat.last_path is None:
                 continue
 
+            id_started = cs.function_identification_started_at
+
+            # if we are assuming AFL will start up, we can also assume identification will start up
+            if id_started is None:
+                continue
+
+            has_pending_favs = cs.fuzzer_stat.pending_favs
+            completed_id = cs.completed_function_identification
+
+            # we drill if...
+            #  - AFL no longer has any pending favs
+            #  - function identification has completed or if 3 minutes has passed since it's scheduling
+            surpassed_threshold = datetime.now() > (id_started + timedelta(minutes=3))
+            needs_drilling = has_pending_favs == 0 and (completed_id or surpassed_threshold)
+
             # is the fuzzer still working on mutating favorites?
-            if not cs.fuzzer_stat.pending_favs > 0:
+            if needs_drilling:
                 LOG.info("AFL has no pending favs, scheduling Driller")
                 LOG.debug("Found {} undrilled tests".format(len(cs.undrilled_tests)))
 
