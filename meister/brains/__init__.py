@@ -52,7 +52,7 @@ class Brain(object):
                 # We are doing this manually instead of through
                 # max(key=) because it would iterate 3x over it instead.
                 for job_type, jobs in job_type__jobs.items():
-                    limit_cpu = job_type.limit_cpu.default,
+                    limit_cpu = job_type.limit_cpu.default
                     limit_memory = job_type.limit_memory.default
                     limit_time = job_type.limit_time.default
                     priority = 0
@@ -75,7 +75,7 @@ class Brain(object):
 
                     # Add meta job with proper payload to queue
                     job = TesterJob(cs=cs, limit_cpu=limit_cpu, limit_memory=limit_memory,
-                                    payload={'type': job_type.worker})
+                                    payload={'type': job_type.worker.default})
                     jobs_new.append((job, priority))
 
         return self._sort(jobs_new)
