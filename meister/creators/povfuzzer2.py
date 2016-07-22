@@ -23,15 +23,12 @@ class PovFuzzer2Creator(meister.creators.BaseCreator):
         for cs in self.challenge_sets():
             multi_cbn = cs.is_multi_cbn
             if not cs.has_type2:
-                if multi_cbn:
-                    LOG.warning("MultiCBs as of yet are unsupported, skipping %s", cs.name)
-                else:
-                    ordered_crashes = cs.crashes.where(Crash.kind == Vulnerability.ARBITRARY_READ) \
-                                                .order_by(fn.octet_length(Crash.blob).asc())
+                ordered_crashes = cs.crashes.where(Crash.kind == Vulnerability.ARBITRARY_READ) \
+                                            .order_by(fn.octet_length(Crash.blob).asc())
 
-                    for priority, crash in self._normalize_sort(BASE_PRIORITY, enumerate(ordered_crashes)):
-                        job = PovFuzzer2Job(cs=cs, payload={'crash_id': crash.id},
-                                            limit_cpu=1, limit_memory=10240)
-                        LOG.debug("Yielding PovFuzzer2Job for %s with crash %s priority %d",
-                                  cs.name, crash.id, priority)
-                        yield (job, priority)
+                for priority, crash in self._normalize_sort(BASE_PRIORITY, enumerate(ordered_crashes)):
+                    job = PovFuzzer2Job(cs=cs, payload={'crash_id': crash.id},
+                                        limit_cpu=1, limit_memory=10240)
+                    LOG.debug("Yielding PovFuzzer2Job for %s with crash %s priority %d",
+                              cs.name, crash.id, priority)
+                    yield (job, priority)
