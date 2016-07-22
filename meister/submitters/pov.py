@@ -15,7 +15,7 @@ LOG = meister.submitters.LOG.getChild('pov')
 
 class POVSubmitter(object):
 
-    def run(self):
+    def run(self, current_round=None, random_submit=False):
         for team in Team.opponents():
             throws = 10
             for cs in ChallengeSet.fielded_in_round():
