@@ -3,7 +3,7 @@
 
 from __future__ import absolute_import
 
-from farnsworth.models import PollCreatorJob, Test, ValidPoll
+from farnsworth.models import PollCreatorJob, Test, ValidPoll, ChallengeSet
 
 import meister.creators
 LOG = meister.creators.LOG.getChild('poll_creator')
@@ -15,17 +15,19 @@ class PollCreatorCreator(meister.creators.BaseCreator):
 
     @property
     def jobs(self):
-        for curr_test in Test.select().where(Test.poll_created == False):
-            job = PollCreatorJob(cs=curr_test.cs, payload={'test_id': curr_test.id}, limit_cpu=20,
-                                 limit_memory=4096*2)
-            priority = 20
+        # iterate only for currently active ChallengeSets
+        for curr_cs in ChallengeSet.fielded_in_round():
+            for curr_test in Test.select().where(Test.poll_created == False & Test.cs == curr_cs):
+                job = PollCreatorJob(cs=curr_test.cs, payload={'test_id': curr_test.id}, limit_cpu=20,
+                                     limit_memory=4096*2)
+                priority = 20
 
-            # Set high priority only, if there are less polls
-            num_poll_available = ValidPoll.select() \
-                                          .where(ValidPoll.cs == curr_test.cs) \
-                                          .count()
-            if num_poll_available < PollCreatorCreator.SAFE_NUM_POLLS:
-                priority = 100
+                # Set high priority only, if there are less polls
+                num_poll_available = ValidPoll.select() \
+                                              .where(ValidPoll.cs == curr_test.cs) \
+                                              .count()
+                if num_poll_available < PollCreatorCreator.SAFE_NUM_POLLS:
+                    priority = 100
 
-            LOG.debug("Creating PollJob for cs %s with test %s ", curr_test.cs.name, curr_test.id)
-            yield (job, priority)
+                LOG.debug("Creating PollJob for cs %s with test %s ", curr_test.cs.name, curr_test.id)
+                yield (job, priority)
