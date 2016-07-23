@@ -89,8 +89,8 @@ class KubernetesScheduler(object):
     def _kube_pod_template(self, job):
         name = self._worker_name(job.id)
         # FIXME
-        cpu = str(job.limit_cpu) if job.limit_cpu is not None else 2
-        memory = str(job.limit_memory) if job.limit_memory is not None else 4
+        cpu = str(job.request_cpu) if job.request_cpu is not None else 2
+        memory = str(job.request_memory) if job.request_memory is not None else 4
         restart_policy = 'OnFailure' if job.restart else 'Never'
         volumes = [{'name': 'devshm', 'emptyDir': {'medium': 'Memory'}}]
         volume_mounts = [{'name': 'devshm', 'mountPath': '/dev/shm'}]

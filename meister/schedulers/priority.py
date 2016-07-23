@@ -41,15 +41,15 @@ class PriorityScheduler(meister.schedulers.BaseScheduler):
         # TODO: We need to remove overhead, like database and meister, from total capacities.
 
         def _can_schedule(job):
-            cpu_available = total_capacities['cpu'] >= job.limit_cpu
-            memory_available = total_capacities['memory'] >= (job.limit_memory * 1024 ** 2)
+            cpu_available = total_capacities['cpu'] >= job.request_cpu
+            memory_available = total_capacities['memory'] >= (job.request_memory * 1024 ** 2)
             pod_available = total_capacities['pods'] >= 1
             return cpu_available and memory_available and pod_available
 
         def _account_for_resources(job):
             LOG.debug("Scheduling new %s job with priority %d", job.worker, job.priority)
-            total_capacities['cpu'] -= job.limit_cpu
-            total_capacities['memory'] -= (job.limit_memory * 1024 ** 2)
+            total_capacities['cpu'] -= job.request_cpu
+            total_capacities['memory'] -= (job.request_memory * 1024 ** 2)
             total_capacities['pods'] -= 1
 
         jobs_to_run, job_ids_to_run = [], set()

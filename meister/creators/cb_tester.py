@@ -22,7 +22,7 @@ class CBTesterCreator(meister.creators.BaseCreator):
                     curr_cb_tester_job = CBTesterJob(cs=poll.cs, payload={'poll_id': poll.id,
                                                                           'cs_id': poll.cs.id,
                                                                           'patch_type': patch_type},
-                                                     limit_cpu=20, limit_memory=4096*2)
+                                                     request_cpu=20, request_memory=4096*2)
 
                     num_tested_polls = CBPollPerformance.num_tested_polls(poll.cs, patch_type)
                     priority = 100 if num_tested_polls < CBTesterCreator.MIN_TESTED_POLLS else 50
@@ -35,7 +35,7 @@ class CBTesterCreator(meister.creators.BaseCreator):
                 # Create job for unpatched binary
                 curr_cb_tester_job = CBTesterJob(cs=poll.cs, payload={'poll_id': poll.id,
                                                                       'cs_id': poll.cs.id},
-                                                 limit_cpu=20, limit_memory=4096*2)
+                                                 request_cpu=20, request_memory=4096*2)
 
                 # get number of successful polls tested against unpatched binary
                 num_tested_polls = CBPollPerformance.num_tested_polls(poll.cs, None)

@@ -57,17 +57,17 @@ class Brain(object):
                 # We are doing this manually instead of through
                 # max(key=) because it would iterate 3x over it instead.
                 for job_type, jobs in job_type__jobs.items():
-                    limit_cpu = job_type.limit_cpu.default
-                    limit_memory = job_type.limit_memory.default
+                    request_cpu = job_type.request_cpu.default
+                    request_memory = job_type.request_memory.default
                     limit_time = job_type.limit_time.default
                     priority = 0
 
                     for job, job_priority in jobs:
-                        if limit_cpu is not None:
-                            limit_cpu = max(limit_cpu, job.limit_cpu)
+                        if request_cpu is not None:
+                            request_cpu = max(request_cpu, job.request_cpu)
 
-                        if limit_memory is not None:
-                            limit_memory = max(limit_memory, job.limit_memory)
+                        if request_memory is not None:
+                            request_memory = max(request_memory, job.request_memory)
 
                         if limit_time is not None:
                             limit_time = max(limit_time, job.limit_time)
@@ -79,7 +79,7 @@ class Brain(object):
                         job_type.get_or_create(**kwargs)
 
                     # Add meta job with proper payload to queue
-                    job = TesterJob(cs=cs, limit_cpu=limit_cpu, limit_memory=limit_memory,
+                    job = TesterJob(cs=cs, request_cpu=request_cpu, request_memory=request_memory,
                                     payload={'type': job_type.worker.default})
                     jobs_new.append((job, priority))
 
