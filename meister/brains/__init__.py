@@ -38,12 +38,15 @@ class Brain(object):
         # through. TesterJobs are per ChallengeSet.
         jobs_to_merge, jobs_new = defaultdict(lambda: defaultdict(list)), []
         for job, priority in jobs:
+            to_merge = False
             for job_type in job_types_to_merge:
                 if isinstance(job, job_type):
                     # Per ChallengeSet per Job type
                     jobs_to_merge[job.cs][job_type].append((job, priority))
-                else:
-                    jobs_new.append((job, priority))
+                    to_merge = True
+
+            if not to_merge:
+                jobs_new.append((job, priority))
 
         # Merge jobs, to have enough resources, we assign the maximum
         # requested resources to the overall TesterJob.
