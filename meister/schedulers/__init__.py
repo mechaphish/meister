@@ -60,7 +60,6 @@ class KubernetesScheduler(object):
         self._available_resources = None
         self._resources_cache_timeout = datetime.timedelta(seconds=1)
         self._resources_timestamp = datetime.datetime(1970, 1, 1, 0, 0, 0)
-        self._overprovision = 2.
 
     def schedule(self, job):
         """Schedule the job with the specific resources."""
@@ -230,10 +229,6 @@ class KubernetesScheduler(object):
             resources['cpu'] += capacity['cpu']
             resources['memory'] += capacity['memory']
             resources['pods'] += capacity['pods']
-
-        resources['cpu'] *= self._overprovision
-        resources['memory'] *= self._overprovision
-        resources['pods'] *= self._overprovision
 
         LOG.debug("Total cluster capacity: %s cores, %s GiB, %s pods",
                   resources['cpu'], resources['memory'] // (1024**3),
