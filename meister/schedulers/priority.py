@@ -52,7 +52,7 @@ class PriorityScheduler(meister.schedulers.BaseScheduler):
             total_capacities['memory'] -= (job.limit_memory * 1024 ** 2)
             total_capacities['pods'] -= 1
 
-        jobs_to_run = []
+        jobs_to_run, job_ids_to_run = [], set()
         with farnsworth.config.master_db.atomic():
             for j, p in self.brain.sort(self.jobs):
                 if not _can_schedule(j):
@@ -68,12 +68,17 @@ class PriorityScheduler(meister.schedulers.BaseScheduler):
                 if created:
                     LOG.debug("Job did not exist yet, created it")
 
-                LOG.debug("Scheduling job id=%d type=%s", job.id, job.worker)
+                if job.id not in job_ids_to_run:
+                    LOG.debug("Scheduling job id=%d type=%s", job.id, job.worker)
 
-                _account_for_resources(job)
-                job.priority = p
-                job.save()
-                jobs_to_run.append(job)
+                    _account_for_resources(job)
+                    if job.priority != p:
+                        job.priority = p
+                        job.save()
+                    jobs_to_run.append(job)
+                    job_ids_to_run.add(job.id)
+                else:
+                    LOG.error("A creator yielded a job a second time: job id=%d", job.id)
 
         # TODO: We might still have some jobs that have the same priority but different requirements
         # and which are sorted differently, we need to solve the resource requirement equations for
