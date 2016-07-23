@@ -53,14 +53,19 @@ class POVSubmitter(object):
                     available_povs = cs.exploits
                     if len(available_povs) > 0:
                         # OK, we select a random PoV from available PoVs and submit.
-                        to_submit_pov = available_povs[random.randint(0,len(available_povs)-1)]
-                        LOG.info("Submitting a randomly chosen POV %s against team %s for CS %s",
+                        to_submit_pov = cs.most_reliable_exploit
+                        LOG.info("Submitting most reliable POV %s against team %s for CS %s",
                                  to_submit_pov.id, team.name, cs.name)
 
                 if to_submit_pov is not None:
-                    ExploitSubmissionCable.create(team=team,
-                                                  exploit=to_submit_pov,
-                                                  throws=throws)
-                    LOG.debug("POV %s marked for submission", to_submit_pov.id)
+
+                    # if the most recent exploit submission for a given team has the same exploit id
+                    # do not resubmit
+
+                    if ExploitSubmissionCable.most_recent_for_team(team) != to_submit_pov:
+                        ExploitSubmissionCable.create(team=team,
+                                                      exploit=to_submit_pov,
+                                                      throws=throws)
+                        LOG.debug("POV %s marked for submission", to_submit_pov.id)
                 else:
                     LOG.warn("No PoV to submit for Team %s for CS %s", team.name, cs.name)
