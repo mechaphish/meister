@@ -17,6 +17,6 @@ class CacheCreator(meister.creators.BaseCreator):
     def jobs(self):
         LOG.debug("Collecting jobs...")
         for cs in self.single_cb_challenge_sets():
-            job = CacheJob(cs=cs, request_cpu=1, request_memory=8192)
+            job = CacheJob(cs=cs, request_cpu=1, request_memory=512, limit_memory=8192)
             LOG.debug("Yielding CacheJob for %s", cs.name)
             yield (job, 100)

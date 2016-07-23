@@ -31,7 +31,8 @@ class PovFuzzer1Creator(meister.creators.BaseCreator):
 
                 for priority, crash in self._normalize_sort(BASE_PRIORITY, enumerate(ordered_crashes)):
                     job = PovFuzzer1Job(cs=cs, payload={'crash_id': crash.id},
-                                        request_cpu=1, request_memory=10240)
+                                        request_cpu=1, limit_memory=2048,
+                                        limit_time=5 * 60)
                     LOG.debug("Yielding PovFuzzer1Job for %s with crash %s priority %d",
                               cs.name, crash.id, priority)
                     yield (job, priority)

@@ -26,7 +26,10 @@ class ColorGuardCreator(meister.creators.BaseCreator):
                     LOG.debug("ColorGuardJob for %s, test %s being created", cs.name, test.id)
                     # TODO: get naive colorguard support working for multicbs
                     job = ColorGuardJob(cs=cs, payload={'test_id': test.id},
-                                        request_cpu=1, request_memory=6144)
+                                        request_cpu=1, request_memory=2048,
+                                        limit_memory=10240,
+                                        limit_time=10 * 60)
+
                     priority = BASE_PRIORITY + 10
 
                     # if there's no crash for a CS, more likely there's a leak.
