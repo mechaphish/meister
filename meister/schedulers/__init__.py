@@ -100,15 +100,19 @@ class KubernetesScheduler(object):
         # Job Resource Limits
         if job.limit_cpu is None:
             limit_cpu = Job.limit_cpu.default
-        else:
+        elif request_cpu < job.limit_cpu:
+            # CPU limit is set to a reasonable value
             limit_cpu = job.limit_cpu
-        limit_cpu = max(request_cpu * 2, limit_cpu)
+        else:
+            # Better add some padding
+            limit_cpu = request_cpu * 2
 
         if job.limit_memory is None:
             limit_memory = Job.limit_memory.default
-        else:
+        elif request_memory < job.limit_memory:
             limit_memory = job.limit_memory
-        limit_memory = max(request_memory * 2, limit_memory)
+        else:
+            limit_memory = request_memory * 2
 
         restart_policy = 'OnFailure' if job.restart else 'Never'
         volumes = [{'name': 'devshm', 'emptyDir': {'medium': 'Memory'}}]
