@@ -71,8 +71,9 @@ class PriorityScheduler(meister.schedulers.BaseScheduler):
                 LOG.debug("Scheduling job id=%d type=%s", job.id, job.worker)
 
                 _account_for_resources(job)
-                job.priority = p
-                job.save()
+                if job.priority != p:
+                    job.priority = p
+                    job.save()
                 jobs_to_run.append(job)
 
         # TODO: We might still have some jobs that have the same priority but different requirements
