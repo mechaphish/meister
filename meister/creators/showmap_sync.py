@@ -24,8 +24,8 @@ class ShowmapSyncCreator(meister.creators.BaseCreator):
             else:
                 prev_round = Round.prev_round()
                 if prev_round:
-                    job = ShowmapSyncJob(cs=cs, payload={"round_id": prev_round.id}, limit_cpu=1,
-                                         limit_time=60 * 10, limit_memory=1024 * 6)
+                    job = ShowmapSyncJob(cs=cs, payload={"round_id": prev_round.id}, request_cpu=1,
+                                         limit_time=60 * 10, request_memory=1024 * 6)
                     priority = 100  # We should always try to sync new testcases
 
                     LOG.debug("Yielding ShowmapSyncJob for %s, round #%d", cs.name, prev_round.num)

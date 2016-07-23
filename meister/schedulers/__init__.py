@@ -60,7 +60,6 @@ class KubernetesScheduler(object):
         self._available_resources = None
         self._resources_cache_timeout = datetime.timedelta(seconds=1)
         self._resources_timestamp = datetime.datetime(1970, 1, 1, 0, 0, 0)
-        self._overprovision = 2.
 
     def schedule(self, job):
         """Schedule the job with the specific resources."""
@@ -88,9 +87,29 @@ class KubernetesScheduler(object):
 
     def _kube_pod_template(self, job):
         name = self._worker_name(job.id)
-        # FIXME
-        cpu = str(job.limit_cpu) if job.limit_cpu is not None else 2
-        memory = str(job.limit_memory) if job.limit_memory is not None else 4
+        # Job Resource Requirements
+        if job.request_cpu is None:
+            request_cpu = Job.request_cpu.default
+        else:
+            request_cpu = job.request_cpu
+        if job.request_memory is None:
+            request_memory = Job.request_memory.default
+        else:
+            request_memory = job.request_memory
+
+        # Job Resource Limits
+        if job.limit_cpu is None:
+            limit_cpu = Job.limit_cpu.default
+        else:
+            limit_cpu = job.limit_cpu
+        limit_cpu = max(request_cpu * 2, limit_cpu)
+
+        if job.limit_memory is None:
+            limit_memory = Job.limit_memory.default
+        else:
+            limit_memory = job.limit_memory
+        limit_memory = max(request_memory * 2, limit_memory)
+
         restart_policy = 'OnFailure' if job.restart else 'Never'
         volumes = [{'name': 'devshm', 'emptyDir': {'medium': 'Memory'}}]
         volume_mounts = [{'name': 'devshm', 'mountPath': '/dev/shm'}]
@@ -127,9 +146,13 @@ class KubernetesScheduler(object):
                         'image': os.environ['WORKER_IMAGE'],
                         'imagePullPolicy': os.environ['WORKER_IMAGE_PULL_POLICY'],
                         'resources': {
+                            'requests': {
+                                'cpu': str(request_cpu),
+                                'memory': "{}Mi".format(request_memory)
+                            },
                             'limits': {
-                                'cpu': str(cpu),
-                                'memory': "{}Mi".format(memory)
+                                'cpu': str(limit_cpu),
+                                'memory': "{}Mi".format(limit_memory)
                             }
                         },
                         'env': filter(None, [
@@ -230,10 +253,6 @@ class KubernetesScheduler(object):
             resources['cpu'] += capacity['cpu']
             resources['memory'] += capacity['memory']
             resources['pods'] += capacity['pods']
-
-        resources['cpu'] *= self._overprovision
-        resources['memory'] *= self._overprovision
-        resources['pods'] *= self._overprovision
 
         LOG.debug("Total cluster capacity: %s cores, %s GiB, %s pods",
                   resources['cpu'], resources['memory'] // (1024**3),

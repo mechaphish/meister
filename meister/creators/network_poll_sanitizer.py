@@ -18,7 +18,7 @@ class NetworkPollSanitizerCreator(meister.creators.BaseCreator):
             # Get the number of polls available for current CS
             job = NetworkPollSanitizerJob(cs=curr_unsan_poll.cs,
                                           payload={'rrp_id': curr_unsan_poll.id},
-                                          limit_cpu=20, limit_memory=4096*2)
+                                          request_cpu=20, request_memory=4096*2)
             priority = 20
 
             # Set high priority only, if there are less polls

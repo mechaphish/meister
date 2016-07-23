@@ -49,7 +49,7 @@ class PovTesterCreator(meister.creators.BaseCreator):
                                 if target_ids_fld is not None:
                                     job_payload['ids_fld_hash'] = target_ids_fld.sha256
 
-                                job = PovTesterJob(cs=curr_cs, payload=job_payload, limit_cpu=20, limit_memory=4096)
+                                job = PovTesterJob(cs=curr_cs, payload=job_payload, request_cpu=20, request_memory=4096)
                                 # Set priority
                                 priority = 100
                                 yield (job, priority)

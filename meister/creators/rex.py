@@ -92,7 +92,7 @@ class RexCreator(meister.creators.BaseCreator):
             for kind in categories:
                 for priority, crash in self._normalize_sort(BASE_PRIORITY, categories[kind]):
                     job = RexJob(cs=cs, payload={'crash_id': crash.id},
-                                 limit_cpu=1, limit_memory=10240)
+                                 request_cpu=1, request_memory=10240)
 
                     if type1_exists and type2_exists:
                         priority = BASE_PRIORITY

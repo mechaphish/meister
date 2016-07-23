@@ -16,7 +16,7 @@ class PatchPerformanceCreator(meister.creators.BaseCreator):
         # passing round id takes care of not generating duplicates in a round for a cs.
         for curr_cs in self.challenge_sets():
             curr_round = Round.current_round()
-            job = PatchPerformanceJob(cs=curr_cs, limit_cpu=1, limit_memory=2048,
+            job = PatchPerformanceJob(cs=curr_cs, request_cpu=1, request_memory=2048,
                                       payload={'round_id': curr_round.id})
             # we want the patch performance to be computed soon for every round.
             priority = 100
