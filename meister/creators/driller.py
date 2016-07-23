@@ -39,7 +39,8 @@ class DrillerCreator(meister.creators.BaseCreator):
                 have_exploit = cs.has_type1 or cs.has_type2
 
                 for test in cs.tests:
-                    job = DrillerJob(cs=cs, request_cpu=1, request_memory=10240,
+                    job = DrillerJob(cs=cs, request_cpu=1, request_memory=2048,
+                                     limit_memory=10240,
                                      limit_time=15 * 60,
                                      payload={'test_id': test.id})
                     LOG.debug("Yielding DrillerJob for %s with %s", cs.name, test.id)
