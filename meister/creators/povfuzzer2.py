@@ -8,7 +8,7 @@ from peewee import fn
 
 import meister.creators
 from .rex import Vulnerability, BASE_PRIORITY
-LOG = meister.creators.LOG.getChild('povfuzzer2job')
+LOG = meister.creators.LOG.getChild('povfuzzer2')
 
 
 class PovFuzzer2Creator(meister.creators.BaseCreator):
