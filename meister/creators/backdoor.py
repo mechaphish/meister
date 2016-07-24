@@ -3,7 +3,7 @@
 
 from __future__ import absolute_import, unicode_literals
 
-from farnsworth.models.job import CacheJob
+from farnsworth.models.job import BackdoorSubmitterJob
 
 import meister.creators
 LOG = meister.creators.LOG.getChild('Cache')
