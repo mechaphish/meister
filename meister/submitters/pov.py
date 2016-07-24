@@ -51,9 +51,11 @@ class POVSubmitter(object):
                     available_povs = cs.exploits
                     if len(available_povs) > 0:
                         # OK, we select a random PoV from available PoVs and submit.
-                        to_submit_pov = cs.most_reliable_exploit
-                        LOG.info("Submitting most reliable POV %s against team %s for CS %s",
-                                 to_submit_pov.id, team.name, cs.name)
+                        most_reliable = cs.most_reliable_exploit
+                        if most_reliable.reliability > 0:
+                            to_submit_pov = most_reliable
+                            LOG.info("Submitting most reliable POV %s against team %s for CS %s",
+                                     to_submit_pov.id, team.name, cs.name)
 
                 if to_submit_pov is not None:
 
