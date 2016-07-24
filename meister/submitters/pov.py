@@ -3,8 +3,6 @@
 
 from __future__ import absolute_import, unicode_literals
 
-import random
-
 from farnsworth.models import ChallengeSet, ExploitSubmissionCable, Team
 
 from ..helpers.pov_test import PovTestHelper
@@ -62,8 +60,9 @@ class POVSubmitter(object):
                     # if the most recent exploit submission for a given team has the same exploit id
                     # do not resubmit
 
-                    if ExploitSubmissionCable.most_recent_for_team(team) != to_submit_pov:
+                    if ExploitSubmissionCable.most_recent_for_team(team, cs) != to_submit_pov:
                         ExploitSubmissionCable.create(team=team,
+                                                      cs=cs,
                                                       exploit=to_submit_pov,
                                                       throws=throws)
                         LOG.debug("POV %s marked for submission", to_submit_pov.id)
