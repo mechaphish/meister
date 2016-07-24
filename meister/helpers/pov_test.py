@@ -81,9 +81,11 @@ class PovTestHelper(object):
         :return: list containing latest cs fielding.
         """
 
-        query = ChallengeSetFielding.select().join(Round, on=(ChallengeSetFielding.available_round == Round.id))
-        predicate = (ChallengeSetFielding.team == target_team) & (ChallengeSetFielding.cs == target_cs)
-        return query.where(predicate).order_by(Round.num.desc()).limit(1)
+        query = ChallengeSetFielding.select()
+        predicate = (ChallengeSetFielding.team == target_team) & \
+                    (ChallengeSetFielding.cs == target_cs) & \
+                    (ChallengeSetFielding.available_round == Round.current_round())
+        return query.where(predicate).limit(1)
 
     @staticmethod
     def get_latest_ids_fielding(target_team, target_cs):
@@ -94,8 +96,9 @@ class PovTestHelper(object):
         :return: list containing latest IDS fielding.
         """
 
-        query = IDSRuleFielding.select()\
-                               .join(Round, on=(IDSRuleFielding.available_round == Round.id))\
+        query = IDSRuleFielding.select() \
                                .join(IDSRule, on=(IDSRuleFielding.ids_rule == IDSRule.id))
-        predicate = (IDSRuleFielding.team == target_team) & (IDSRule.cs == target_cs)
-        return query.where(predicate).order_by(Round.num.desc()).limit(1)
+        predicate = (IDSRuleFielding.team == target_team) & \
+                    (IDSRule.cs == target_cs) & \
+                    (IDSRuleFielding.available_round == Round.current_round())
+        return query.where(predicate).limit(1)
