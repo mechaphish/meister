@@ -35,8 +35,6 @@ from meister.creators.rop_cache import RopCacheCreator
 from meister.creators.showmap_sync import ShowmapSyncCreator
 import meister.log
 from meister.schedulers.priority import PriorityScheduler
-from meister.submitters.cb import CBSubmitter
-from meister.submitters.pov import POVSubmitter
 
 LOG = meister.log.LOG.getChild('main')
 
@@ -51,7 +49,6 @@ def wait_for_ambassador():
 def main(args=[]):
     """Run the meister."""
     brain = ElephantBrain()
-    submitters = [POVSubmitter(), CBSubmitter()]
     creators = [DrillerCreator(),
                 RexCreator(),
                 PovFuzzer1Creator(),
@@ -72,18 +69,12 @@ def main(args=[]):
                 NetworkPollSanitizerCreator(),
                 CBTesterCreator(),
                 PovTesterCreator()]
-
     scheduler = PriorityScheduler(brain, creators)
 
     while True:
         wait_for_ambassador()
-
         LOG.info("Round #%d", Round.current_round().num)
-
         scheduler.run()
-
-        for submitter in submitters:
-            submitter.run(Round.current_round().num)
 
     return 0
 
