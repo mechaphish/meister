@@ -15,6 +15,7 @@ from farnsworth.models import Round
 
 from meister.brains.elephant import ElephantBrain
 from meister.creators.afl import AFLCreator
+from meister.creators.backdoor import BackdoorSubmitterCreator
 from meister.creators.cache import CacheCreator
 from meister.creators.cb_tester import CBTesterCreator
 from meister.creators.colorguard import ColorGuardCreator
@@ -57,6 +58,7 @@ def main(args=[]):
                 PovFuzzer2Creator(),
                 ColorGuardCreator(),
                 AFLCreator(),
+                BackdoorSubmitterCreator(),
                 CacheCreator(),
                 RopCacheCreator(),
                 PatcherexCreator(),
