@@ -17,6 +17,6 @@ class BackdoorSubmitterCreator(meister.creators.BaseCreator):
     def jobs(self):
         LOG.debug("Collecting jobs...")
         for cs in self.challenge_sets():
-            job = BackdoorSubmitterJob(cs=cs, request_cpu=1, request_memory=128, limit_memory=128)
+            job = BackdoorSubmitterJob(cs=cs, request_cpu=1, request_memory=512, limit_memory=1024)
             LOG.debug("Yielding BackdoorSubmitterJob for %s", cs.name)
             yield (job, 100)
