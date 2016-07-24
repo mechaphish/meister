@@ -13,6 +13,7 @@ import operator
 
 import concurrent.futures
 import farnsworth.config
+from farnsworth.models.job import TesterJob
 import pykube.objects
 
 import meister.schedulers
@@ -59,8 +60,17 @@ class PriorityScheduler(meister.schedulers.BaseScheduler):
                     LOG.debug("Resources exhausted, stopping scheduling")
                     break
 
+                # FIXME: We always want to create new TesterJob to spawn
+                # up a VM if none is running. In the worst case, we
+                # spawn up an extra one and speed up processing.  In the
+                # very worst case, we have ONLY testing jobs.
                 kwargs = {df.name: getattr(j, df.name) for df in j.dirty_fields}
-                job, created = type(j).get_or_create(**kwargs)
+
+                if not isinstance(j, TesterJob):
+                    job, created = type(j).get_or_create(**kwargs)
+                else:
+                    job, created = type(j).create(**kwargs), True
+
                 if job.completed_at is not None:
                     LOG.debug("Job has been completed at %s, skipping", job.completed_at)
                     continue
@@ -70,7 +80,6 @@ class PriorityScheduler(meister.schedulers.BaseScheduler):
 
                 if job.id not in job_ids_to_run:
                     LOG.debug("Scheduling job id=%d type=%s", job.id, job.worker)
-
                     _account_for_resources(job)
                     if job.priority != p:
                         job.priority = p
