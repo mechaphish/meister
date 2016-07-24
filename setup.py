@@ -16,7 +16,7 @@ with open('requirements.txt', 'r') as req_file:
 
 setup(name='meister',
       version='0.0.1',
-      packages=['meister', 'meister.schedulers'],
+      packages=['meister', 'meister.creators', 'meister.schedulers'],
       install_requires=REQUIREMENTS,
       entry_points={
           'console_scripts': [
