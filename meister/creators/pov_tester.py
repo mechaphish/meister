@@ -24,32 +24,29 @@ class PovTesterCreator(meister.creators.BaseCreator):
     def jobs(self):
         for team in Team.opponents():
             for cs in self.challenge_sets():
-                cs_fieldings = ChallengeSetFielding.latest(cs, team)
+                target_cs_fld = ChallengeSetFielding.latest(cs, team)
 
                 # if there is any CS fielded?
-                if cs_fieldings:
-                    target_cs_fld = cs_fieldings[0]
-                    target_ids_fld = None
-
-                    ids_fieldings = IDSRuleFielding.latest(cs, team)
-                    if ids_fieldings:
-                        target_ids_fld = ids_fieldings[0]
+                if target_cs_fld is not None:
+                    target_ids_fld = IDSRuleFielding.latest(cs, team)
 
                     # see if there are successful PoVs for this fielded CS and IDS.
                     # if yes, no need to schedule Pov Testing Jobs
                     pov_test_results = PovTestResult.best(target_cs_fld, target_ids_fld)
 
                     # no results or we do not have strong PoV's?
-                    if not pov_test_results or \
-                            pov_test_results[0].num_success >= self.SUCCESS_THRESHOLD:
+                    if pov_test_results is None or \
+                            pov_test_results.num_success >= self.SUCCESS_THRESHOLD:
+
                         # OK, we do not have any successful PoVs for the current fielded CS.
                         # schedule jobs for all PoVs, if they are not tested before.
                         for exploit in target_cs_fld.cs.exploits:
                             # if this exploit is not tested, then schedule the PovTesterJob
-                            results = PovTestResult.exploit_test_results(exploit, target_cs_fld,
-                                                                         target_ids_fld)
+                            results = PovTestResult.best_exploit_test_results(exploit,
+                                                                              target_cs_fld,
+                                                                              target_ids_fld)
 
-                            if not results:
+                            if results is not None:
                                 # Schedule a Pov Tester Job for this
                                 job_payload = {'exploit_id': exploit.id,
                                                'cs_fld_hash': target_cs_fld.sha256}
