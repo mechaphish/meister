@@ -17,6 +17,13 @@ class CacheCreator(meister.creators.BaseCreator):
     def jobs(self):
         LOG.debug("Collecting jobs...")
         for cs in self.single_cb_challenge_sets():
-            job = CacheJob(cs=cs, request_cpu=1, request_memory=512, limit_memory=8192)
+            # if we have identification results run another one
+            if cs.completed_function_identification:
+                job = CacheJob(cs=cs, request_cpu=1, request_memory=512, limit_memory=8192,
+                               payload={'with_atoi': True})
+                yield (job, 100)
+
+            job = CacheJob(cs=cs, request_cpu=1, request_memory=512, limit_memory=8192,
+                           payload={'with_atoi': False})
             LOG.debug("Yielding CacheJob for %s", cs.name)
             yield (job, 100)
