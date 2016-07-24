@@ -6,7 +6,7 @@ from __future__ import absolute_import, unicode_literals
 from farnsworth.models.job import RopCacheJob
 
 import meister.creators
-LOG = meister.creators.LOG.getChild('Cache')
+LOG = meister.creators.LOG.getChild('rop_cache')
 
 
 class RopCacheCreator(meister.creators.BaseCreator):

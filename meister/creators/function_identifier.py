@@ -6,7 +6,7 @@ from __future__ import absolute_import
 from farnsworth.models.job import FunctionIdentifierJob
 
 import meister.creators
-LOG = meister.creators.LOG.getChild('FunctionIdentifier')
+LOG = meister.creators.LOG.getChild('function_identifier')
 
 
 class FunctionIdentifierCreator(meister.creators.BaseCreator):

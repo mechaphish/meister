@@ -6,7 +6,7 @@ from __future__ import absolute_import, unicode_literals
 from farnsworth.models.job import CacheJob
 
 import meister.creators
-LOG = meister.creators.LOG.getChild('Cache')
+LOG = meister.creators.LOG.getChild('cache')
 
 
 class CacheCreator(meister.creators.BaseCreator):
