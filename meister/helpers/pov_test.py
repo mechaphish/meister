@@ -83,7 +83,7 @@ class PovTestHelper(object):
 
         query = ChallengeSetFielding.select().join(Round, on=(ChallengeSetFielding.available_round == Round.id))
         predicate = (ChallengeSetFielding.team == target_team) & (ChallengeSetFielding.cs == target_cs)
-        return query.where(predicate).order_by(Round.num.desc()).limit(1)
+        return query.where(predicate).order_by(Round.id.desc()).limit(1)
 
     @staticmethod
     def get_latest_ids_fielding(target_team, target_cs):
@@ -98,4 +98,4 @@ class PovTestHelper(object):
                                .join(Round, on=(IDSRuleFielding.available_round == Round.id))\
                                .join(IDSRule, on=(IDSRuleFielding.ids_rule == IDSRule.id))
         predicate = (IDSRuleFielding.team == target_team) & (IDSRule.cs == target_cs)
-        return query.where(predicate).order_by(Round.num.desc()).limit(1)
+        return query.where(predicate).order_by(Round.id.desc()).limit(1)
