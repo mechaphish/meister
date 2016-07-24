@@ -15,7 +15,7 @@ from farnsworth.models import Round
 
 from meister.brains.elephant import ElephantBrain
 from meister.creators.afl import AFLCreator
-from meister.creators.backdoor import BackdoorSubmitterCreator
+from meister.creators.backdoor_submitter import BackdoorSubmitterCreator
 from meister.creators.cache import CacheCreator
 from meister.creators.cb_tester import CBTesterCreator
 from meister.creators.colorguard import ColorGuardCreator
