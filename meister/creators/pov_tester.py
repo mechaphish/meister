@@ -46,7 +46,7 @@ class PovTesterCreator(meister.creators.BaseCreator):
                                                                               target_cs_fld,
                                                                               target_ids_fld)
 
-                            if results is not None:
+                            if results is None:
                                 # Schedule a Pov Tester Job for this
                                 job_payload = {'exploit_id': exploit.id,
                                                'cs_fld_hash': target_cs_fld.sha256}
