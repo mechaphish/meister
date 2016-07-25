@@ -11,7 +11,7 @@ LOG = meister.creators.LOG.getChild('poll_creator')
 
 class PollCreatorCreator(meister.creators.BaseCreator):
     # we want each CS to have these many polls
-    SAFE_NUM_POLLS = 10000
+    SAFE_NUM_POLLS = 11000
     # reasonable number of polls
     RESONABLE_NUM_POLLS = 1000
 
