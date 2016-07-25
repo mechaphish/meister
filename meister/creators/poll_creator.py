@@ -32,5 +32,11 @@ class PollCreatorCreator(meister.creators.BaseCreator):
                     priority = ((PollCreatorCreator.SAFE_NUM_POLLS - num_poll_available) * 100) / \
                                (PollCreatorCreator.SAFE_NUM_POLLS - PollCreatorCreator.RESONABLE_NUM_POLLS)
 
+                # sanity, bound priority values
+                if priority < 0:
+                    priority = 0
+                if priority > 100:
+                    priority = 100
+
                 LOG.debug("Creating PollJob for cs %s with test %s ", curr_test.cs.name, curr_test.id)
                 yield (job, priority)
