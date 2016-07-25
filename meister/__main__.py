@@ -67,7 +67,7 @@ def main(args=[]):
                 # VM jobs
                 PollCreatorCreator(),
                 NetworkPollSanitizerCreator(),
-                CBTesterCreator(),
+                # CBTesterCreator(),
                 PovTesterCreator()]
     scheduler = PriorityScheduler(brain, creators)
 
