@@ -66,10 +66,9 @@ class PriorityScheduler(meister.schedulers.BaseScheduler):
                 # very worst case, we have ONLY testing jobs.
                 kwargs = {df.name: getattr(j, df.name) for df in j.dirty_fields}
 
-                if not isinstance(j, TesterJob):
-                    job, created = type(j).get_or_create(**kwargs)
-                else:
-                    job, created = type(j).create(**kwargs), True
+                job, created = type(j).get_or_create(**kwargs)
+                if isinstance(j, TesterJob):
+                    job.completed_at = None
 
                 if job.completed_at is not None:
                     LOG.debug("Job has been completed at %s, skipping", job.completed_at)
