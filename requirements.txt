@@ -1,6 +1,6 @@
 futures
 requests
-python-dotenv
+python-dotenv==0.3.0
 git+ssh://git@git.seclab.cs.ucsb.edu/cgc/farnsworth#egg=farnsworth-0.0.1
 git+ssh://git@git.seclab.cs.ucsb.edu/cgc/pykube#egg=pykube-0.12.0
 responses
