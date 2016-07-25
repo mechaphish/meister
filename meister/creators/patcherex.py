@@ -14,7 +14,7 @@ class PatcherexCreator(meister.creators.BaseCreator):
         super(self.__class__, self).__init__(*args, **kwargs)
 
     @property
-    def jobs(self):
+    def _jobs(self):
         LOG.debug("Collecting jobs")
         for cbn in self.cbns():
             for patch_type in PatcherexJob.PATCH_TYPES:

@@ -6,9 +6,12 @@ from __future__ import absolute_import, unicode_literals
 import os
 
 from farnsworth.models import ChallengeBinaryNode, ChallengeSet, ChallengeSetFielding, Round, Team
+import stopit
 
 import meister.log
 LOG = meister.log.LOG.getChild('creators')
+
+JOBS_TIME_LIMIT = 30
 
 """Job creator."""
 
@@ -25,8 +28,23 @@ class BaseCreator(object):
         pass
 
     @property
-    def jobs(self):
+    def _jobs(self):
         raise NotImplementedError("You have to implemented the jobs property")
+
+    @property
+    def jobs(self):
+        yielded = False
+        try:
+            with stopit.ThreadingTimeout(JOBS_TIME_LIMIT, swallow_exc=False):
+                for job_priority in self._jobs:
+                    # Pass through the actual job priority tuple
+                    yielded = True
+                    yield job_priority
+        except Exception, e:
+            # Pokemon Exception Handling to reduce impact of bad creators.
+            LOG.error("%s failed with %s: %s", self.__class__.__name__, e.__class__.__name__, e)
+            if not yielded:
+                raise StopIteration()
 
     def challenge_sets(self, round_=None):
         """Return the list of challenge sets that are active in a round.

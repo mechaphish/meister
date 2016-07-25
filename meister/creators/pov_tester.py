@@ -21,7 +21,7 @@ class PovTesterCreator(meister.creators.BaseCreator):
     SUCCESS_THRESHOLD = 4
 
     @property
-    def jobs(self):
+    def _jobs(self):
         for team in Team.opponents():
             for cs in self.challenge_sets():
                 target_cs_fld = ChallengeSetFielding.latest(cs, team)

@@ -15,7 +15,7 @@ class ShowmapSyncCreator(meister.creators.BaseCreator):
         super(self.__class__, self).__init__(*args, **kwargs)
 
     @property
-    def jobs(self):
+    def _jobs(self):
         LOG.debug("Collecting jobs")
         for cs in self.challenge_sets():
             prev_round = Round.prev_round()

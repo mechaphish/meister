@@ -14,7 +14,7 @@ class BackdoorSubmitterCreator(meister.creators.BaseCreator):
         super(self.__class__, self).__init__(*args, **kwargs)
 
     @property
-    def jobs(self):
+    def _jobs(self):
         LOG.debug("Collecting jobs...")
         for cs in self.challenge_sets():
             job = BackdoorSubmitterJob(cs=cs, request_cpu=1, request_memory=512, limit_memory=1024)
