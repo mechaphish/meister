@@ -55,7 +55,7 @@ class PovTesterCreator(meister.creators.BaseCreator):
                                     job_payload['ids_fld_hash'] = target_ids_fld.sha256
 
                                 job = PovTesterJob(cs=cs, payload=job_payload,
-                                                   request_cpu=20, request_memory=4096)
+                                                   request_cpu=10, request_memory=4096*2)
 
                                 yield (job, 100)
 

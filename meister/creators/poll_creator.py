@@ -18,7 +18,7 @@ class PollCreatorCreator(meister.creators.BaseCreator):
         # iterate only for currently active ChallengeSets
         for curr_cs in ChallengeSet.fielded_in_round():
             for curr_test in Test.select().where((Test.poll_created == False) & (Test.cs == curr_cs)):
-                job = PollCreatorJob(cs=curr_test.cs, payload={'test_id': curr_test.id}, request_cpu=20,
+                job = PollCreatorJob(cs=curr_test.cs, payload={'test_id': curr_test.id}, request_cpu=10,
                                      request_memory=4096*2)
                 priority = 20
 
