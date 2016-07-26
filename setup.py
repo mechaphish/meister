@@ -17,7 +17,7 @@ with open('requirements.txt', 'r') as req_file:
         r_ = r.strip()
         if r_.startswith('git+'):
             DEPENDENCIES.append(r_)
-            # FIXME: We are discarding the version number here
+            # We discard the version number of our requirements
             REQUIREMENTS.append(r_.rsplit("egg=", 1)[1].rsplit("-", 1)[0])
         else:
             REQUIREMENTS.append(r_)
