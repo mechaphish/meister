@@ -7,7 +7,6 @@ from collections import defaultdict
 
 import farnsworth.config
 from farnsworth.models.job import (CBTesterJob,
-                                   NetworkPollCreatorJob,
                                    NetworkPollSanitizerJob,
                                    PovTesterJob,
                                    PollCreatorJob,
@@ -29,7 +28,6 @@ class Brain(object):
     def sort(self, jobs):
         # Merge jobs
         job_types_to_merge = [CBTesterJob,
-                              NetworkPollCreatorJob,
                               NetworkPollSanitizerJob,
                               PovTesterJob,
                               PollCreatorJob]
@@ -72,11 +70,14 @@ class Brain(object):
                         if limit_time is not None:
                             limit_time = max(limit_time, job.limit_time)
 
-                        priority = max(priority, job_priority)
-
                         # Save object to DB so the worker can access it
                         kwargs = {df.name: getattr(job, df.name) for df in job.dirty_fields}
-                        job_type.get_or_create(**kwargs)
+                        individual_job, _ = job_type.get_or_create(**kwargs)
+                        individual_job.priority = job_priority
+                        individual_job.save()
+
+                        # Update TesterJob priority accordingly
+                        priority = max(priority, job_priority)
 
                     # Add meta job with proper payload to queue
                     job = TesterJob(cs=cs, request_cpu=request_cpu, request_memory=request_memory,

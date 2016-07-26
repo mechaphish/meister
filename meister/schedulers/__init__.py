@@ -205,7 +205,6 @@ class KubernetesScheduler(object):
         self._available_resources = copy.copy(self._kube_total_capacity)
 
         # Collect fresh information from the Kubernetes API about all running pods
-        # FIXME: Shitty loop to fix https://github.com/kelproject/pykube/issues/10
         pods = []
         for pod in pykube.objects.Pod.objects(self.api):
             try:
@@ -232,13 +231,13 @@ class KubernetesScheduler(object):
                 LOG.error("Hit a KeyError %s", e)
 
         for pod in pods:
-            # FIXME: We are assuming that each pod only has one container here
             try:
                 resources = pod.obj['spec']['containers'][0]['resources']['limits']
             except KeyError:
                 resources = pod.obj['spec']['containers'][0]['resources']['requests']
             self._available_resources['cpu'] -= _cpu2float(resources['cpu'])
             self._available_resources['memory'] -= _memory2int(resources['memory'])
+            # We are assuming that each pod only has one container here.
             self._available_resources['pods'] -= 1
         self._resources_timestamp = datetime.datetime.now()
 

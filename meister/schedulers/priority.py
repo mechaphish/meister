@@ -34,12 +34,19 @@ class PriorityScheduler(meister.schedulers.BaseScheduler):
 
     def _run(self):
         """Run jobs based on priority."""
-        # Sorting is not necessarily stable, and only by priority, we have other requirements too.
-
-        # GJA = Greedy Job Allocator
+        # Our Greedy Job Allocator (GJA) is not optimal.
+        # It does work well enough in our tests though. A problem is
+        # that we might still have some jobs that have the same priority
+        # but different requirements and which are sorted differently
+        # each time (as in, not necessarily in a total order).
+        # For now, we do not optimize for the highest number of jobs at
+        # the lowest priority because the unused resources each
+        # scheduling round will be very small in comparison to all
+        # resources.
+        # Note, however, that in the worst case, we will kill the lowest
+        # priority jobs in an oscillatory fashion at each scheduling
+        # round.
         total_capacities = copy.deepcopy(self._kube_total_capacity)
-
-        # TODO: We need to remove overhead, like database and meister, from total capacities.
 
         def _can_schedule(job):
             cpu_available = total_capacities['cpu'] >= job.request_cpu
@@ -60,13 +67,16 @@ class PriorityScheduler(meister.schedulers.BaseScheduler):
                     LOG.debug("Resources exhausted, stopping scheduling")
                     break
 
-                # FIXME: We always want to create new TesterJob to spawn
-                # up a VM if none is running. In the worst case, we
-                # spawn up an extra one and speed up processing.  In the
-                # very worst case, we have ONLY testing jobs.
+                # We need to set completed_at to None if the TesterJob
+                # has finished because it will almost always exist for
+                # this CS already and we would otherwise not test
+                # anything for this CS and this worker type anymore.
+                # If it hasn't completed yet, it will pick up the
+                # individual jobs that we have already created at this
+                # point in the brain
                 kwargs = {df.name: getattr(j, df.name) for df in j.dirty_fields}
-
                 job, created = type(j).get_or_create(**kwargs)
+
                 if isinstance(j, TesterJob):
                     job.completed_at = None
 
@@ -81,16 +91,13 @@ class PriorityScheduler(meister.schedulers.BaseScheduler):
                     LOG.debug("Scheduling job id=%d type=%s", job.id, job.worker)
                     _account_for_resources(job)
                     if job.priority != p:
+                        LOG.debug("Priority changed from %d to %d", job.priority, p)
                         job.priority = p
                         job.save()
                     jobs_to_run.append(job)
                     job_ids_to_run.add(job.id)
                 else:
                     LOG.error("A creator yielded a job a second time: job id=%d", job.id)
-
-        # TODO: We might still have some jobs that have the same priority but different requirements
-        # and which are sorted differently, we need to solve the resource requirement equations for
-        # the lowest priority we want to schedule, so that we maximize the use of our resources.
 
         job_ids_to_run = set(job.id for job in jobs_to_run)
         LOG.debug("Jobs to run: %s", job_ids_to_run)
