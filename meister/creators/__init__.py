@@ -39,8 +39,8 @@ class BaseCreator(object):
             with stopit.ThreadingTimeout(JOBS_TIME_LIMIT, swallow_exc=False):
                 for job_priority in self._jobs:
                     # Pass through the actual job priority tuple
-                    yielded = True
                     yield job_priority
+                    yielded = True
         except Exception, e:
             # Pokemon Exception Handling to reduce impact of bad creators.
             LOG.error("%s failed with %s: %s", self.__class__.__name__, e.__class__.__name__, e)
