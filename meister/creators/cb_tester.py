@@ -13,7 +13,7 @@ class CBTesterCreator(meister.creators.BaseCreator):
     MIN_TESTED_POLLS = 10000    # Number of polls we want to be tested for each CB
 
     @property
-    def jobs(self):
+    def _jobs(self):
         for cs in ChallengeSet.fielded_in_round():
             # For each of patch types create Tester Jobs
             for patch_type in cs.cbns_by_patch_type():

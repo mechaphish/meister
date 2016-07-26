@@ -11,7 +11,7 @@ LOG = meister.creators.LOG.getChild('driller')
 
 class DrillerCreator(meister.creators.BaseCreator):
     @property
-    def jobs(self):
+    def _jobs(self):
         for cs in self.single_cb_challenge_sets():
             if cs.fuzzer_stat is None or cs.fuzzer_stat.last_path is None:
                 continue

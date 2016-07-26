@@ -67,7 +67,7 @@ class RexCreator(meister.creators.BaseCreator):
             yield max(base, 100 - p), c
 
     @property
-    def jobs(self):
+    def _jobs(self):
         for cs in self.single_cb_challenge_sets():
             # does this fetch blobs? can we do the filter with the query?
             crashes = self._filter_non_exploitable(cs.crashes)

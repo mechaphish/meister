@@ -13,7 +13,7 @@ LOG = meister.creators.LOG.getChild('network_poll_sanitizer')
 class NetworkPollSanitizerCreator(meister.creators.BaseCreator):
 
     @property
-    def jobs(self):
+    def _jobs(self):
         for curr_unsan_poll in RawRoundPoll.select().where(RawRoundPoll.sanitized == False):
             # Get the number of polls available for current CS
             job = NetworkPollSanitizerJob(cs=curr_unsan_poll.cs,

@@ -19,7 +19,7 @@ class PovFuzzer1Creator(meister.creators.BaseCreator):
             yield max(base, 100 - p), c
 
     @property
-    def jobs(self):
+    def _jobs(self):
         for cs in self.challenge_sets():
             multi_cbn = cs.is_multi_cbn
 

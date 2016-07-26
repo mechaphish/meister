@@ -14,7 +14,7 @@ class RopCacheCreator(meister.creators.BaseCreator):
         super(self.__class__, self).__init__(*args, **kwargs)
 
     @property
-    def jobs(self):
+    def _jobs(self):
         LOG.debug("Collecting jobs...")
         for cs in self.single_cb_challenge_sets():
             job = RopCacheJob(cs=cs, request_cpu=1, request_memory=2048, limit_memory=8192)

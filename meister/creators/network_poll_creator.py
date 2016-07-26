@@ -12,7 +12,7 @@ LOG = meister.creators.LOG.getChild('network_poll_creator')
 
 class NetworkPollCreatorCreator(meister.creators.BaseCreator):
     @property
-    def jobs(self):
+    def _jobs(self):
         # get only unprocessed traffic files and schedule them.
         for curr_round_traffic in RawRoundTraffic.select().where(RawRoundTraffic.processed == False):
             job = NetworkPollCreatorJob(request_cpu=1, request_memory=4096*2,

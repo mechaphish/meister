@@ -14,7 +14,7 @@ class PollCreatorCreator(meister.creators.BaseCreator):
     SAFE_NUM_POLLS = 10000
 
     @property
-    def jobs(self):
+    def _jobs(self):
         # iterate only for currently active ChallengeSets
         for curr_cs in ChallengeSet.fielded_in_round():
             for curr_test in Test.select().where((Test.poll_created == False) & (Test.cs == curr_cs)):

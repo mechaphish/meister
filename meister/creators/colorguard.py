@@ -12,7 +12,7 @@ LOG = meister.creators.LOG.getChild('colorguard')
 
 class ColorGuardCreator(meister.creators.BaseCreator):
     @property
-    def jobs(self):
+    def _jobs(self):
         for cs in self.challenge_sets():
             found_crash_for_cs = cs.found_crash
             if cs.completed_caching or cs.tracer_cache.exists() or cs.is_multi_cbn:
