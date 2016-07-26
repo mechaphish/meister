@@ -168,6 +168,10 @@ class KubernetesScheduler(object):
                              'value': os.environ['POSTGRES_DATABASE_PASSWORD']},
                             {'name': "POSTGRES_DATABASE_NAME",
                              'value': os.environ['POSTGRES_DATABASE_NAME']},
+                            {'name': "POSTGRES_MASTER_CONNECTIONS",
+                             'value': "1"},
+                            {'name': "POSTGRES_SLAVE_CONNECTIONS",
+                             'value': "1"},
                         ]),
                         'volumeMounts': volume_mounts,
                         'securityContext': security_context
