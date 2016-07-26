@@ -65,8 +65,8 @@ class PriorityScheduler(meister.schedulers.BaseScheduler):
                 # spawn up an extra one and speed up processing.  In the
                 # very worst case, we have ONLY testing jobs.
                 kwargs = {df.name: getattr(j, df.name) for df in j.dirty_fields}
-
                 job, created = type(j).get_or_create(**kwargs)
+
                 if isinstance(j, TesterJob):
                     job.completed_at = None
 
@@ -81,6 +81,7 @@ class PriorityScheduler(meister.schedulers.BaseScheduler):
                     LOG.debug("Scheduling job id=%d type=%s", job.id, job.worker)
                     _account_for_resources(job)
                     if job.priority != p:
+                        LOG.debug("Priority changed from %d to %d", job.priority, p)
                         job.priority = p
                         job.save()
                     jobs_to_run.append(job)
