@@ -12,10 +12,7 @@ LOG = meister.brains.LOG.getChild('elephant')
 
 class ElephantBrain(meister.brains.Brain):
 
-    def __init__(self):
-        pass
-
-    def _sanitize_component(job, priority):
+    def _sanitize_component(self, job, priority):
         if priority > 100:
             LOG.warning('Job id=%d has priority > 100 at p=%d, setting to 100', job.id, priority)
             return 100
