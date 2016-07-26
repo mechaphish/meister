@@ -14,7 +14,8 @@ class ElephantBrain(meister.brains.Brain):
 
     def _sanitize_component(self, job, priority):
         if priority > 100:
-            LOG.warning('Job id=%d has priority > 100 at p=%d, setting to 100', job.id, priority)
+            LOG.warning('%s for cs=%s cbn=%s has priority > 100 at p=%d, setting to 100',
+                        job.__class__.__name__, job.cs.id, job.cbn.id, priority)
             return 100
         elif priority < 0:
             return 0
