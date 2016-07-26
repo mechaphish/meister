@@ -9,16 +9,18 @@ import meister.brains
 
 LOG = meister.brains.LOG.getChild('elephant')
 
+PRIORITY_MAX = 200
+
 
 class ElephantBrain(meister.brains.Brain):
 
     def _sanitize_component(self, job, priority):
-        if priority > 100:
-            cs = job.cs.id if job.cs is not None else "<>"
-            cbn = job.cbn.id if job.cbn is not None else "<>"
-            LOG.warning('%s for cs=%s cbn=%s has priority > 100 at p=%d, setting to 100',
-                        job.__class__.__name__, cs, cbn, priority)
-            return 100
+        if priority > PRIORITY_MAX:
+            cs = job.cs.id if job.cs is not None else ""
+            cbn = job.cbn.id if job.cbn is not None else ""
+            LOG.warning('%s for cs=%s cbn=%s has priority > %d at p=%d, setting to %d',
+                        job.__class__.__name__, cs, cbn, PRIORITY_MAX, priority, PRIORITY_MAX)
+            return PRIORITY_MAX
         elif priority < 0:
             return 0
         else:
