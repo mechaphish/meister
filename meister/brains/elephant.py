@@ -15,6 +15,15 @@ class ElephantBrain(meister.brains.Brain):
     def __init__(self):
         pass
 
+    def _sanitize_component(job, priority):
+        if priority > 100:
+            LOG.warning('Job id=%d has priority > 100 at p=%d, setting to 100', job.id, priority)
+            return 100
+        elif priority < 0:
+            return 0
+        else:
+            return priority
+
     def _local(self, job):
         # Local priorities are within a ChallengeSet:
         # - What is more important for this CS right now? A PoV or a RCB?
@@ -28,5 +37,6 @@ class ElephantBrain(meister.brains.Brain):
         return 1.
 
     def _sort(self, jobs):
-        jobs = ((j, int(self._global(j) * self._local(j) * p)) for j, p in jobs)
+        jobs = ((j, int(self._global(j) * self._local(j) * self._sanitize_component(p)))
+                 for j, p in jobs)
         return sorted(jobs, key=operator.itemgetter(1), reverse=True)
