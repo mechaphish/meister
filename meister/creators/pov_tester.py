@@ -36,7 +36,7 @@ class PovTesterCreator(meister.creators.BaseCreator):
 
                     # no results or we do not have strong PoV's?
                     if pov_test_results is None or \
-                            pov_test_results.num_success >= self.SUCCESS_THRESHOLD:
+                            pov_test_results.num_success < self.SUCCESS_THRESHOLD:
 
                         # OK, we do not have any successful PoVs for the current fielded CS.
                         # schedule jobs for all PoVs, if they are not tested before.
