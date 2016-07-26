@@ -4,6 +4,7 @@
 from __future__ import absolute_import, unicode_literals
 
 import os
+import traceback
 
 from farnsworth.models import ChallengeBinaryNode, ChallengeSet, ChallengeSetFielding, Round, Team
 import stopit
@@ -43,6 +44,7 @@ class BaseCreator(object):
         except Exception, e:
             # Pokemon Exception Handling to reduce impact of bad creators.
             LOG.error("%s failed with %s: %s", self.__class__.__name__, e.__class__.__name__, e)
+            LOG.debug(traceback.format_exc())
             if not yielded:
                 raise StopIteration()
 
