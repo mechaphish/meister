@@ -11,7 +11,9 @@ LOG = meister.creators.LOG.getChild('poll_creator')
 
 class PollCreatorCreator(meister.creators.BaseCreator):
     # we want each CS to have these many polls
-    SAFE_NUM_POLLS = 10000
+    SAFE_NUM_POLLS = 11000
+    # reasonable number of polls
+    RESONABLE_NUM_POLLS = 1000
 
     @property
     def _jobs(self):
@@ -27,6 +29,13 @@ class PollCreatorCreator(meister.creators.BaseCreator):
                                               .where(ValidPoll.cs == curr_test.cs) \
                                               .count()
                 if num_poll_available < PollCreatorCreator.SAFE_NUM_POLLS:
+                    priority = ((PollCreatorCreator.SAFE_NUM_POLLS - num_poll_available) * 100) / \
+                               (PollCreatorCreator.SAFE_NUM_POLLS - PollCreatorCreator.RESONABLE_NUM_POLLS)
+
+                # sanity, bound priority values
+                if priority < 0:
+                    priority = 0
+                if priority > 100:
                     priority = 100
 
                 LOG.debug("Creating PollJob for cs %s with test %s ", curr_test.cs.name, curr_test.id)
