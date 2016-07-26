@@ -19,6 +19,7 @@ class PatcherexCreator(meister.creators.BaseCreator):
         for cbn in self.cbns():
             for patch_type in PatcherexJob.PATCH_TYPES:
                 job = PatcherexJob(cbn=cbn, payload={'patch_type': patch_type},
-                                   request_cpu=1, request_memory=10240)
+                                   request_cpu=1, request_memory=int(1024*3.5),
+                                   limit_memory=int(1024*16.0))
                 LOG.debug("Yielding PatcherexJob for %s", cbn.name)
                 yield (job, 500)
