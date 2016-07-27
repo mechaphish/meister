@@ -355,6 +355,9 @@ class BaseScheduler(KubernetesScheduler):
             for job in itertools.chain.from_iterable(jobs_unordered_iter):
                 yield job
 
+    def _run(self):
+        raise NotImplementedError("Implement it!")
+
     def run(self):
         """Run the scheduler."""
         if self._is_kubernetes_unavailable():

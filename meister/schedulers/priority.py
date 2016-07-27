@@ -155,4 +155,4 @@ class PriorityScheduler(meister.schedulers.BaseScheduler):
         with concurrent.futures.ThreadPoolExecutor(max_workers=20) as executor:
             executor.map(_schedule, jobs_to_run)
 
-        self._kube_resources
+        self._kube_resources    # pylint: disable=pointless-statement
