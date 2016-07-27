@@ -67,4 +67,3 @@ class PovTesterCreator(meister.creators.BaseCreator):
                 else:
                     LOG.warn("No CS fieldings with team=%s cs=%s, no jobs scheduled",
                              team.name, cs.name)
-
