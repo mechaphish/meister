@@ -14,6 +14,7 @@ import time
 
 import concurrent.futures
 import farnsworth.config
+from farnsworth.models.job import Job
 import pykube.exceptions
 import pykube.http
 import pykube.objects
