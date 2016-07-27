@@ -19,7 +19,9 @@ class ShowmapSyncCreator(meister.creators.BaseCreator):
         LOG.debug("Collecting jobs")
         for cs in self.challenge_sets():
             prev_round = Round.prev_round()
-            if prev_round and cs.raw_round_polls.join(Round).where(Round.id == prev_round.id).exists():
+            if prev_round is not None and cs.raw_round_polls.join(Round) \
+                                                            .where(Round.id == prev_round.id) \
+                                                            .exists():
                 job = ShowmapSyncJob(cs=cs, payload={"round_id": prev_round.id},
                                      request_cpu=1, request_memory=4096,
                                      limit_memory=8192, limit_time=10 * 60)
