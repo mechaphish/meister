@@ -23,7 +23,7 @@ with open('requirements.txt', 'r') as req_file:
             REQUIREMENTS.append(r_)
 
 setup(name='meister',
-      version='1.0.0',
+      version='1.0.1',
       packages=['meister', 'meister.creators', 'meister.schedulers'],
       install_requires=REQUIREMENTS,
       dependency_links=DEPENDENCIES,
