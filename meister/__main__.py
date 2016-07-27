@@ -20,7 +20,6 @@ from meister.creators.cache import CacheCreator
 from meister.creators.cb_tester import CBTesterCreator
 from meister.creators.colorguard import ColorGuardCreator
 from meister.creators.driller import DrillerCreator
-from meister.creators.ids import IDSCreator
 from meister.creators.function_identifier import FunctionIdentifierCreator
 from meister.creators.patcherex import PatcherexCreator
 from meister.creators.poll_creator import PollCreatorCreator
@@ -59,7 +58,6 @@ def main(args=[]):
                 CacheCreator(),
                 RopCacheCreator(),
                 PatcherexCreator(),
-                # IDSCreator(),
                 FunctionIdentifierCreator(),
                 NetworkPollCreatorCreator(),
                 ShowmapSyncCreator(),
