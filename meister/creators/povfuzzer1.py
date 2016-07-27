@@ -21,8 +21,6 @@ class PovFuzzer1Creator(meister.creators.BaseCreator):
     @property
     def _jobs(self):
         for cs in self.challenge_sets():
-            multi_cbn = cs.is_multi_cbn
-
             # unlike Rex, there's really only one kind of crash we can exploit
             # we do not schedule if we already have a type1 exploit
             if not cs.has_type1:
