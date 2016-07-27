@@ -3,7 +3,7 @@
 
 from __future__ import absolute_import
 
-from farnsworth.models import RawRoundTraffic, Round, ShowmapSyncJob
+from farnsworth.models import RawRoundTraffic, RawRoundPoll, Round, ShowmapSyncJob
 
 import meister.creators
 LOG = meister.creators.LOG.getChild('showmap_sync')
@@ -23,11 +23,7 @@ class ShowmapSyncCreator(meister.creators.BaseCreator):
             if not rnd.raw_round_traffics.where(RawRoundTraffic.processed == False).exists():
                 LOG.debug("All of round #%d's traffic has been processed", rnd.num)
                 for cs in self.challenge_sets():
-
-                    if cs.raw_round_polls.join(Round) \
-                            .where(Round.id == rnd.id) \
-                            .exists():
-
+                    if cs.raw_round_polls.where(RawRoundPoll.round == rnd).exists():
                         job = ShowmapSyncJob(cs=cs, payload={"round_id": rnd.id},
                                              request_cpu=1, request_memory=4096,
                                              limit_memory=8192, limit_time=10 * 60)
