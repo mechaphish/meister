@@ -17,9 +17,9 @@ class ShowmapSyncCreator(meister.creators.BaseCreator):
     @property
     def _jobs(self):
         LOG.debug("Collecting jobs")
-        # for each round see if we need to schedule a ShowmapSyncCreator
+        # For each round see if we need to schedule a ShowmapSyncCreator
         for rnd in Round.select():
-            # only work on raw round polls which which come from processed rounds
+            # Only work on raw round polls which which come from processed rounds
             if not rnd.raw_round_traffics.where(RawRoundTraffic.processed == False).exists():
                 LOG.debug("All of round #%d's traffic has been processed", rnd.num)
                 for cs in self.challenge_sets():
@@ -31,10 +31,9 @@ class ShowmapSyncCreator(meister.creators.BaseCreator):
                         job = ShowmapSyncJob(cs=cs, payload={"round_id": rnd.id},
                                              request_cpu=1, request_memory=4096,
                                              limit_memory=8192, limit_time=10 * 60)
-
                         priority = 100  # We should always try to sync new testcases
 
                         LOG.debug("Yielding ShowmapSyncJob for %s, round #%d", cs.name, rnd.num)
                         yield (job, priority)
             else:
-                LOG.debug("All of round #%d's traffic has not yet been processed", rnd.num)
+                LOG.debug("Some of round #%d's traffic is unprocessed, skipping", rnd.num)
