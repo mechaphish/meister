@@ -5,7 +5,7 @@ from __future__ import absolute_import, unicode_literals
 
 import itertools
 
-from farnsworth.models import RexJob, Exploit, Crash
+from farnsworth.models import RexJob, Crash
 from peewee import fn
 
 import meister.creators

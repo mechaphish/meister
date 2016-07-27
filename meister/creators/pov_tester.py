@@ -4,7 +4,6 @@
 from __future__ import absolute_import, unicode_literals
 
 from farnsworth.models.challenge_set_fielding import ChallengeSetFielding
-from farnsworth.models.exploit import Exploit
 from farnsworth.models.ids_rule_fielding import IDSRuleFielding
 from farnsworth.models.job import PovTesterJob
 from farnsworth.models.pov_test_result import PovTestResult

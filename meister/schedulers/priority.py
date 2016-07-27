@@ -9,7 +9,6 @@ Schedule everything whenver it is available.
 from __future__ import unicode_literals, absolute_import
 
 import copy
-import operator
 
 import concurrent.futures
 import farnsworth.config

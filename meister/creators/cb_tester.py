@@ -3,7 +3,7 @@
 
 from __future__ import absolute_import, unicode_literals
 
-from farnsworth.models import CBTesterJob, ValidPoll, CBPollPerformance, ChallengeSet
+from farnsworth.models import CBTesterJob, CBPollPerformance, ChallengeSet
 
 import meister.creators
 LOG = meister.creators.LOG.getChild('cb_tester')
