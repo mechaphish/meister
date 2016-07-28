@@ -61,7 +61,7 @@ def main(args=[]):
                 FunctionIdentifierCreator(),
                 NetworkPollCreatorCreator(),
                 ShowmapSyncCreator(),
-                PatchPerformanceCreator(),
+                #PatchPerformanceCreator(),
                 # VM jobs
                 #PollCreatorCreator(),
                 #NetworkPollSanitizerCreator(),
