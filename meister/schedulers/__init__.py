@@ -229,7 +229,7 @@ class KubernetesScheduler(object):
                     # for performance reason (we do not need to loop over them
                     # the next time, this might become critical for scheduler
                     # performance if we have had a lot of jobs).
-                    # pod.delete()
+                    pod.delete()
                 else:
                     LOG.debug("Pod %s is in a weird state", pod.name)
             except KeyError, e:
