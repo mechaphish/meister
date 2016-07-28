@@ -8,6 +8,7 @@ from farnsworth.models.ids_rule_fielding import IDSRuleFielding
 from farnsworth.models.job import PovTesterJob
 from farnsworth.models.pov_test_result import PovTestResult
 from farnsworth.models.team import Team
+from farnsworth.models.exploit import Exploit
 
 import meister.creators
 
@@ -39,7 +40,7 @@ class PovTesterCreator(meister.creators.BaseCreator):
 
                         # OK, we do not have any successful PoVs for the current fielded CS.
                         # schedule jobs for all PoVs, if they are not tested before.
-                        for exploit in target_cs_fld.cs.exploits:
+                        for exploit in target_cs_fld.cs.exploits.select(Exploit.id):
                             # if this exploit is not tested, then schedule the PovTesterJob
                             results = PovTestResult.best_exploit_test_results(exploit,
                                                                               target_cs_fld,
