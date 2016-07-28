@@ -210,17 +210,18 @@ class KubernetesScheduler(object):
         self._available_resources = copy.copy(self._kube_total_capacity)
 
         # Collect fresh information from the Kubernetes API about all running pods
-        pods = []
-        for pod in pykube.objects.Pod.objects(self.api):
+        def cleanup(pod):
             try:
                 if pod.pending or pod.running:
                     try:
                         LOG.debug("Pod %s is taking up resources", pod.name)
                     except requests.exceptions.HTTPError, e:
                         LOG.error("Somehow failed at HTTP %s", e)
-                    pods.append(pod)
+                    return pod
                 elif pod.failed:
                     LOG.debug("Pod %s failed", pod.name)
+                    # TODO: We should delete pods that have failed and should
+                    # not be restarted.
                 elif pod.unknown:
                     LOG.warning("Pod %s in unknown state", pod.name)
                 elif pod.succeeded:
@@ -235,7 +236,14 @@ class KubernetesScheduler(object):
             except KeyError, e:
                 LOG.error("Hit a KeyError %s", e)
 
+        pods = []
+        with concurrent.futures.ThreadPoolExecutor(max_workers=20) as executor:
+            pods = executor.map(cleanup, pykube.objects.Pod.objects(self.api))
+
         for pod in pods:
+            if pod is None:
+                continue
+
             try:
                 resources = pod.obj['spec']['containers'][0]['resources']['limits']
             except KeyError:
@@ -244,7 +252,12 @@ class KubernetesScheduler(object):
             self._available_resources['memory'] -= _memory2int(resources['memory'])
             # We are assuming that each pod only has one container here.
             self._available_resources['pods'] -= 1
+
         self._resources_timestamp = datetime.datetime.now()
+
+        self._available_resources['cpu'] *= os.environ['MEISTER_OVERPROVISION']
+        self._available_resources['memory'] *= os.environ['MEISTER_OVERPROVISION']
+        self._available_resources['pods'] *= os.environ['MEISTER_OVERPROVISION']
 
         LOG.debug("Resources available: %s cores, %s GiB, %s pods",
                   self._available_resources['cpu'],
