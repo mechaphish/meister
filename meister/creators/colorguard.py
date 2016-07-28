@@ -15,7 +15,10 @@ class ColorGuardCreator(meister.creators.BaseCreator):
     def _jobs(self):
         for cs in self.challenge_sets():
             found_crash_for_cs = cs.found_crash
-            if cs.completed_caching or cs.tracer_cache.exists() or cs.is_multi_cbn:
+            if cs.is_multi_cbn:
+                LOG.warning("ColorGuard does not support MultiCBs refusing to schedule")
+
+            elif cs.completed_caching or cs.tracer_cache.exists():
                 LOG.debug("Caching complete for %s, scheduling ColorGuard", cs.name)
                 if cs.has_circumstantial_type2:
                     LOG.debug("Circumstantial Type2 for Challenge %s already exists"
