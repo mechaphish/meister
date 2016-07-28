@@ -255,9 +255,9 @@ class KubernetesScheduler(object):
 
         self._resources_timestamp = datetime.datetime.now()
 
-        self._available_resources['cpu'] *= os.environ['MEISTER_OVERPROVISION']
-        self._available_resources['memory'] *= os.environ['MEISTER_OVERPROVISION']
-        self._available_resources['pods'] *= os.environ['MEISTER_OVERPROVISION']
+        self._available_resources['cpu'] *= float(os.environ['MEISTER_OVERPROVISIONING'])
+        self._available_resources['memory'] *= float(os.environ['MEISTER_OVERPROVISIONING'])
+        self._available_resources['pods'] *= float(os.environ['MEISTER_OVERPROVISIONING'])
 
         LOG.debug("Resources available: %s cores, %s GiB, %s pods",
                   self._available_resources['cpu'],
