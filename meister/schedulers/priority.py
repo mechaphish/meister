@@ -12,7 +12,7 @@ import copy
 
 import concurrent.futures
 import farnsworth.config
-from farnsworth.models.job import TesterJob
+from farnsworth.models.job import AFLJob, TesterJob
 import pykube.objects
 
 import meister.schedulers
@@ -76,7 +76,7 @@ class PriorityScheduler(meister.schedulers.BaseScheduler):
                 kwargs = {df.name: getattr(j, df.name) for df in j.dirty_fields}
                 job, created = type(j).get_or_create(**kwargs)
 
-                if isinstance(j, TesterJob):
+                if isinstance(j, (AFLJob, TesterJob)):
                     job.completed_at = None
 
                 if job.completed_at is not None:
