@@ -20,4 +20,5 @@ class AFLCreator(meister.creators.BaseCreator):
         for cs in self.challenge_sets():
             job = AFLJob(cs=cs, request_cpu=8, request_memory=4096, limit_memory=16384)
             LOG.debug("Yielding AFLJob for %s", cs.name)
-            yield (job, 100)
+            # AFL should have a slightly higher priority than one-off jobs
+            yield (job, 105) 
