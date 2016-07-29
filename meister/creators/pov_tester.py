@@ -57,6 +57,7 @@ class PovTesterCreator(meister.creators.BaseCreator):
                                 job = PovTesterJob(cs=cs, payload=job_payload,
                                                    request_cpu=10, request_memory=4096*2)
 
+                                LOG.info("Yielding PovTesterJob for exploit %s", str(exploit.id))
                                 yield (job, 100)
 
                             else:
