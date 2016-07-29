@@ -245,9 +245,10 @@ class KubernetesScheduler(object):
                 continue
 
             try:
-                resources = pod.obj['spec']['containers'][0]['resources']['limits']
-            except KeyError:
                 resources = pod.obj['spec']['containers'][0]['resources']['requests']
+            except KeyError:
+                resources = pod.obj['spec']['containers'][0]['resources']['limits']
+
             self._available_resources['cpu'] -= _cpu2float(resources['cpu'])
             self._available_resources['memory'] -= _memory2int(resources['memory'])
             # We are assuming that each pod only has one container here.
