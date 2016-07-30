@@ -27,8 +27,7 @@ class ColorGuardCreator(meister.creators.BaseCreator):
 
                 for test in cs.tests:
                     LOG.debug("ColorGuardJob for %s, test %s being created", cs.name, test.id)
-                    # TODO: get naive colorguard support working for multicbs
-                    job = ColorGuardJob(cs=cs, payload={'test_id': test.id},
+                    job = ColorGuardJob(cs=cs, payload={'crash': False, 'id': test.id},
                                         request_cpu=1, request_memory=2048,
                                         limit_memory=10240,
                                         limit_time=10 * 60)
@@ -46,6 +45,18 @@ class ColorGuardCreator(meister.creators.BaseCreator):
                         priority = 100
 
                     LOG.debug("Yielding ColorGuardJob for %s with %s", cs.name, test.id)
+                    yield (job, priority)
+
+                for crash in cs.crashes:
+                    LOG.debug("ColorGuardJobs for %s, crash %s being created", cs.name, test.id)
+                    job = ColorGuardJob(cs=cs, payload={'crash': True, 'id': crash.id},
+                                        request_cpu=1, request_memory=2048,
+                                        limit_memory=10240,
+                                        limit_time=10 * 60)
+
+                    priority = BASE_PRIORITY + 5
+
+                    LOG.debug("Yielding ColorGuardJob for %s with crash %s", cs.name, crash.id)
                     yield (job, priority)
 
             else:
