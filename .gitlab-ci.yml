@@ -16,11 +16,11 @@ docs:
   tags: ["cgc-linter"]
 
 build_images:
-    only: ["master"]
-    stage: deploy
-    script:
-    - cgc-build meister
-    tags: ["docker-builder"]
+  only: ["master"]
+  stage: deploy
+  script:
+  - cgc-build meister
+  tags: ["docker-builder"]
 
 production:
   only: ["master"]
