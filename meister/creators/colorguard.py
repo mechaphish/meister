@@ -48,7 +48,7 @@ class ColorGuardCreator(meister.creators.BaseCreator):
                     yield (job, priority)
 
                 for crash in cs.crashes:
-                    LOG.debug("ColorGuardJobs for %s, crash %s being created", cs.name, test.id)
+                    LOG.debug("ColorGuardJobs for %s, crash %s being created", cs.name, crash.id)
                     job = ColorGuardJob(cs=cs, payload={'crash': True, 'id': crash.id},
                                         request_cpu=1, request_memory=2048,
                                         limit_memory=10240,
