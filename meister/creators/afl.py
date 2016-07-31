@@ -21,4 +21,4 @@ class AFLCreator(meister.creators.BaseCreator):
             job = AFLJob(cs=cs, request_cpu=8, request_memory=4096, limit_memory=16384)
             LOG.debug("Yielding AFLJob for %s", cs.name)
             # AFL should have a slightly higher priority than one-off jobs
-            yield (job, 105) 
+            yield (job, 105)
