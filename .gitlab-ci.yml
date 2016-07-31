@@ -23,10 +23,10 @@ build_images:
     tags: ["docker-builder"]
 
 production:
+  only: ["master"]
   stage: deploy
   script:
   - docker tag meister 172.16.7.72/meister:stable
   - docker push 172.16.7.72/meister:stable
   environment: production
-  when: manual
   tags: ["docker-builder"]
