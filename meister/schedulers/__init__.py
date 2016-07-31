@@ -244,10 +244,13 @@ class KubernetesScheduler(object):
             if pod is None:
                 continue
 
-            try:
-                resources = pod.obj['spec']['containers'][0]['resources']['requests']
-            except KeyError:
-                resources = pod.obj['spec']['containers'][0]['resources']['limits']
+            if pod.obj['spec']['containers'][0]['resources']:
+                try:
+                    resources = pod.obj['spec']['containers'][0]['resources']['requests']
+                except KeyError:
+                    resources = pod.obj['spec']['containers'][0]['resources']['limits']
+            else:
+                resources = {'cpu': '0', 'memory': '0Ki'}
 
             self._available_resources['cpu'] -= _cpu2float(resources['cpu'])
             self._available_resources['memory'] -= _memory2int(resources['memory'])
