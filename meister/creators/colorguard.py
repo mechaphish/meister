@@ -20,10 +20,11 @@ class ColorGuardCreator(meister.creators.BaseCreator):
 
             elif cs.completed_caching or cs.tracer_cache.exists():
                 LOG.debug("Caching complete for %s, scheduling ColorGuard", cs.name)
-                if cs.has_circumstantial_type2:
+                has_circumstantial_type2 = cs.has_circumstantial_type2
+
+                if has_circumstantial_type2:
                     LOG.debug("Circumstantial Type2 for Challenge %s already exists"
-                            "refusing to schedule ColorGuard" % cs.name)
-                    continue
+                            " lowering priority of ColorGuard", cs.name)
 
                 for test in cs.tests:
                     LOG.debug("ColorGuardJob for %s, test %s being created", cs.name, test.id)
@@ -44,6 +45,9 @@ class ColorGuardCreator(meister.creators.BaseCreator):
                     if test.job.worker == "rex":
                         priority = 100
 
+                    if has_circumstantial_type2:
+                        priority = max(BASE_PRIORITY, priority - 70)
+
                     LOG.debug("Yielding ColorGuardJob for %s with %s", cs.name, test.id)
                     yield (job, priority)
 
@@ -57,6 +61,9 @@ class ColorGuardCreator(meister.creators.BaseCreator):
                     # because AFL has a harder time distinguishing between interesting crashes
                     # we give these a lower priority
                     priority = BASE_PRIORITY + 5
+
+                    if has_circumstantial_type2:
+                        priority = BASE_PRIORITY
 
                     LOG.debug("Yielding ColorGuardJob for %s with crash %s", cs.name, crash.id)
                     yield (job, priority)
