@@ -1,3 +1,8 @@
+stages:
+  - test
+  - build
+  - deploy
+
 # tests:
 #   script:
 #     - pip install -r requirements.txt
@@ -12,19 +17,20 @@
 #   tags: ["cgc-linter"]
 
 docs:
+  stage: build
   script: "generate_docs"
   tags: ["cgc-linter"]
 
 build_images:
+  stage: build
   only: ["master"]
-  stage: deploy
   script:
   - cgc-build meister
   tags: ["docker-builder"]
 
 production:
-  only: ["master"]
   stage: deploy
+  only: ["master"]
   script:
   - docker tag meister 172.16.7.72/meister:stable
   - docker push 172.16.7.72/meister:stable
