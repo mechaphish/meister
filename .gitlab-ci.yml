@@ -21,3 +21,11 @@ build_images:
     script:
     - cgc-build meister
     tags: ["docker-builder"]
+
+production:
+  stage: deploy
+  script:
+  - docker tag meister 172.16.7.72/meister:stable
+  - docker push 172.16.7.72/meister:stable
+  environment: production
+  when: manual
