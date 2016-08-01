@@ -13,6 +13,7 @@ import meister.settings
 
 from farnsworth.models import Round
 
+# pylint: disable=ungrouped-imports
 from meister.brains.elephant import ElephantBrain
 from meister.creators.afl import AFLCreator
 from meister.creators.backdoor_submitter import BackdoorSubmitterCreator
@@ -34,19 +35,23 @@ from meister.creators.rop_cache import RopCacheCreator
 from meister.creators.showmap_sync import ShowmapSyncCreator
 import meister.log
 from meister.schedulers.priority import PriorityScheduler
+# pylint: enable=ungrouped-imports
 
 LOG = meister.log.LOG.getChild('main')
 
 
 def wait_for_ambassador():
-    POLL_INTERVAL = 3
+    poll_interval = 3
     while not (Round.current_round() and Round.current_round().is_ready()):
-        LOG.info("Round data not available, waiting %d seconds", POLL_INTERVAL)
-        time.sleep(POLL_INTERVAL)
+        LOG.info("Round data not available, waiting %d seconds", poll_interval)
+        time.sleep(poll_interval)
 
 
-def main(args=[]):
+def main(args=None):
     """Run the meister."""
+    if args is None:
+        args = []
+
     brain = ElephantBrain()
     creators = [DrillerCreator(),
                 RexCreator(),

@@ -16,5 +16,5 @@ LOG = logging.getLogger('meister')
 LOG.setLevel(os.environ.get('MEISTER_LOG_LEVEL', 'DEBUG'))
 
 HANDLER = logging.StreamHandler(sys.stdout)
-HANDLER.setFormatter(logging.Formatter(os.environ.get('MEISTER_LOG_FORMAT',DEFAULT_FORMAT)))
+HANDLER.setFormatter(logging.Formatter(os.environ.get('MEISTER_LOG_FORMAT', DEFAULT_FORMAT)))
 LOG.addHandler(HANDLER)
