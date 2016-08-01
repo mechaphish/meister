@@ -31,8 +31,7 @@ def _cpu2float(cpu):
     """Internal helper function to convert Kubernetes CPU numbers to float."""
     if cpu.endswith("m"):
         cpu = int(cpu[:-1]) / 1000.
-    else:
-        return float(cpu)
+    return float(cpu)
 
 
 def _memory2int(memory):
