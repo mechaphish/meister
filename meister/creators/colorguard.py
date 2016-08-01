@@ -4,9 +4,10 @@
 from __future__ import absolute_import
 
 from farnsworth.models import Crash, Test, ColorGuardJob
+from itertools import islice
 
 import meister.creators
-from .rex import BASE_PRIORITY
+from .rex import BASE_PRIORITY, FEED_LIMIT
 LOG = meister.creators.LOG.getChild('colorguard')
 
 
@@ -32,7 +33,7 @@ class ColorGuardCreator(meister.creators.BaseCreator):
                               "lowering priority of ColorGuard", cs.name)
 
                 max_priority = BASE_PRIORITY + 10 if found_crash_for_cs else 70
-                tests = cs.tests.order_by(Test.created_at.asc())
+                tests = islice(cs.tests.order_by(Test.created_at.asc()), FEED_LIMIT)
                 tests_by_priority = self._normalize_sort(BASE_PRIORITY + 5,
                                                          max_priority,
                                                          tests)
@@ -56,7 +57,7 @@ class ColorGuardCreator(meister.creators.BaseCreator):
                     LOG.debug("Yielding ColorGuardJob for %s with %s, priority %d", cs.name, test.id, priority)
                     yield (job, priority)
 
-                crashes = cs.crashes.order_by(Crash.bb_count.asc())
+                crashes = islice(cs.crashes.order_by(Crash.bb_count.asc()), FEED_LIMIT)
                 crashes_by_priority = self._normalize_sort(BASE_PRIORITY,
                                                            BASE_PRIORITY + 5,
                                                            crashes)

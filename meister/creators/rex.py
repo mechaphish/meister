@@ -43,7 +43,8 @@ PRIORITY_MAP = {Vulnerability.IP_OVERWRITE: 100,
 
 # the base Rex priority
 BASE_PRIORITY = 10
-
+# the limit of crashes to schedule at a time
+FEED_LIMIT = 200
 
 class RexCreator(meister.creators.BaseCreator):
 
@@ -83,7 +84,8 @@ class RexCreator(meister.creators.BaseCreator):
                     & (Crash.crash_pc << encountered_subquery)).order_by(Crash.bb_count.asc())
 
                 if high_priority or low_priority:
-                    categories[vulnerability] = enumerate(itertools.chain(high_priority, low_priority))
+                    sliced = itertools.islice(itertools.chain(high_priority, low_priority), FEED_LIMIT)
+                    categories[vulnerability] = enumerate(sliced)
 
             type1_exists = cs.has_type1
             type2_exists = cs.has_type2
