@@ -64,7 +64,7 @@ class RexCreator(meister.creators.BaseCreator):
 
     @staticmethod
     def _normalize_sort(base, ordered_crashes):
-        for p, c in ordered_crashes:
+        for p, c in enumerate(ordered_crashes):
             yield max(base, 100 - p), c
 
     @property
@@ -85,7 +85,7 @@ class RexCreator(meister.creators.BaseCreator):
 
                 if high_priority or low_priority:
                     sliced = itertools.islice(itertools.chain(high_priority, low_priority), FEED_LIMIT)
-                    categories[vulnerability] = enumerate(sliced)
+                    categories[vulnerability] = sliced
 
             type1_exists = cs.has_type1
             type2_exists = cs.has_type2

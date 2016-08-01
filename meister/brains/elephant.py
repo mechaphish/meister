@@ -12,7 +12,7 @@ LOG = meister.brains.LOG.getChild('elephant')
 PRIORITY_MAX = 200
 
 
-class ElephantBrain(meister.brains.Brain):
+class ElephantBrain(meister.brains.Brain):  # pylint: disable=too-few-public-methods
 
     def _sanitize_component(self, job, priority):
         if priority > PRIORITY_MAX:
@@ -40,5 +40,5 @@ class ElephantBrain(meister.brains.Brain):
 
     def _sort(self, jobs):
         jobs = ((j, int(self._global(j) * self._local(j) * self._sanitize_component(j, p)))
-                 for j, p in jobs)
+                for j, p in jobs)
         return sorted(jobs, key=operator.itemgetter(1), reverse=True)
