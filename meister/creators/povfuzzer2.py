@@ -22,7 +22,8 @@ class PovFuzzer2Creator(meister.creators.BaseCreator):
     def _jobs(self):
         for cs in self.challenge_sets():
             if not cs.has_type2:
-                ordered_crashes = cs.crashes.where(Crash.kind == Vulnerability.ARBITRARY_READ) \
+                ordered_crashes = cs.crashes.select(Crash.id) \
+                                            .where(Crash.kind == Vulnerability.ARBITRARY_READ) \
                                             .order_by(fn.octet_length(Crash.blob).asc())
 
                 for priority, crash in self._normalize_sort(BASE_PRIORITY, enumerate(ordered_crashes)):

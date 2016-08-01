@@ -77,9 +77,9 @@ class RexCreator(meister.creators.BaseCreator):
 
             categories = dict()
             for vulnerability in PRIORITY_MAP.keys():
-                high_priority = crashes.where((Crash.kind == vulnerability) \
+                high_priority = crashes.select(Crash.id).where((Crash.kind == vulnerability) \
                     & ~(Crash.crash_pc << encountered_subquery)).order_by(Crash.bb_count.asc())
-                low_priority = crashes.where((Crash.kind == vulnerability) \
+                low_priority = crashes.select(Crash.id).where((Crash.kind == vulnerability) \
                     & (Crash.crash_pc << encountered_subquery)).order_by(Crash.bb_count.asc())
 
                 if high_priority or low_priority:

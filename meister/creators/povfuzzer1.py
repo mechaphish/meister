@@ -24,7 +24,8 @@ class PovFuzzer1Creator(meister.creators.BaseCreator):
             # Unlike Rex, there's only 1 kind of crash we can exploit
             # We do not schedule if we already have a type1 exploit
             if not cs.has_type1:
-                ordered_crashes = cs.crashes.where(Crash.kind == Vulnerability.IP_OVERWRITE) \
+                ordered_crashes = cs.crashes.select(Crash.id) \
+                                            .where(Crash.kind == Vulnerability.IP_OVERWRITE) \
                                             .order_by(fn.octet_length(Crash.blob).asc())
 
                 for priority, crash in self._normalize_sort(BASE_PRIORITY,
