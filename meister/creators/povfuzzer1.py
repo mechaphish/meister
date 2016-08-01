@@ -16,7 +16,7 @@ class PovFuzzer1Creator(meister.creators.BaseCreator):
 
     @staticmethod
     def _normalize_sort(base, ordered_crashes):
-        for p, c in ordered_crashes:
+        for p, c in enumerate(ordered_crashes):
             yield max(base, 100 - p), c
 
     @property
@@ -30,7 +30,7 @@ class PovFuzzer1Creator(meister.creators.BaseCreator):
                                             .order_by(fn.octet_length(Crash.blob).asc())
 
                 sliced = islice(ordered_crashes, FEED_LIMIT)
-                for priority, crash in self._normalize_sort(BASE_PRIORITY, enumerate(sliced)):
+                for priority, crash in self._normalize_sort(BASE_PRIORITY, sliced):
                     job = PovFuzzer1Job(cs=cs, payload={'crash_id': crash.id,
                                                         'target_cs_fld': None,
                                                         'target_ids_fld': None},
