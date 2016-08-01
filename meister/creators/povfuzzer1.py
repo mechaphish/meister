@@ -4,10 +4,11 @@
 from __future__ import absolute_import
 
 from farnsworth.models import ChallengeSetFielding, Crash, Exploit, IDSRuleFielding, PovFuzzer1Job, PovTestResult, Team
+from itertools import islice
 from peewee import fn
 
 import meister.creators
-from .rex import Vulnerability, BASE_PRIORITY
+from .rex import Vulnerability, BASE_PRIORITY, FEED_LIMIT
 LOG = meister.creators.LOG.getChild('povfuzzer1')
 
 
@@ -28,8 +29,8 @@ class PovFuzzer1Creator(meister.creators.BaseCreator):
                                             .where(Crash.kind == Vulnerability.IP_OVERWRITE) \
                                             .order_by(fn.octet_length(Crash.blob).asc())
 
-                for priority, crash in self._normalize_sort(BASE_PRIORITY,
-                                                            enumerate(ordered_crashes)):
+                sliced = islice(ordered_crashes, FEED_LIMIT)
+                for priority, crash in self._normalize_sort(BASE_PRIORITY, enumerate(sliced)):
                     job = PovFuzzer1Job(cs=cs, payload={'crash_id': crash.id,
                                                         'target_cs_fld': None,
                                                         'target_ids_fld': None},
