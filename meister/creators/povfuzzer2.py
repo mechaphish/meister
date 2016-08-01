@@ -4,8 +4,8 @@
 from __future__ import absolute_import
 
 from farnsworth.models import ChallengeSetFielding, Crash, Exploit, IDSRuleFielding, PovFuzzer2Job, PovTestResult, Team
-from peewee import fn
 from itertools import islice
+from peewee import fn
 
 import meister.creators
 from .rex import Vulnerability, BASE_PRIORITY, FEED_LIMIT
