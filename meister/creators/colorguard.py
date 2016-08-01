@@ -69,10 +69,6 @@ class ColorGuardCreator(meister.creators.BaseCreator):
                                         limit_memory=10240,
                                         limit_time=10 * 60)
 
-                    # because AFL has a harder time distinguishing between interesting crashes
-                    # we give these a lower priority
-                    priority = BASE_PRIORITY + 5
-
                     if has_circumstantial_type2:
                         priority = BASE_PRIORITY
 
