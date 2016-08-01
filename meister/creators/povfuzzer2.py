@@ -29,7 +29,9 @@ class PovFuzzer2Creator(meister.creators.BaseCreator):
 
                 sliced = islice(ordered_crashes, FEED_LIMIT)
                 for priority, crash in self._normalize_sort(BASE_PRIORITY, enumerate(sliced)):
-                    job = PovFuzzer2Job(cs=cs, payload={'crash_id': crash.id},
+                    job = PovFuzzer2Job(cs=cs, payload={'crash_id': crash.id,
+                                                        'target_cs_fld': None,
+                                                        'target_ids_fld': None},
                                         request_cpu=1, limit_memory=2048,
                                         limit_time=5 * 60)
                     LOG.debug("Yielding PovFuzzer2Job for %s with crash %s priority %d",
