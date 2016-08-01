@@ -33,34 +33,30 @@ class PovFuzzer2Creator(meister.creators.BaseCreator):
                               cs.name, crash.id, priority)
                     yield (job, priority)
             else:
-                # schedule pov_fuzzers against other teams
-                # we will schedule at most 3 exploits
-                # get the shortest crashes with exploits
-                longest = list(cs.exploits.join(Crash)
+                # Schedule pov_fuzzers against other teams
+                # We will schedule at most 3 exploits
+                longest = list(cs.exploits.select(Exploit.crash)
+                                          .join(Crash)
                                           .where(Exploit.method == "fuzzer",
                                                  Exploit.reliability > 0,
                                                  Exploit.pov_type == "type2")
                                           .order_by(fn.octet_length(Crash.blob).desc())
-                                          .limit(3)
-                                          .select(Exploit.crash))
+                                          .limit(3))
 
                 for team in Team.opponents():
                     target_cs_fld = ChallengeSetFielding.latest(cs, team)
 
-                    # if there is any CS fielded?
-                    if target_cs_fld is not None:
+                    if target_cs_fld is not None:   # Are there any CS fielded?
                         target_ids_fld = IDSRuleFielding.latest(cs, team)
 
-                        # see if there are successful PoVs for this fielded CS and IDS.
-                        # if yes, no need to schedule Pov Testing Jobs
+                        # See if there are successful PoVs for this
+                        # fielded CS and IDS. If yes, no need to
+                        # schedule Pov Testing Jobs
                         pov_test_results = PovTestResult.best(target_cs_fld, target_ids_fld)
 
-                        # no results or we do not have strong PoV's?
-                        if pov_test_results is None or \
-                                pov_test_results.num_success < 3:
-
-                            # OK, we do not have any successful PoVs for the current fielded CS.
-                            # schedule 3 pov_fuzzers
+                        if pov_test_results is None or pov_test_results.num_success < 3:
+                            # We do not have any strong PoVs for the
+                            # current fielded CS. Schedule 3 pov_fuzzers
                             for exploit in longest:
                                 if target_ids_fld is not None:
                                     target_ids_id = target_ids_fld.id
