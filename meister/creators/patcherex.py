@@ -22,4 +22,4 @@ class PatcherexCreator(meister.creators.BaseCreator):
                                    request_cpu=1, request_memory=int(1024*3.5),
                                    limit_memory=int(1024*16.0))
                 LOG.debug("Yielding PatcherexJob for %s", cbn.name)
-                yield (job, 500)
+                yield (job, 200)
