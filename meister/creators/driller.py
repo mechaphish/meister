@@ -5,6 +5,7 @@ from __future__ import absolute_import
 
 from datetime import datetime, timedelta
 from farnsworth.models.job import DrillerJob
+from farnsworth.models.test import Test
 
 import meister.creators
 LOG = meister.creators.LOG.getChild('driller')
@@ -34,11 +35,11 @@ class DrillerCreator(meister.creators.BaseCreator):
             # is the fuzzer still working on mutating favorites?
             if needs_drilling:
                 LOG.info("AFL has no pending favs, scheduling Driller")
-                LOG.debug("Found {} undrilled tests".format(len(cs.undrilled_tests)))
+                LOG.debug("Found {} undrilled tests".format(cs.undrilled_tests.count()))
 
                 have_exploit = cs.has_type1 or cs.has_type2
 
-                for test in cs.tests:
+                for test in cs.tests.select(Test.id):
                     job = DrillerJob(cs=cs, request_cpu=1, request_memory=2048,
                                      limit_memory=10240,
                                      limit_time=15 * 60,

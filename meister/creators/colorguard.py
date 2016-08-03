@@ -33,7 +33,8 @@ class ColorGuardCreator(meister.creators.BaseCreator):
                               "lowering priority of ColorGuard", cs.name)
 
                 max_priority = BASE_PRIORITY + 10 if found_crash_for_cs else 70
-                tests = islice(cs.tests.order_by(Test.created_at.asc()), FEED_LIMIT)
+                tests = islice(cs.tests.select(Test.id, Test.job) \
+                                       .order_by(Test.created_at.asc()), FEED_LIMIT)
                 tests_by_priority = self._normalize_sort(BASE_PRIORITY + 5,
                                                          max_priority,
                                                          tests)
