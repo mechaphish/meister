@@ -21,7 +21,20 @@ import pykube.objects
 import meister.schedulers
 
 LOG = meister.schedulers.LOG.getChild('priority')
+CHUNK_SIZE=20
 
+def _make_job(jp):
+    # We need to set completed_at to None if the TesterJob
+    # has finished because it will almost always exist for
+    # this CS already and we would otherwise not test
+    # anything for this CS and this worker type anymore.
+    # If it hasn't completed yet, it will pick up the
+    # individual jobs that we have already created at this
+    # point in the brain
+    j,p = jp
+    kwargs = {df.name: getattr(j, df.name) for df in j.dirty_fields}
+    job, created = type(j).get_or_create(**kwargs)
+    return job, created, j, p
 
 class PriorityScheduler(meister.schedulers.BaseScheduler):
     """Priority scheduler.
@@ -60,6 +73,12 @@ class PriorityScheduler(meister.schedulers.BaseScheduler):
             pod_available = total_capacities['pods'] >= 1
             return cpu_available and memory_available and pod_available
 
+        def _out_of_resources():
+            cpu_available = total_capacities['cpu'] >= 0
+            memory_available = total_capacities['memory'] >= 0
+            pod_available = total_capacities['pods'] >= 0
+            return cpu_available and memory_available and pod_available
+
         def _account_for_resources(job):
             LOG.debug("Scheduling new %s job with priority %d", job.worker, job.priority)
             total_capacities['cpu'] -= job.request_cpu
@@ -68,42 +87,37 @@ class PriorityScheduler(meister.schedulers.BaseScheduler):
 
         jobs_to_run, job_ids_to_run = [], set()
         with farnsworth.config.master_db.atomic():
-            for j, p in self.brain.sort(self.jobs):
-                if not _can_schedule(j):
+            all_jobs = list(self.brain.sort(self.jobs))
+            for n in range(0, len(all_jobs), CHUNK_SIZE):
+                if not _out_of_resources():
                     LOG.debug("Resources exhausted, stopping scheduling")
                     break
 
-                # We need to set completed_at to None if the TesterJob
-                # has finished because it will almost always exist for
-                # this CS already and we would otherwise not test
-                # anything for this CS and this worker type anymore.
-                # If it hasn't completed yet, it will pick up the
-                # individual jobs that we have already created at this
-                # point in the brain
-                kwargs = {df.name: getattr(j, df.name) for df in j.dirty_fields}
-                job, created = type(j).get_or_create(**kwargs)
+                with concurrent.futures.ThreadPoolExecutor(max_workers=20) as executor:
+                    job_batch = executor.map(_make_job, all_jobs[n:n+CHUNK_SIZE])
 
-                if isinstance(j, (AFLJob, TesterJob)):
-                    job.completed_at = None
+                for job, created, j, p in job_batch:
+                    if isinstance(j, (AFLJob, TesterJob)):
+                        job.completed_at = None
 
-                if job.completed_at is not None:
-                    LOG.debug("Job has been completed at %s, skipping", job.completed_at)
-                    continue
+                    if job.completed_at is not None:
+                        LOG.debug("Job has been completed at %s, skipping", job.completed_at)
+                        continue
 
-                if created:
-                    LOG.debug("Job did not exist yet, created it")
+                    if created:
+                        LOG.debug("Job did not exist yet, created it")
 
-                if job.id not in job_ids_to_run:
-                    LOG.debug("Scheduling job id=%d type=%s", job.id, job.worker)
-                    _account_for_resources(job)
-                    if job.priority != p:
-                        LOG.debug("Priority changed from %d to %d", job.priority, p)
-                        job.priority = p
-                        job.save()
-                    jobs_to_run.append(job)
-                    job_ids_to_run.add(job.id)
-                else:
-                    LOG.error("A creator yielded a job a second time: job id=%d", job.id)
+                    if job.id not in job_ids_to_run:
+                        LOG.debug("Scheduling job id=%d type=%s", job.id, job.worker)
+                        _account_for_resources(job)
+                        if job.priority != p:
+                            LOG.debug("Priority changed from %d to %d", job.priority, p)
+                            job.priority = p
+                            job.save()
+                        jobs_to_run.append(job)
+                        job_ids_to_run.add(job.id)
+                    else:
+                        LOG.error("A creator yielded a job a second time: job id=%d", job.id)
 
         job_ids_to_run = set(job.id for job in jobs_to_run)
         LOG.debug("Jobs to run: %s", job_ids_to_run)
