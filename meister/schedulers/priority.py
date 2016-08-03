@@ -144,23 +144,24 @@ class PriorityScheduler(meister.schedulers.BaseScheduler):
 
         # pods_zipped are the pods zipped with job_ids sorted by id
         # s.t. we can zip them again with the job objects, which are unknown
-        pods_zipped = sorted(zip(pods_to_kill, job_ids_to_kill), key=operator.itemgetter(1))
-        jobs = Job.select(Job.request_cpu, Job.request_memory, Job.priority) \
-                  .where(Job.id.in_(job_ids_to_kill)) \
-                  .order_by(Job.id.asc())
-
         jobs_staggered_to_kill = []
-        for (pod, job_id), job in sorted(zip(pods_zipped, jobs), key=lambda j: j[1].priority):
-            resources_needed['cpu'] -= job.request_cpu
-            resources_needed['memory'] -= job.request_memory
-            resources_needed['pods'] -= 1
-            jobs_staggered_to_kill.append(job_id)
+        if job_ids_to_kill:
+            pods_zipped = sorted(zip(pods_to_kill, job_ids_to_kill), key=operator.itemgetter(1))
+            jobs = Job.select(Job.request_cpu, Job.request_memory, Job.priority) \
+                    .where(Job.id.in_(job_ids_to_kill)) \
+                    .order_by(Job.id.asc())
 
-            LOG.debug("Sacrificing job id=%s", job_id)
+            for (pod, job_id), job in sorted(zip(pods_zipped, jobs), key=lambda j: j[1].priority):
+                resources_needed['cpu'] -= job.request_cpu
+                resources_needed['memory'] -= job.request_memory
+                resources_needed['pods'] -= 1
+                jobs_staggered_to_kill.append(job_id)
 
-            if resources_needed['cpu'] < 0 and resources_needed['memory'] < 0 and resources_needed['pods'] < 0:
-                LOG.debug("Collected enough jobs to sacrifice for our staggered jobs")
-                break
+                LOG.debug("Sacrificing job id=%s", job_id)
+
+                if resources_needed['cpu'] < 0 and resources_needed['memory'] < 0 and resources_needed['pods'] < 0:
+                    LOG.debug("Collected enough jobs to sacrifice for our staggered jobs")
+                    break
 
         LOG.debug("Terminating workers: %s", jobs_staggered_to_kill)
         LOG.debug("Workers running already: %s", job_ids_to_ignore)
