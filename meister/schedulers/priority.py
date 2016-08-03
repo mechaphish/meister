@@ -158,7 +158,7 @@ class PriorityScheduler(meister.schedulers.BaseScheduler):
 
         resources_needed = {'cpu': sum(j.request_cpu for j in jobs_staggered) * self.stagger_factor,
                             'memory': sum(j.request_memory for j in jobs_staggered) * self.stagger_factor,
-                            'pods': int(self.staggering * self.stagger_factor)}
+                            'pods': int(jobs_to_stagger * self.stagger_factor)}
 
         resources_needed['cpu'] -= free_resources['cpu']
         resources_needed['memory'] -= free_resources['memory']
