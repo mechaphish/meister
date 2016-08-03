@@ -9,6 +9,7 @@ Schedule everything whenver it is available.
 from __future__ import unicode_literals, absolute_import
 
 import copy
+from datetime import datetime, timedelta
 import operator
 import os
 
@@ -32,6 +33,7 @@ class PriorityScheduler(meister.schedulers.BaseScheduler):
         """Create a priority strategy object."""
         self.staggering = int(os.environ['MEISTER_PRIORITY_STAGGERING'])
         self.stagger_factor = float(os.environ['MEISTER_PRIORITY_STAGGER_FACTOR'])
+        self.runtime = timedelta(seconds=45)
         super(PriorityScheduler, self).__init__(*args, **kwargs)
         LOG.debug("PriorityScheduler time!")
 
@@ -49,6 +51,7 @@ class PriorityScheduler(meister.schedulers.BaseScheduler):
         # Note, however, that in the worst case, we will kill the lowest
         # priority jobs in an oscillatory fashion at each scheduling
         # round.
+        start_time = datetime.now()
         total_capacities = copy.deepcopy(self._kube_total_capacity)
 
         def _can_schedule(job):
@@ -149,7 +152,8 @@ class PriorityScheduler(meister.schedulers.BaseScheduler):
         # Take first N jobs
         # Take from pods_to_kill and job_ids_to_kill the first M
         # s.t. resources(M) == resources(N) * 1.1
-        jobs_staggered = [j for j in jobs_to_run if j.id not in job_ids_to_ignore][:self.staggering]
+        jobs_to_stagger = self.staggering * self.runtime.seconds
+        jobs_staggered = [j for j in jobs_to_run if j.id not in job_ids_to_ignore][:jobs_to_stagger]
         LOG.debug("Staggered jobs: %s", jobs_staggered)
 
         resources_needed = {'cpu': sum(j.request_cpu for j in jobs_staggered) * self.stagger_factor,
@@ -206,3 +210,4 @@ class PriorityScheduler(meister.schedulers.BaseScheduler):
             executor.map(_schedule, jobs_staggered)
 
         self._kube_resources    # pylint: disable=pointless-statement
+        self.runtime = datetime.now() - start_time
