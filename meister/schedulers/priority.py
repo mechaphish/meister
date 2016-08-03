@@ -108,6 +108,17 @@ class PriorityScheduler(meister.schedulers.BaseScheduler):
         if job_ids_to_run:
             assert isinstance(list(job_ids_to_run)[0], (int, long))
 
+        # Calculate free resources, so that we do not kill jobs unnecessarily
+        free_resources = copy.deepcopy(self._kube_total_capacity)
+
+        def _remove_from_free(pod):
+            if 'resources' in pod.obj['spec']['containers'][0] and \
+                    'requests' in pod.obj['spec']['containers'][0]['resources']:
+                r = pod.obj['spec']['containers'][0]['resources']['requests']
+                free_resources['cpu'] -= meister.schedulers.cpu2float(r['cpu'])
+                free_resources['memory'] -= meister.schedulers.memory2int(r['memory'])
+                free_resources['pods'] -= 1
+
         # Collect all current jobs
         job_ids_to_kill, pods_to_kill, job_ids_to_ignore = [], [], set()
         pending_pods = pykube.objects.Pod.objects(self.api).filter(field_selector={"status.phase": "Pending"})
@@ -116,6 +127,9 @@ class PriorityScheduler(meister.schedulers.BaseScheduler):
         # Delay in API calls may result in change of number of pending/running pods
         pods = [p for p in pending_pods] + [p for p in running_pods]
         for pod in pods:
+            if pod.running or pod.pending:
+                _remove_from_free(pod)
+
             if 'job_id' in pod.obj['metadata']['labels']:
                 job_id = int(pod.obj['metadata']['labels']['job_id'])
                 if job_id in job_ids_to_run:
@@ -142,26 +156,34 @@ class PriorityScheduler(meister.schedulers.BaseScheduler):
                             'memory': sum(j.request_memory for j in jobs_staggered) * self.stagger_factor,
                             'pods': int(self.staggering * self.stagger_factor)}
 
+        resources_needed['cpu'] -= free_resources['cpu']
+        resources_needed['memory'] -= free_resources['memory']
+        resources_needed['pods'] -= free_resources['pods']
+
         # pods_zipped are the pods zipped with job_ids sorted by id
         # s.t. we can zip them again with the job objects, which are unknown
         jobs_staggered_to_kill = []
-        if job_ids_to_kill:
+        if (resources_needed['cpu'] > 0 or
+                resources_needed['memory'] > 0 or
+                resources_needed['pods'] > 0) and job_ids_to_kill:
             pods_zipped = sorted(zip(pods_to_kill, job_ids_to_kill), key=operator.itemgetter(1))
             jobs = Job.select(Job.request_cpu, Job.request_memory, Job.priority) \
-                    .where(Job.id.in_(job_ids_to_kill)) \
-                    .order_by(Job.id.asc())
+                      .where(Job.id.in_(job_ids_to_kill)) \
+                      .order_by(Job.id.asc())
 
             for (pod, job_id), job in sorted(zip(pods_zipped, jobs), key=lambda j: j[1].priority):
+                if resources_needed['cpu'] < 0 and \
+                        resources_needed['memory'] < 0 and \
+                        resources_needed['pods'] < 0:
+                    LOG.debug("Collected enough jobs to sacrifice for our staggered jobs")
+                    break
+
                 resources_needed['cpu'] -= job.request_cpu
                 resources_needed['memory'] -= job.request_memory
                 resources_needed['pods'] -= 1
                 jobs_staggered_to_kill.append(job_id)
 
                 LOG.debug("Sacrificing job id=%s", job_id)
-
-                if resources_needed['cpu'] < 0 and resources_needed['memory'] < 0 and resources_needed['pods'] < 0:
-                    LOG.debug("Collected enough jobs to sacrifice for our staggered jobs")
-                    break
 
         LOG.debug("Terminating workers: %s", jobs_staggered_to_kill)
         LOG.debug("Workers running already: %s", job_ids_to_ignore)

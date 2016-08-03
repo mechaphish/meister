@@ -27,14 +27,14 @@ import meister.kubernetes as kubernetes
 LOG = meister.log.LOG.getChild('schedulers')
 
 
-def _cpu2float(cpu):
+def cpu2float(cpu):
     """Internal helper function to convert Kubernetes CPU numbers to float."""
     if cpu.endswith("m"):
         cpu = int(cpu[:-1]) / 1000.
     return float(cpu)
 
 
-def _memory2int(memory):
+def memory2int(memory):
     """Internal helper function to convert Kubernetes memory amount to integers."""
     multiplier = 1
     if memory.endswith("Ki"):
@@ -251,8 +251,8 @@ class KubernetesScheduler(object):
             else:
                 resources = {'cpu': '0', 'memory': '0Ki'}
 
-            self._available_resources['cpu'] -= _cpu2float(resources['cpu'])
-            self._available_resources['memory'] -= _memory2int(resources['memory'])
+            self._available_resources['cpu'] -= cpu2float(resources['cpu'])
+            self._available_resources['memory'] -= memory2int(resources['memory'])
             # We are assuming that each pod only has one container here.
             self._available_resources['pods'] -= 1
 
@@ -293,8 +293,8 @@ class KubernetesScheduler(object):
             nodes = pykube.objects.Node.objects(self.api).all()
             self._node_capacities = {}
             for node in nodes:
-                cpu = _cpu2float(node.obj['status']['capacity']['cpu'])
-                memory = _memory2int(node.obj['status']['capacity']['memory'])
+                cpu = cpu2float(node.obj['status']['capacity']['cpu'])
+                memory = memory2int(node.obj['status']['capacity']['memory'])
                 pods = int(node.obj['status']['capacity']['pods'])
                 self._node_capacities[node.name] = {'cpu': cpu,
                                                     'memory': memory,
