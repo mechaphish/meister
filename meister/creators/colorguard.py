@@ -34,10 +34,12 @@ class ColorGuardCreator(meister.creators.BaseCreator):
 
                 max_priority = BASE_PRIORITY + 10 if found_crash_for_cs else 70
                 tests = islice(cs.tests.select(Test.id, Test.job) \
+                                       .where(Test.colorguard_traced == False) \
                                        .order_by(Test.created_at.asc()), FEED_LIMIT)
                 tests_by_priority = self._normalize_sort(BASE_PRIORITY + 5,
                                                          max_priority,
                                                          tests)
+
                 for priority, test in tests_by_priority:
                     LOG.debug("ColorGuardJob for %s, test %s being created", cs.name, test.id)
                     job = ColorGuardJob(cs=cs,
