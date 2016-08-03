@@ -32,7 +32,7 @@ class PovFuzzer2Creator(meister.creators.BaseCreator):
                     job = PovFuzzer2Job(cs=cs, payload={'crash_id': crash.id,
                                                         'target_cs_fld': None,
                                                         'target_ids_fld': None},
-                                        request_cpu=1, limit_memory=2048,
+                                        request_cpu=1, limit_memory=4096,
                                         limit_time=5 * 60)
                     LOG.debug("Yielding PovFuzzer2Job for %s with crash %s priority %d",
                               cs.name, crash.id, priority)

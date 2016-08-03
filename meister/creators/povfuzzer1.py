@@ -34,7 +34,7 @@ class PovFuzzer1Creator(meister.creators.BaseCreator):
                     job = PovFuzzer1Job(cs=cs, payload={'crash_id': crash.id,
                                                         'target_cs_fld': None,
                                                         'target_ids_fld': None},
-                                        request_cpu=1, limit_memory=2048,
+                                        request_cpu=1, limit_memory=4096,
                                         limit_time=5 * 60)
                     LOG.debug("Yielding PovFuzzer1Job for %s with crash %s priority %d",
                               cs.name, crash.id, priority)
