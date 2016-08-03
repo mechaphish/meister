@@ -12,7 +12,7 @@ import stopit
 import meister.log
 LOG = meister.log.LOG.getChild('creators')
 
-JOBS_TIME_LIMIT = 15
+JOBS_TIME_LIMIT = 30
 
 """Job creator."""
 

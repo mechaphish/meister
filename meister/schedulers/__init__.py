@@ -8,7 +8,6 @@ from __future__ import absolute_import, division, unicode_literals
 import copy
 import datetime
 import itertools
-import operator
 import os
 import time
 
@@ -45,6 +44,8 @@ def memory2int(memory):
         multiplier = 1024 ** 3
     return int(memory[:-2]) * multiplier
 
+def _list_getter(c):
+    return list(c.jobs)
 
 class KubernetesScheduler(object):
     """Kubernetes scheduler class, should be inherited by actual schedulers."""
@@ -366,7 +367,7 @@ class BaseScheduler(KubernetesScheduler):
         """Return all jobs that all creators want to run."""
         with concurrent.futures.ThreadPoolExecutor(max_workers=20) as executor:
             # Return 25 jobs at a time to speed up generator
-            jobs_unordered_iter = executor.map(operator.attrgetter('jobs'),
+            jobs_unordered_iter = executor.map(_list_getter,
                                                self.creators, chunksize=25)
             for job in itertools.chain.from_iterable(jobs_unordered_iter):
                 yield job
