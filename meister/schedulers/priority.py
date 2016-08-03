@@ -152,7 +152,7 @@ class PriorityScheduler(meister.schedulers.BaseScheduler):
         # Take first N jobs
         # Take from pods_to_kill and job_ids_to_kill the first M
         # s.t. resources(M) == resources(N) * 1.1
-        jobs_to_stagger = self.staggering * self.runtime.seconds
+        jobs_to_stagger = self.staggering * max(2, self.runtime.seconds)
         jobs_staggered = [j for j in jobs_to_run if j.id not in job_ids_to_ignore][:jobs_to_stagger]
         LOG.debug("Staggered jobs: %s", jobs_staggered)
 
