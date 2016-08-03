@@ -109,7 +109,7 @@ class PriorityScheduler(meister.schedulers.BaseScheduler):
             assert isinstance(list(job_ids_to_run)[0], (int, long))
 
         # Collect all current jobs
-        job_ids_to_kill, pods_to_kill, job_ids_to_ignore = [], [], []
+        job_ids_to_kill, pods_to_kill, job_ids_to_ignore = [], [], set()
         pending_pods = pykube.objects.Pod.objects(self.api).filter(field_selector={"status.phase": "Pending"})
         running_pods = pykube.objects.Pod.objects(self.api).filter(field_selector={"status.phase": "Running"})
 
@@ -120,7 +120,7 @@ class PriorityScheduler(meister.schedulers.BaseScheduler):
                 job_id = int(pod.obj['metadata']['labels']['job_id'])
                 if job_id in job_ids_to_run:
                     LOG.debug("Found a worker already taking care of id=%s", job_id)
-                    job_ids_to_ignore.append(job_id)
+                    job_ids_to_ignore.add(job_id)
                 else:
                     # We do not kill jobs that have been completed to keep the logs around. We do
                     # want to kill jobs that are still in the processing stage though.
