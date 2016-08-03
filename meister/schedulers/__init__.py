@@ -222,6 +222,7 @@ class KubernetesScheduler(object):
                     LOG.debug("Pod %s failed", pod.name)
                     # TODO: We should delete pods that have failed and should
                     # not be restarted.
+                    pod.delete()
                 elif pod.unknown:
                     LOG.warning("Pod %s in unknown state", pod.name)
                 elif pod.succeeded:
