@@ -58,7 +58,8 @@ class ColorGuardCreator(meister.creators.BaseCreator):
                     LOG.debug("Yielding ColorGuardJob for %s with %s, priority %d", cs.name, test.id, priority)
                     yield (job, priority)
 
-                crashes = islice(cs.crashes.order_by(Crash.bb_count.asc()), FEED_LIMIT)
+                crashes = islice(cs.crashes.select(Crash.id) \
+                                           .order_by(Crash.bb_count.asc()), FEED_LIMIT)
                 crashes_by_priority = self._normalize_sort(BASE_PRIORITY,
                                                            BASE_PRIORITY + 5,
                                                            crashes)
