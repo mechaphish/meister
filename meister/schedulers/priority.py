@@ -9,10 +9,12 @@ Schedule everything whenver it is available.
 from __future__ import unicode_literals, absolute_import
 
 import copy
+import operator
+import os
 
 import concurrent.futures
 import farnsworth.config
-from farnsworth.models.job import AFLJob, TesterJob
+from farnsworth.models.job import AFLJob, TesterJob, Job
 import pykube.objects
 
 import meister.schedulers
@@ -28,6 +30,8 @@ class PriorityScheduler(meister.schedulers.BaseScheduler):
 
     def __init__(self, *args, **kwargs):
         """Create a priority strategy object."""
+        self.staggering = int(os.environ['MEISTER_PRIORITY_STAGGERING'])
+        self.stagger_factor = float(os.environ['MEISTER_PRIORITY_STAGGER_FACTOR'])
         super(PriorityScheduler, self).__init__(*args, **kwargs)
         LOG.debug("PriorityScheduler time!")
 
@@ -105,7 +109,7 @@ class PriorityScheduler(meister.schedulers.BaseScheduler):
             assert isinstance(list(job_ids_to_run)[0], (int, long))
 
         # Collect all current jobs
-        job_ids_to_kill, job_ids_to_ignore = [], []
+        job_ids_to_kill, pods_to_kill, job_ids_to_ignore = [], [], []
         pending_pods = pykube.objects.Pod.objects(self.api).filter(field_selector={"status.phase": "Pending"})
         running_pods = pykube.objects.Pod.objects(self.api).filter(field_selector={"status.phase": "Running"})
 
@@ -115,24 +119,50 @@ class PriorityScheduler(meister.schedulers.BaseScheduler):
             if 'job_id' in pod.obj['metadata']['labels']:
                 job_id = int(pod.obj['metadata']['labels']['job_id'])
                 if job_id in job_ids_to_run:
+                    LOG.debug("Found a worker already taking care of id=%s", job_id)
                     job_ids_to_ignore.append(job_id)
                 else:
                     # We do not kill jobs that have been completed to keep the logs around. We do
                     # want to kill jobs that are still in the processing stage though.
                     # See states docs http://kubernetes.io/docs/user-guide/pod-states/
                     if pod.running or pod.pending:
+                        pods_to_kill.append(pod)
                         job_ids_to_kill.append(job_id)
                     else:
                         LOG.warning("Encountered a Pod that is not ready (running or completed): %s",
                                     pod.obj['metadata']['name'])
 
-        if job_ids_to_kill:
-            assert isinstance(job_ids_to_kill[0], (int, long))
+        # Take first N jobs
+        # Take from pods_to_kill and job_ids_to_kill the first M
+        # s.t. resources(M) == resources(N) * 1.1
+        jobs_staggered = [j for j in jobs_to_run if j.id not in job_ids_to_ignore][:self.staggering]
+        LOG.debug("Staggered jobs: %s", jobs_staggered)
 
-        if job_ids_to_ignore:
-            assert isinstance(job_ids_to_ignore[0], (int, long))
+        resources_needed = {'cpu': sum(j.request_cpu for j in jobs_staggered) * self.stagger_factor,
+                            'memory': sum(j.request_memory for j in jobs_staggered) * self.stagger_factor,
+                            'pods': int(self.staggering * self.stagger_factor)}
 
-        LOG.debug("Terminating workers: %s", job_ids_to_kill)
+        # pods_zipped are the pods zipped with job_ids sorted by id
+        # s.t. we can zip them again with the job objects, which are unknown
+        pods_zipped = sorted(zip(pods_to_kill, job_ids_to_kill), key=operator.itemgetter(1))
+        jobs = Job.select(Job.request_cpu, Job.request_memory, Job.priority) \
+                  .where(Job.id.in_(job_ids_to_kill)) \
+                  .order_by(Job.id.asc())
+
+        jobs_staggered_to_kill = []
+        for (pod, job_id), job in sorted(zip(pods_zipped, jobs), key=lambda j: j[1].priority):
+            resources_needed['cpu'] -= job.request_cpu
+            resources_needed['memory'] -= job.request_memory
+            resources_needed['pods'] -= 1
+            jobs_staggered_to_kill.append(job_id)
+
+            LOG.debug("Sacrificing job id=%s", job_id)
+
+            if resources_needed['cpu'] < 0 and resources_needed['memory'] < 0 and resources_needed['pods'] < 0:
+                LOG.debug("Collected enough jobs to sacrifice for our staggered jobs")
+                break
+
+        LOG.debug("Terminating workers: %s", jobs_staggered_to_kill)
         LOG.debug("Workers running already: %s", job_ids_to_ignore)
 
         # Kill workers
@@ -141,18 +171,15 @@ class PriorityScheduler(meister.schedulers.BaseScheduler):
             self.terminate(self._worker_name(job_id))
 
         with concurrent.futures.ThreadPoolExecutor(max_workers=20) as executor:
-            executor.map(_terminate, job_ids_to_kill)
+            executor.map(_terminate, jobs_staggered_to_kill)
 
         # Schedule jobs
         def _schedule(job):
-            if job.id not in job_ids_to_ignore:
-                LOG.debug("Scheduling %s for cs=%s cbn=%s", job.__class__.__name__, job.cs_id,
-                          job.cbn_id)
-                self.schedule(job)
-            else:
-                LOG.debug("Worker already taking care of job %d", job.id)
+            LOG.debug("Scheduling %s for cs=%s cbn=%s", job.__class__.__name__, job.cs_id,
+                        job.cbn_id)
+            self.schedule(job)
 
         with concurrent.futures.ThreadPoolExecutor(max_workers=20) as executor:
-            executor.map(_schedule, jobs_to_run)
+            executor.map(_schedule, jobs_staggered)
 
         self._kube_resources    # pylint: disable=pointless-statement
