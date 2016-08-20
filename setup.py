@@ -33,4 +33,4 @@ setup(name='meister',
           ],
       },
       description='Master component of the Shellphish CRS.',
-      url='https://git.seclab.cs.ucsb.edu/cgc/meister')
+      url='https://github.com/mechaphish/meister')
