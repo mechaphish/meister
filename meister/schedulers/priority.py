@@ -22,6 +22,8 @@ import meister.schedulers
 
 LOG = meister.schedulers.LOG.getChild('priority')
 
+NUM_THREADS = int(os.environ.get('MEISTER_NUM_THREADS', '20'))
+
 
 class PriorityScheduler(meister.schedulers.BaseScheduler):
     """Priority scheduler.
@@ -197,7 +199,7 @@ class PriorityScheduler(meister.schedulers.BaseScheduler):
             LOG.debug("Killing worker for job %s", job_id)
             self.terminate(self._worker_name(job_id))
 
-        with concurrent.futures.ThreadPoolExecutor(max_workers=20) as executor:
+        with concurrent.futures.ThreadPoolExecutor(max_workers=NUM_THREADS) as executor:
             executor.map(_terminate, jobs_staggered_to_kill)
 
         # Schedule jobs
@@ -206,7 +208,7 @@ class PriorityScheduler(meister.schedulers.BaseScheduler):
                         job.cbn_id)
             self.schedule(job)
 
-        with concurrent.futures.ThreadPoolExecutor(max_workers=20) as executor:
+        with concurrent.futures.ThreadPoolExecutor(max_workers=NUM_THREADS) as executor:
             executor.map(_schedule, jobs_staggered)
 
         self._kube_resources    # pylint: disable=pointless-statement

@@ -25,6 +25,8 @@ import meister.kubernetes as kubernetes
 
 LOG = meister.log.LOG.getChild('schedulers')
 
+NUM_THREADS = int(os.environ.get('MEISTER_NUM_THREADS', '20'))
+
 
 def cpu2float(cpu):
     """Internal helper function to convert Kubernetes CPU numbers to float."""
@@ -232,7 +234,7 @@ class KubernetesScheduler(object):
                 LOG.error("Hit a KeyError %s", e)
 
         pods = []
-        with concurrent.futures.ThreadPoolExecutor(max_workers=20) as executor:
+        with concurrent.futures.ThreadPoolExecutor(max_workers=NUM_THREADS) as executor:
             pods = executor.map(cleanup, pykube.objects.Pod.objects(self.api))
 
         for pod in pods:
@@ -360,7 +362,7 @@ class BaseScheduler(KubernetesScheduler):
     @property
     def jobs(self):
         """Return all jobs that all creators want to run."""
-        with concurrent.futures.ThreadPoolExecutor(max_workers=20) as executor:
+        with concurrent.futures.ThreadPoolExecutor(max_workers=NUM_THREADS) as executor:
             # Return 25 jobs at a time to speed up generator
             jobs_unordered_iter = executor.map(_list_getter,
                                                self.creators, chunksize=25)
