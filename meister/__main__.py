@@ -74,10 +74,14 @@ def main(args=None):
                 PovTesterCreator()]
     scheduler = PriorityScheduler(brain, creators)
 
-    while True:
-        wait_for_ambassador()
-        LOG.info("Round #%d", Round.current_round().num)
+    if '--single' in sys.argv:
         scheduler.run()
+
+    else:
+        while True:
+            wait_for_ambassador()
+            LOG.info("Round #%d", Round.current_round().num)
+            scheduler.run()
 
     return 0
 
